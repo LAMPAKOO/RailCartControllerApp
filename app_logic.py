@@ -90,16 +90,16 @@ class IndustrialControlApp(AppUI):
 
     def refresh_ports(self):
         self.port_combo.clear()
+        import sys # Upewnij się, że masz ten import (najlepiej na górze pliku)
         
         ports = []
         for p in serial.tools.list_ports.comports():
             if sys.platform.startswith('linux'):
-                # Jeśli to Linux, dodaj tylko te porty, które mają 'tty' w nazwie
-                # (odrzuca np. dziwne porty wirtualne lub puste duszki)
-                if 'tty' in p.device.lower():
+                # Odrzucamy wszystko poza ttyUSB i ttyACM
+                if 'ttyUSB' in p.device or 'ttyACM' in p.device:
                     ports.append(p.device)
             else:
-                # Jeśli to Windows/Mac, zostaw standardowe ładowanie (np. COM3)
+                # Jeśli uruchomisz to na Windowsie, zostawi standardowe porty (COM)
                 ports.append(p.device)
                 
         self.port_combo.addItems(ports)

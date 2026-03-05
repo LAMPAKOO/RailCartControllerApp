@@ -9,7 +9,7 @@ class DummyCurve:
 class AppUI(QtWidgets.QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Industrial Motor Control & Data Logger")
-        self.resize(1400, 850)
+        self.showFullScreen()
         
         # Główne tło okna
         self.setStyleSheet("QMainWindow { background-color: #1e1e1e; }")
@@ -351,6 +351,27 @@ class AppUI(QtWidgets.QMainWindow):
         self.terminal.setReadOnly(True)
         self.terminal.setStyleSheet("background-color: #171717; color: #00ff00; font-family: 'Consolas'; font-size: 10pt; border: 1px solid #333; border-radius: 5px;")
         col3_layout.addWidget(self.terminal, 1)
+        
+        # =========================================================
+        # NOWE: PRZYCISK WYJŚCIA Z APLIKACJI (FULL SCREEN)
+        # =========================================================
+        self.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
+        self.btn_exit.setFixedHeight(45)
+        self.btn_exit.setStyleSheet("""
+            QPushButton { 
+                background-color: #4a0000; 
+                color: #ffaaaa; 
+                font-size: 16px; 
+                font-weight: bold; 
+                border-radius: 5px; 
+                margin-top: 10px;
+            }
+            QPushButton:hover { background-color: #660000; color: white; }
+            QPushButton:pressed { background-color: #ff0000; color: white; }
+        """)
+        # Metoda self.close() jest wbudowana w PyQt/PySide6 i bezpiecznie zamyka okno
+        self.btn_exit.clicked.connect(self.close) 
+        col3_layout.addWidget(self.btn_exit)
 
         # =========================================================
         # ZKOŃCZENIE UKŁADU I ZAŚLEPKI DLA app_logic.py
