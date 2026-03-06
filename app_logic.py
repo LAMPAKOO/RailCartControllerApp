@@ -82,7 +82,7 @@ class IndustrialControlApp(AppUI):
             self.save_path_input.setText(path)
             self.save_config()
 
-    # ------------------ LOGIKA GŁÓWNA ------------------
+    # ------------------ LOGIKA GŁÓWNA (UART) ------------------
     def log(self, msg):
         time_str = datetime.now().strftime('%H:%M:%S')
         self.terminal.appendPlainText(f" {time_str} | {msg}")
@@ -90,16 +90,15 @@ class IndustrialControlApp(AppUI):
 
     def refresh_ports(self):
         self.port_combo.clear()
-        import sys # Upewnij się, że masz ten import (najlepiej na górze pliku)
         
         ports = []
         for p in serial.tools.list_ports.comports():
             if sys.platform.startswith('linux'):
-                # Odrzucamy wszystko poza ttyUSB i ttyACM
+                # Na Linuxie pokazuj tylko wybrane urządzenia USB/ACM
                 if 'ttyUSB' in p.device or 'ttyACM' in p.device:
                     ports.append(p.device)
             else:
-                # Jeśli uruchomisz to na Windowsie, zostawi standardowe porty (COM)
+                # Na Windowsie pokazuj wszystkie (np. COM3)
                 ports.append(p.device)
                 
         self.port_combo.addItems(ports)
@@ -117,6 +116,13 @@ class IndustrialControlApp(AppUI):
                 port = self.port_combo.currentText()
                 if not port: return
                 self.ser = serial.Serial(port, 115200, timeout=0.1)
+                
+                # --- CZYSZCZENIE BUFORA PORTU SZEREGOWEGO ---
+                # Niezwykle ważne po nawiązaniu połączenia - zapobiega czytaniu starych/uszkodzonych danych z kabla
+                self.ser.reset_input_buffer()
+                self.ser.reset_output_buffer()
+                # --------------------------------------------
+                
                 self.btn_connect.setText("Disconnect")
                 self.timer.start(30)
                 
@@ -171,7 +177,7 @@ class IndustrialControlApp(AppUI):
                             self.lbl_speed.setText(f"{speed:.2f}")
                             self.lbl_rpm.setText(f"{rpm:.2f}")
                             
-                            # --- UPDATE PLOT DATA (Hidden) ---
+                            # --- UPDATE PLOT DATA (Hidden in UI) ---
                             self.data_distance.append(dist)
                             self.data_speed.append(speed)
                             self.data_rpm.append(rpm)

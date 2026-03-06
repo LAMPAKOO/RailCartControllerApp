@@ -354,35 +354,18 @@ class AppUI(QtWidgets.QMainWindow):
         
 
         # =========================================================
-        # PRZYCISKI SYSTEMOWE (KLAWIATURA I WYJŚCIE)
+        # PRZYCISK SYSTEMOWY (WYJŚCIE)
         # =========================================================
         sys_btns_layout = QtWidgets.QHBoxLayout()
-        sys_btns_layout.setSpacing(15) # Zwiększony odstęp między przyciskami
-        
-        # Przycisk Klawiatury Ekranowej
-        self.btn_osk = QtWidgets.QPushButton("⌨ KLAWIATURA")
-        self.btn_osk.setFixedHeight(80) # ZNACZNIE ZWIĘKSZONA WYSOKOŚĆ
-        self.btn_osk.setStyleSheet("""
-            QPushButton { 
-                background-color: #333333; 
-                color: #00E5FF; 
-                font-size: 20px; /* ZWIĘKSZONA CZCIONKA */
-                font-weight: bold; 
-                border-radius: 8px; 
-                margin-top: 10px;
-            }
-            QPushButton:hover { background-color: #444444; color: white; }
-            QPushButton:pressed { background-color: #2196F3; color: white; }
-        """)
         
         # Przycisk Wyjścia
         self.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
-        self.btn_exit.setFixedHeight(80) # ZNACZNIE ZWIĘKSZONA WYSOKOŚĆ
+        self.btn_exit.setFixedHeight(80) # Duża wysokość
         self.btn_exit.setStyleSheet("""
             QPushButton { 
                 background-color: #4a0000; 
                 color: #ffaaaa; 
-                font-size: 20px; /* ZWIĘKSZONA CZCIONKA */
+                font-size: 20px; 
                 font-weight: bold; 
                 border-radius: 8px; 
                 margin-top: 10px;
@@ -392,15 +375,13 @@ class AppUI(QtWidgets.QMainWindow):
         """)
         self.btn_exit.clicked.connect(self.close) 
         
-        sys_btns_layout.addWidget(self.btn_osk)
         sys_btns_layout.addWidget(self.btn_exit)
-        
         col3_layout.addLayout(sys_btns_layout)
 
         # =========================================================
         # ZKOŃCZENIE UKŁADU I ZAŚLEPKI DLA app_logic.py
         # =========================================================
-        
+
         self.curve_distance = DummyCurve()
         self.curve_speed = DummyCurve()
         self.curve_rpm = DummyCurve()
