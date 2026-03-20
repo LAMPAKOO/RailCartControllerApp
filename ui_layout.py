@@ -9,7 +9,7 @@ class DummyCurve:
 class AppUI(QtWidgets.QMainWindow):
     def init_ui(self):
         self.setWindowTitle("Industrial Motor Control & Data Logger")
-        self.showFullScreen()
+        self.resize(1400, 850)
         
         # Główne tło okna
         self.setStyleSheet("QMainWindow { background-color: #1e1e1e; }")
@@ -22,13 +22,26 @@ class AppUI(QtWidgets.QMainWindow):
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(15)
         
-        # Style wielokrotnego użytku
+        # =========================================================
+        # STYLE WIELOKROTNEGO UŻYTKU
+        # =========================================================
         panel_style = "#MainPanel { background-color: #2b2b2b; border: 1px solid #3c3c3c; border-radius: 8px; }"
         display_style = "#DisplayPanel { background-color: #141414; border-radius: 5px; border: 1px solid #1f1f1f; }"
-        # Styl nagłówków dopasowany do screena (turkusowy kolor, pogrubienie)
         header_style = "color: #00E5FF; font-size: 18px; font-weight: bold; font-family: 'Segoe UI', Arial, sans-serif; background: transparent; margin-bottom: 5px;"
         input_style = "background-color: #333333; color: white; border: 1px solid #444; border-radius: 3px; padding: 6px; font-size: 14px;"
         label_style = "color: #aaaaaa; background: transparent; font-size: 12px;"
+        
+        move_btn_style = """
+            QPushButton { 
+                font-size: 20px; 
+                font-weight: bold; 
+                background-color: #444444; 
+                color: white; 
+                border-radius: 8px; 
+            }
+            QPushButton:hover { background-color: #555555; }
+            QPushButton:pressed { background-color: #2196F3; }
+        """
 
         # =========================================================
         # KOLUMNA 1: OBSŁUGA SILNIKA
@@ -41,12 +54,10 @@ class AppUI(QtWidgets.QMainWindow):
         col1_layout.setContentsMargins(15, 15, 15, 15)
         col1_layout.setSpacing(15)
         
-        # Nagłówek: MOTOR CONTROL
         lbl_title_1 = QtWidgets.QLabel("MOTOR CONTROL")
         lbl_title_1.setStyleSheet(header_style)
         col1_layout.addWidget(lbl_title_1, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
-        # Czarny ekran z wartościami Speed i RPM
         disp1 = QtWidgets.QFrame()
         disp1.setObjectName("DisplayPanel")
         disp1.setStyleSheet(display_style)
@@ -54,7 +65,6 @@ class AppUI(QtWidgets.QMainWindow):
         disp1_layout.setContentsMargins(20, 20, 20, 20)
         disp1_layout.setSpacing(15)
         
-        # Speed
         h_spd = QtWidgets.QHBoxLayout()
         lbl_s_pfx = QtWidgets.QLabel("SPEED: ")
         lbl_s_pfx.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -64,7 +74,6 @@ class AppUI(QtWidgets.QMainWindow):
         h_spd.addWidget(self.lbl_speed)
         h_spd.addStretch()
         
-        # RPM
         h_rpm = QtWidgets.QHBoxLayout()
         lbl_r_pfx = QtWidgets.QLabel("RPM: ")
         lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -78,10 +87,9 @@ class AppUI(QtWidgets.QMainWindow):
         disp1_layout.addLayout(h_rpm)
         col1_layout.addWidget(disp1)
         
-        # Przyciski MANUAL / AUTO
         mode_h = QtWidgets.QHBoxLayout()
         mode_h.setSpacing(10)
-        mode_btn_style = """
+        mode_btn_style_col1 = """
             QPushButton { font-size: 16px; font-weight: bold; background-color: #444444; color: white; border-radius: 5px; border: none; }
             QPushButton:checked { background-color: #2196F3; color: white; }
         """
@@ -90,13 +98,13 @@ class AppUI(QtWidgets.QMainWindow):
         self.btn_manual.setCheckable(True)
         self.btn_manual.setChecked(True)
         self.btn_manual.setFixedHeight(45)
-        self.btn_manual.setStyleSheet(mode_btn_style)
+        self.btn_manual.setStyleSheet(mode_btn_style_col1)
         self.btn_manual.clicked.connect(self.switch_to_manual)
         
         self.btn_auto = QtWidgets.QPushButton("AUTO")
         self.btn_auto.setCheckable(True)
         self.btn_auto.setFixedHeight(45)
-        self.btn_auto.setStyleSheet(mode_btn_style)
+        self.btn_auto.setStyleSheet(mode_btn_style_col1)
         self.btn_auto.clicked.connect(lambda: self.send_cmd("MODE_AUTO"))
         
         self.mode_btn_group = QtWidgets.QButtonGroup()
@@ -107,14 +115,11 @@ class AppUI(QtWidgets.QMainWindow):
         mode_h.addWidget(self.btn_auto)
         col1_layout.addLayout(mode_h)
         
-        # Reszta funkcjonalności: Zakładki (Basic/Settings)
         self.tabs = QtWidgets.QTabWidget()
         
-        # TAB: BASIC
         tab_basic = QtWidgets.QWidget()
         basic_layout = QtWidgets.QVBoxLayout(tab_basic)
         
-        # ----- STEP INCREMENT -----
         inc_layout = QtWidgets.QHBoxLayout()
         
         lbl_inc = QtWidgets.QLabel("Step Increment:")
@@ -144,48 +149,38 @@ class AppUI(QtWidgets.QMainWindow):
         inc_layout.addStretch()
         basic_layout.addLayout(inc_layout)
         
-        # ----- FORWARD / BACKWARD SPEED -----
         self.fwd_speed = self.create_step_control(basic_layout, "Forward Speed:", "forwardSpeed")
         self.bwd_speed = self.create_step_control(basic_layout, "Backward Speed:", "backwardSpeed")
         
-        # Odstęp przed przyciskami
         basic_layout.addSpacing(15)
         
-        # ----- MOVE BUTTONS (OBOK SIEBIE, KWADRATOWE) -----
         move_layout = QtWidgets.QHBoxLayout()
         move_layout.setSpacing(15)
         
-        move_btn_style = """
-            QPushButton { 
-                font-size: 20px; 
-                font-weight: bold; 
-                background-color: #444444; 
-                color: white; 
-                border-radius: 8px; 
-            }
-            QPushButton:hover { background-color: #555555; }
-            QPushButton:pressed { background-color: #2196F3; }
-        """
-        
         btn_fwd = QtWidgets.QPushButton("▲\nMOVE FWD")
-        btn_fwd.setFixedHeight(140) # Kwadratowe proporcje
+        btn_fwd.setFixedHeight(140) 
         btn_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_fwd.setStyleSheet(move_btn_style)
         btn_fwd.clicked.connect(lambda: self.send_cmd("MOVE_FORWARD"))
         
         btn_bwd = QtWidgets.QPushButton("▼\nMOVE BWD")
-        btn_bwd.setFixedHeight(140) # Kwadratowe proporcje
+        btn_bwd.setFixedHeight(140) 
         btn_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_bwd.setStyleSheet(move_btn_style)
         btn_bwd.clicked.connect(lambda: self.send_cmd("MOVE_BACKWARD"))
         
-        move_layout.addWidget(btn_fwd)
-        move_layout.addWidget(btn_bwd)
-        
+        move_layout.addWidget(btn_fwd, 1)
+        move_layout.addWidget(btn_bwd, 1)
         basic_layout.addLayout(move_layout)
+        
+        self.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
+        self.btn_motor_stop.setFixedHeight(60)
+        self.btn_motor_stop.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; margin-top: 10px;")
+        self.btn_motor_stop.clicked.connect(lambda: self.send_cmd("STOP"))
+        basic_layout.addWidget(self.btn_motor_stop)
+        
         basic_layout.addStretch()
         
-        # TAB: ADVANCED
         tab_adv = QtWidgets.QWidget()
         adv_layout = QtWidgets.QVBoxLayout(tab_adv)
         
@@ -208,16 +203,9 @@ class AppUI(QtWidgets.QMainWindow):
         self.tabs.addTab(tab_basic, "Basic Control")
         self.tabs.addTab(tab_adv, "Settings")
         col1_layout.addWidget(self.tabs)
-        
-        # Emergency STOP
-        self.btn_stop_global = QtWidgets.QPushButton("EMERGENCY STOP")
-        self.btn_stop_global.setFixedHeight(70)
-        self.btn_stop_global.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; margin-top: 10px;")
-        self.btn_stop_global.clicked.connect(lambda: self.send_cmd("STOP"))
-        col1_layout.addWidget(self.btn_stop_global)
 
         # =========================================================
-        # KOLUMNA 2: FALOWNIK
+        # KOLUMNA 2: FALOWNIK (INVERTER)
         # =========================================================
         col2 = QtWidgets.QFrame()
         col2.setObjectName("MainPanel")
@@ -225,13 +213,100 @@ class AppUI(QtWidgets.QMainWindow):
         col2_layout = QtWidgets.QVBoxLayout(col2)
         col2_layout.setAlignment(QtCore.Qt.AlignTop)
         col2_layout.setContentsMargins(15, 15, 15, 15)
+        col2_layout.setSpacing(15)
         
-        # Nagłówek: INVERTER (TODO)
-        lbl_title_2 = QtWidgets.QLabel("INVERTER (TODO)")
+        lbl_title_2 = QtWidgets.QLabel("INVERTER CONTROL")
         lbl_title_2.setStyleSheet(header_style)
         col2_layout.addWidget(lbl_title_2, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
-        col2_layout.addStretch()
+        disp2 = QtWidgets.QFrame()
+        disp2.setObjectName("DisplayPanel")
+        disp2.setStyleSheet(display_style)
+        disp2_layout = QtWidgets.QHBoxLayout(disp2)
+        disp2_layout.setContentsMargins(20, 20, 20, 20)
+        disp2_layout.setSpacing(15)
+        
+        lbl_freq_pfx = QtWidgets.QLabel("FREQ: ")
+        lbl_freq_pfx.setStyleSheet("color: #FFC107; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        
+        self.lbl_vfd_freq = QtWidgets.QLabel("0.00")
+        self.lbl_vfd_freq.setStyleSheet("color: #FFC107; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        
+        lbl_freq_sfx = QtWidgets.QLabel(" Hz")
+        lbl_freq_sfx.setStyleSheet("color: #FFC107; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        
+        disp2_layout.addWidget(lbl_freq_pfx)
+        disp2_layout.addWidget(self.lbl_vfd_freq)
+        disp2_layout.addWidget(lbl_freq_sfx)
+        disp2_layout.addStretch()
+        col2_layout.addWidget(disp2)
+        
+        vfd_container = QtWidgets.QWidget()
+        vfd_layout = QtWidgets.QVBoxLayout(vfd_container)
+        vfd_layout.setContentsMargins(0, 0, 0, 0)
+        vfd_layout.setSpacing(15)
+        
+        vfd_inc_layout = QtWidgets.QHBoxLayout()
+        
+        lbl_vfd_inc = QtWidgets.QLabel("Step Increment:")
+        lbl_vfd_inc.setFixedWidth(140) 
+        lbl_vfd_inc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
+        
+        self.vfd_inc = QtWidgets.QSpinBox()
+        self.vfd_inc.setRange(1, 100)
+        self.vfd_inc.setValue(5)
+        self.vfd_inc.setFixedSize(120, 50) 
+        self.vfd_inc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+        
+        btn_vfd_inc_minus = QtWidgets.QPushButton("-")
+        btn_vfd_inc_minus.setFixedSize(50, 50) 
+        btn_vfd_inc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+        btn_vfd_inc_minus.clicked.connect(lambda: self.vfd_inc.setValue(self.vfd_inc.value() - 1))
+        
+        btn_vfd_inc_plus = QtWidgets.QPushButton("+")
+        btn_vfd_inc_plus.setFixedSize(50, 50) 
+        btn_vfd_inc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+        btn_vfd_inc_plus.clicked.connect(lambda: self.vfd_inc.setValue(self.vfd_inc.value() + 1))
+        
+        vfd_inc_layout.addWidget(lbl_vfd_inc)
+        vfd_inc_layout.addWidget(btn_vfd_inc_minus)
+        vfd_inc_layout.addWidget(self.vfd_inc)
+        vfd_inc_layout.addWidget(btn_vfd_inc_plus)
+        vfd_inc_layout.addStretch()
+        
+        vfd_layout.addLayout(vfd_inc_layout)
+        
+        self.vfd_freq = self.create_vfd_step_control(vfd_layout, "Frequency (Hz):", "HZ")
+        
+        vfd_layout.addSpacing(15)
+        
+        vfd_move_layout = QtWidgets.QHBoxLayout()
+        vfd_move_layout.setSpacing(15)
+        
+        btn_vfd_fwd = QtWidgets.QPushButton("▲\nMOVE FWD")
+        btn_vfd_fwd.setFixedHeight(140) 
+        btn_vfd_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        btn_vfd_fwd.setStyleSheet(move_btn_style)
+        btn_vfd_fwd.clicked.connect(lambda: self.send_cmd("VFD_FORWARD"))
+        
+        btn_vfd_bwd = QtWidgets.QPushButton("▼\nMOVE BWD")
+        btn_vfd_bwd.setFixedHeight(140) 
+        btn_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        btn_vfd_bwd.setStyleSheet(move_btn_style)
+        btn_vfd_bwd.clicked.connect(lambda: self.send_cmd("VFD_REVERSE"))
+        
+        vfd_move_layout.addWidget(btn_vfd_fwd, 1)
+        vfd_move_layout.addWidget(btn_vfd_bwd, 1)
+        vfd_layout.addLayout(vfd_move_layout)
+        
+        col2_layout.addWidget(vfd_container)
+        col2_layout.addStretch() 
+        
+        self.btn_vfd_stop = QtWidgets.QPushButton("STOP INVERTER")
+        self.btn_vfd_stop.setFixedHeight(70)
+        self.btn_vfd_stop.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; margin-top: 10px;")
+        self.btn_vfd_stop.clicked.connect(lambda: self.send_cmd("VFD_STOP"))
+        col2_layout.addWidget(self.btn_vfd_stop)
 
         # =========================================================
         # KOLUMNA 3: RECORDING, CONNECTION, TERMINAL
@@ -244,12 +319,34 @@ class AppUI(QtWidgets.QMainWindow):
         col3_layout.setContentsMargins(15, 15, 15, 15)
         col3_layout.setSpacing(15)
         
-        # Nagłówek: DATA RECORDING
+        # --- PRZYCISK EXIT PRZENIESIONY NA SAMĄ GÓRĘ 3 KOLUMNY ---
+        self.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
+        self.btn_exit.setFixedHeight(50) 
+        self.btn_exit.setFixedWidth(160) # <-- DODANE: sztywne ograniczenie szerokości
+        self.btn_exit.setStyleSheet("""
+            QPushButton { 
+                background-color: #4a0000; 
+                color: #ffaaaa; 
+                font-size: 18px; 
+                font-weight: bold; 
+                border-radius: 8px; 
+            }
+            QPushButton:hover { background-color: #660000; color: white; }
+            QPushButton:pressed { background-color: #ff0000; color: white; }
+        """)
+        self.btn_exit.clicked.connect(self.close) 
+        
+        # <-- ZMIENIONE: dodano parametr alignment spymający przycisk do prawej
+        col3_layout.addWidget(self.btn_exit, alignment=QtCore.Qt.AlignRight)
+        # ---------------------------------------------------------
+
+        
         lbl_title_3 = QtWidgets.QLabel("DATA RECORDING")
         lbl_title_3.setStyleSheet(header_style)
+        # Dodajemy mały margines z góry, by oddzielić od przycisku EXIT
+        lbl_title_3.setContentsMargins(0, 10, 0, 0)
         col3_layout.addWidget(lbl_title_3, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
-        # Czarny ekran z dystansem
         disp3 = QtWidgets.QFrame()
         disp3.setObjectName("DisplayPanel")
         disp3.setStyleSheet(display_style)
@@ -266,19 +363,19 @@ class AppUI(QtWidgets.QMainWindow):
         disp3_layout.addWidget(lbl_m)
         col3_layout.addWidget(disp3)
         
-        # Pole Filename
         lbl_fn = QtWidgets.QLabel("Filename:")
         lbl_fn.setStyleSheet(label_style)
-        self.filename_input = QtWidgets.QLineEdit("motor_test")
+        
+        self.filename_input = QtWidgets.QLineEdit()
         self.filename_input.setStyleSheet(input_style)
+        
         col3_layout.addWidget(lbl_fn)
         col3_layout.addWidget(self.filename_input)
 
-        # Pole Save Directory
         lbl_dir = QtWidgets.QLabel("Save Directory:")
         lbl_dir.setStyleSheet(label_style)
         
-        self.save_path_input = QtWidgets.QLineEdit(os.getcwd())
+        self.save_path_input = QtWidgets.QLineEdit()
         self.save_path_input.setStyleSheet(input_style)
         
         btn_browse = QtWidgets.QPushButton("Browse")
@@ -292,7 +389,6 @@ class AppUI(QtWidgets.QMainWindow):
         col3_layout.addWidget(lbl_dir)
         col3_layout.addLayout(dir_h)
         
-        # Przyciski START/STOP REC
         rec_h = QtWidgets.QHBoxLayout()
         rec_btn_style = """
             QPushButton { background-color: #444444; color: #aaaaaa; font-size: 14px; border-radius: 5px; border: none; }
@@ -303,6 +399,7 @@ class AppUI(QtWidgets.QMainWindow):
         self.btn_start_rec = QtWidgets.QPushButton("START REC")
         self.btn_start_rec.setFixedHeight(40)
         self.btn_start_rec.setStyleSheet(rec_btn_style)
+        self.btn_start_rec.setEnabled(False)
         self.btn_start_rec.clicked.connect(self.start_recording)
         
         self.btn_stop_rec = QtWidgets.QPushButton("STOP REC")
@@ -315,18 +412,15 @@ class AppUI(QtWidgets.QMainWindow):
         rec_h.addWidget(self.btn_stop_rec)
         col3_layout.addLayout(rec_h)
         
-        # Separator
         line = QtWidgets.QFrame()
         line.setFrameShape(QtWidgets.QFrame.HLine)
         line.setStyleSheet("color: #444444;")
         col3_layout.addWidget(line)
         
-        # Nagłówek: CONNECTIVITY
         lbl_title_conn = QtWidgets.QLabel("CONNECTIVITY")
         lbl_title_conn.setStyleSheet(header_style)
         col3_layout.addWidget(lbl_title_conn, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
-        # Connection Layout
         conn_layout = QtWidgets.QHBoxLayout()
         self.port_combo = QtWidgets.QComboBox()
         self.port_combo.setFixedHeight(30)
@@ -342,7 +436,6 @@ class AppUI(QtWidgets.QMainWindow):
         conn_layout.addWidget(self.btn_connect)
         col3_layout.addLayout(conn_layout)
         
-        # Terminal
         lbl_term = QtWidgets.QLabel("Terminal:")
         lbl_term.setStyleSheet(label_style)
         col3_layout.addWidget(lbl_term)
@@ -351,37 +444,10 @@ class AppUI(QtWidgets.QMainWindow):
         self.terminal.setReadOnly(True)
         self.terminal.setStyleSheet("background-color: #171717; color: #00ff00; font-family: 'Consolas'; font-size: 10pt; border: 1px solid #333; border-radius: 5px;")
         col3_layout.addWidget(self.terminal, 1)
-        
-
-        # =========================================================
-        # PRZYCISK SYSTEMOWY (WYJŚCIE)
-        # =========================================================
-        sys_btns_layout = QtWidgets.QHBoxLayout()
-        
-        # Przycisk Wyjścia
-        self.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
-        self.btn_exit.setFixedHeight(80) # Duża wysokość
-        self.btn_exit.setStyleSheet("""
-            QPushButton { 
-                background-color: #4a0000; 
-                color: #ffaaaa; 
-                font-size: 20px; 
-                font-weight: bold; 
-                border-radius: 8px; 
-                margin-top: 10px;
-            }
-            QPushButton:hover { background-color: #660000; color: white; }
-            QPushButton:pressed { background-color: #ff0000; color: white; }
-        """)
-        self.btn_exit.clicked.connect(self.close) 
-        
-        sys_btns_layout.addWidget(self.btn_exit)
-        col3_layout.addLayout(sys_btns_layout)
 
         # =========================================================
         # ZKOŃCZENIE UKŁADU I ZAŚLEPKI DLA app_logic.py
         # =========================================================
-
         self.curve_distance = DummyCurve()
         self.curve_speed = DummyCurve()
         self.curve_rpm = DummyCurve()
@@ -390,22 +456,21 @@ class AppUI(QtWidgets.QMainWindow):
         main_layout.addWidget(col2, 1)
         main_layout.addWidget(col3, 1)
 
+    # ----------------- FUNKCJE POMOCNICZE UI -----------------
+
     def create_step_control(self, layout, label, cmd_name):
         h_layout = QtWidgets.QHBoxLayout()
         
-        # Etykieta w tej samej linii
         lbl = QtWidgets.QLabel(label)
         lbl.setFixedWidth(140) 
         lbl.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
         h_layout.addWidget(lbl)
         
-        # Zwężony, ale większy na wysokość SpinBox
         spin = QtWidgets.QDoubleSpinBox()
         spin.setRange(0, 10000)
         spin.setFixedSize(120, 50) 
         spin.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
         
-        # Powiększone przyciski
         btn_minus = QtWidgets.QPushButton("-")
         btn_minus.setFixedSize(50, 50) 
         btn_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
@@ -415,6 +480,37 @@ class AppUI(QtWidgets.QMainWindow):
         btn_plus.setFixedSize(50, 50) 
         btn_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
         btn_plus.clicked.connect(lambda: self.adjust_value(spin, cmd_name, self.speed_inc.value()))
+        
+        h_layout.addWidget(btn_minus)
+        h_layout.addWidget(spin)
+        h_layout.addWidget(btn_plus)
+        h_layout.addStretch() 
+        
+        layout.addLayout(h_layout)
+        return spin
+
+    def create_vfd_step_control(self, layout, label, cmd_name):
+        h_layout = QtWidgets.QHBoxLayout()
+        
+        lbl = QtWidgets.QLabel(label)
+        lbl.setFixedWidth(140) 
+        lbl.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
+        h_layout.addWidget(lbl)
+        
+        spin = QtWidgets.QDoubleSpinBox()
+        spin.setRange(0, 100) 
+        spin.setFixedSize(120, 50) 
+        spin.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+        
+        btn_minus = QtWidgets.QPushButton("-")
+        btn_minus.setFixedSize(50, 50) 
+        btn_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+        btn_minus.clicked.connect(lambda: self.adjust_value(spin, cmd_name, -self.vfd_inc.value()))
+        
+        btn_plus = QtWidgets.QPushButton("+")
+        btn_plus.setFixedSize(50, 50) 
+        btn_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+        btn_plus.clicked.connect(lambda: self.adjust_value(spin, cmd_name, self.vfd_inc.value()))
         
         h_layout.addWidget(btn_minus)
         h_layout.addWidget(spin)

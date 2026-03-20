@@ -4,11 +4,11 @@ import csv
 import os
 import sys
 import json
+import time # Dodane dla wstrzymania działania portu na ułamek sekundy przy zamykaniu
 from datetime import datetime
 from collections import deque
 from PySide6 import QtWidgets, QtCore, QtGui
 
-# Importujemy klasę interfejsu z drugiego pliku
 from ui_layout import AppUI
 
 class IndustrialControlApp(AppUI):
@@ -22,7 +22,6 @@ class IndustrialControlApp(AppUI):
         self.csv_writer = None
         self.current_full_path = ""
         
-        # Osobne bufory dla TRZECH zmiennych
         self.data_distance = deque([0] * 100, maxlen=100)
         self.data_speed = deque([0] * 100, maxlen=100)
         self.data_rpm = deque([0] * 100, maxlen=100)
@@ -32,21 +31,39 @@ class IndustrialControlApp(AppUI):
         self.config_file = os.path.join(self.base_dir, "config.json")
         self.config_data = {"filename": "motor_test", "save_dir": self.base_dir}
         
-        # Budowa UI (dziedziczona z AppUI)
         self.init_ui()
-        
-        # Inicjalizacja konfiguracji (odczyt + podpięcie sygnałów zapisu)
         self.init_config()
-        
         self.refresh_ports()
         
-        # UART Reading Timer
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
 
+    # =========================================================
+    # EVENT ZAMYKANIA APLIKACJI (Krzyżyk, Alt+F4, przycisk EXIT)
+    # =========================================================
+    def closeEvent(self, event):
+        """Zatrzymuje silniki, zapisuje nagranie i zamyka port przy wyjściu."""
+        # 1. Jeśli trwa nagrywanie, zapisz je bezpiecznie
+        if self.is_recording:
+            self.stop_recording()
+            
+        # 2. Jeśli jesteśmy połączeni, wyślij sygnał STOP do wszystkiego
+        if self.ser and self.ser.is_open:
+            try:
+                self.send_cmd("STOP")
+                self.send_cmd("VFD_STOP")
+                
+                # Czekamy krótką chwilę, aby upewnić się, że komendy "wyleciały" przewodem
+                time.sleep(0.1) 
+                
+                self.ser.close()
+            except Exception:
+                pass
+                
+        event.accept()
+
     # ------------------ KONFIGURACJA PLIKÓW ------------------
     def init_config(self):
-        """Odczytuje config z pliku JSON i ustawia wartości w UI."""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -57,16 +74,13 @@ class IndustrialControlApp(AppUI):
             except Exception as e:
                 self.log(f"Config Load Error: {str(e)}")
 
-        # Wpisanie odczytanych wartości do pól w UI
         self.filename_input.setText(self.config_data["filename"])
         self.save_path_input.setText(self.config_data["save_dir"])
         
-        # Podpięcie sygnałów: zapisz config za każdym razem, gdy użytkownik wpisze tekst
         self.filename_input.textChanged.connect(self.save_config)
         self.save_path_input.textChanged.connect(self.save_config)
 
     def save_config(self):
-        """Zapisuje obecne wartości pól do pliku JSON."""
         self.config_data["filename"] = self.filename_input.text()
         self.config_data["save_dir"] = self.save_path_input.text()
         try:
@@ -76,7 +90,6 @@ class IndustrialControlApp(AppUI):
             self.log(f"Config Save Error: {str(e)}")
 
     def select_save_path(self):
-        """Otwiera okno dialogowe do wyboru folderu zapisu."""
         path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", self.save_path_input.text())
         if path:
             self.save_path_input.setText(path)
@@ -94,11 +107,9 @@ class IndustrialControlApp(AppUI):
         ports = []
         for p in serial.tools.list_ports.comports():
             if sys.platform.startswith('linux'):
-                # Na Linuxie pokazuj tylko wybrane urządzenia USB/ACM
                 if 'ttyUSB' in p.device or 'ttyACM' in p.device:
                     ports.append(p.device)
             else:
-                # Na Windowsie pokazuj wszystkie (np. COM3)
                 ports.append(p.device)
                 
         self.port_combo.addItems(ports)
@@ -106,10 +117,15 @@ class IndustrialControlApp(AppUI):
 
     def toggle_connection(self):
         if self.ser and self.ser.is_open:
+            # Zabezpieczenie: Przy rozłączeniu automatycznie kończymy nagrywanie, jeśli trwa
+            if self.is_recording:
+                self.stop_recording()
+                
             self.ser.close()
             self.ser = None
             self.timer.stop()
             self.btn_connect.setText("Connect")
+            self.btn_start_rec.setEnabled(False) # Zablokowanie guzika nagrywania
             self.log("Disconnected")
         else:
             try:
@@ -117,22 +133,18 @@ class IndustrialControlApp(AppUI):
                 if not port: return
                 self.ser = serial.Serial(port, 115200, timeout=0.1)
                 
-                # --- CZYSZCZENIE BUFORA PORTU SZEREGOWEGO ---
-                # Niezwykle ważne po nawiązaniu połączenia - zapobiega czytaniu starych/uszkodzonych danych z kabla
                 self.ser.reset_input_buffer()
                 self.ser.reset_output_buffer()
-                # --------------------------------------------
                 
                 self.btn_connect.setText("Disconnect")
+                self.btn_start_rec.setEnabled(True) # Odblokowanie guzika nagrywania
                 self.timer.start(30)
                 
-                # Zsynchronizuj tryb z kontrolerem zaraz po połączeniu
                 if self.btn_manual.isChecked():
                     self.send_cmd("MODE_MANUAL")
                 else:
                     self.send_cmd("MODE_AUTO")
                 
-                # Pobierz aktualne wartości z kontrolera
                 self.read_nvs()
                 self.log(f"Connected to {port}")
             except Exception as e:
@@ -145,6 +157,9 @@ class IndustrialControlApp(AppUI):
 
     def adjust_value(self, spin, cmd, delta):
         new_val = max(0, spin.value() + delta)
+        if cmd == "HZ":
+            new_val = min(100, new_val)
+            
         spin.setValue(new_val)
         self.send_cmd(f"{cmd} {new_val}")
         
@@ -171,13 +186,16 @@ class IndustrialControlApp(AppUI):
                             dist = float(parts[0])
                             speed = float(parts[1])
                             rpm = float(parts[2])
+                            freq = 0.0
                             
-                            # --- UPDATE DISPLAYS ---
+                            if len(parts) >= 4:
+                                freq = float(parts[3])
+                                self.lbl_vfd_freq.setText(f"{freq:.2f}")
+                            
                             self.lbl_distance.setText(f"{dist:.2f}")
                             self.lbl_speed.setText(f"{speed:.2f}")
                             self.lbl_rpm.setText(f"{rpm:.2f}")
                             
-                            # --- UPDATE PLOT DATA (Hidden in UI) ---
                             self.data_distance.append(dist)
                             self.data_speed.append(speed)
                             self.data_rpm.append(rpm)
@@ -185,14 +203,13 @@ class IndustrialControlApp(AppUI):
                             self.curve_speed.setData(list(self.data_speed))
                             self.curve_rpm.setData(list(self.data_rpm))
                             
-                            # --- RECORD CSV ---
                             if self.is_recording:
                                 self.csv_writer.writerow([
                                     datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3], 
-                                    dist, speed, rpm
+                                    dist, speed, rpm, freq
                                 ])
                     except ValueError:
-                        pass # Zignoruj błędy uszkodzonej ramki
+                        pass
                 else:
                     self.log(f"<< {line}")
                     self.process_incoming_params(line)
@@ -202,12 +219,21 @@ class IndustrialControlApp(AppUI):
     def process_incoming_params(self, line):
         if ":" in line and "==" not in line:
             try:
-                name, val = [x.strip() for x in line.split(":")]
+                parts = line.split(":", 1) 
+                name = parts[0].strip()
+                val = parts[1].strip()
+                
                 val_f = float(val)
+                name_lower = name.lower()
+                
                 if name == "forwardSpeed": self.fwd_speed.setValue(val_f)
                 elif name == "backwardSpeed": self.bwd_speed.setValue(val_f)
                 elif name == "accGlue": self.glue_acc.setValue(int(val_f))
                 elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.4f}")
+                
+                elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
+                    self.lbl_vfd_freq.setText(f"{val_f:.2f}")
+                    self.vfd_freq.setValue(val_f)
             except: pass
 
     def start_recording(self):
@@ -220,7 +246,7 @@ class IndustrialControlApp(AppUI):
             self.csv_file = open(self.current_full_path, mode='w', newline='')
             self.csv_writer = csv.writer(self.csv_file)
             
-            self.csv_writer.writerow(["Timestamp", "Distance", "Speed", "RPM"])
+            self.csv_writer.writerow(["Timestamp", "Distance", "Speed", "RPM", "Frequency"])
             self.is_recording = True
             self.send_cmd("START_RECORDING")
             
@@ -250,6 +276,7 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"backwardSpeed {self.bwd_speed.value()}")
         self.send_cmd(f"glueAcc {self.glue_acc.value()}")
         self.send_cmd(f"calGlue {self.cal_glue.text()}")
+        self.send_cmd(f"HZ {self.vfd_freq.value()}")
 
     def read_nvs(self):
         self.send_cmd("READNVS")
