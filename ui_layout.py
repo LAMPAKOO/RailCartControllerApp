@@ -66,7 +66,7 @@ class AppUI(QtWidgets.QMainWindow):
         disp1_layout.setSpacing(15)
         
         h_spd = QtWidgets.QHBoxLayout()
-        lbl_s_pfx = QtWidgets.QLabel("SPEED: ")
+        lbl_s_pfx = QtWidgets.QLabel("GLUE [RPM]: ")
         lbl_s_pfx.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
         self.lbl_speed = QtWidgets.QLabel("0.00")
         self.lbl_speed.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -75,7 +75,7 @@ class AppUI(QtWidgets.QMainWindow):
         h_spd.addStretch()
         
         h_rpm = QtWidgets.QHBoxLayout()
-        lbl_r_pfx = QtWidgets.QLabel("RPM: ")
+        lbl_r_pfx = QtWidgets.QLabel("M/min: ")
         lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
         self.lbl_rpm = QtWidgets.QLabel("0.00")
         self.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -291,7 +291,7 @@ class AppUI(QtWidgets.QMainWindow):
         
         btn_vfd_bwd = QtWidgets.QPushButton("▼\nMOVE BWD")
         btn_vfd_bwd.setFixedHeight(140) 
-        btn_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        btn_vfd_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_vfd_bwd.setStyleSheet(move_btn_style)
         btn_vfd_bwd.clicked.connect(lambda: self.send_cmd("VFD_REVERSE"))
         
@@ -319,10 +319,9 @@ class AppUI(QtWidgets.QMainWindow):
         col3_layout.setContentsMargins(15, 15, 15, 15)
         col3_layout.setSpacing(15)
         
-        # --- PRZYCISK EXIT PRZENIESIONY NA SAMĄ GÓRĘ 3 KOLUMNY ---
         self.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
         self.btn_exit.setFixedHeight(50) 
-        self.btn_exit.setFixedWidth(160) # <-- DODANE: sztywne ograniczenie szerokości
+        self.btn_exit.setFixedWidth(160)
         self.btn_exit.setStyleSheet("""
             QPushButton { 
                 background-color: #4a0000; 
@@ -335,33 +334,69 @@ class AppUI(QtWidgets.QMainWindow):
             QPushButton:pressed { background-color: #ff0000; color: white; }
         """)
         self.btn_exit.clicked.connect(self.close) 
-        
-        # <-- ZMIENIONE: dodano parametr alignment spymający przycisk do prawej
         col3_layout.addWidget(self.btn_exit, alignment=QtCore.Qt.AlignRight)
-        # ---------------------------------------------------------
-
         
         lbl_title_3 = QtWidgets.QLabel("DATA RECORDING")
         lbl_title_3.setStyleSheet(header_style)
-        # Dodajemy mały margines z góry, by oddzielić od przycisku EXIT
         lbl_title_3.setContentsMargins(0, 10, 0, 0)
         col3_layout.addWidget(lbl_title_3, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
+        # --- PODWÓJNY EKRAN DYSTANSÓW (REL i ABS) ---
         disp3 = QtWidgets.QFrame()
         disp3.setObjectName("DisplayPanel")
         disp3.setStyleSheet(display_style)
         disp3_layout = QtWidgets.QHBoxLayout(disp3)
-        disp3_layout.setContentsMargins(20, 30, 20, 30)
-        disp3_layout.setAlignment(QtCore.Qt.AlignCenter)
+        disp3_layout.setContentsMargins(10, 15, 10, 15)
         
-        self.lbl_distance = QtWidgets.QLabel("0.00")
-        self.lbl_distance.setStyleSheet("color: #2196F3; font-size: 50px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
-        lbl_m = QtWidgets.QLabel(" m")
-        lbl_m.setStyleSheet("color: #2196F3; font-size: 50px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        # Sekcja REL
+        rel_layout = QtWidgets.QVBoxLayout()
+        rel_layout.setAlignment(QtCore.Qt.AlignCenter)
+        lbl_rel_title = QtWidgets.QLabel("REL")
+        lbl_rel_title.setStyleSheet("color: #aaaaaa; font-size: 14px; font-weight: bold; background: transparent;")
+        lbl_rel_title.setAlignment(QtCore.Qt.AlignCenter)
         
-        disp3_layout.addWidget(self.lbl_distance)
-        disp3_layout.addWidget(lbl_m)
+        h_rel = QtWidgets.QHBoxLayout()
+        self.lbl_distance_rel = QtWidgets.QLabel("0.00")
+        self.lbl_distance_rel.setStyleSheet("color: #2196F3; font-size: 36px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        lbl_rel_m = QtWidgets.QLabel("m")
+        lbl_rel_m.setStyleSheet("color: #2196F3; font-size: 20px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        h_rel.addWidget(self.lbl_distance_rel)
+        h_rel.addWidget(lbl_rel_m)
+        h_rel.setAlignment(QtCore.Qt.AlignCenter)
+        
+        rel_layout.addWidget(lbl_rel_title)
+        rel_layout.addLayout(h_rel)
+        
+        # Pionowa linia rozdzielająca
+        v_line_dist = QtWidgets.QFrame()
+        v_line_dist.setFrameShape(QtWidgets.QFrame.VLine)
+        v_line_dist.setStyleSheet("color: #333333;")
+        
+        # Sekcja ABS
+        abs_layout = QtWidgets.QVBoxLayout()
+        abs_layout.setAlignment(QtCore.Qt.AlignCenter)
+        lbl_abs_title = QtWidgets.QLabel("ABS")
+        lbl_abs_title.setStyleSheet("color: #aaaaaa; font-size: 14px; font-weight: bold; background: transparent;")
+        lbl_abs_title.setAlignment(QtCore.Qt.AlignCenter)
+        
+        h_abs = QtWidgets.QHBoxLayout()
+        self.lbl_distance_abs = QtWidgets.QLabel("0.00")
+        self.lbl_distance_abs.setStyleSheet("color: #FF9800; font-size: 36px; font-weight: bold; font-family: 'Consolas'; background: transparent;") # Inny kolor dla ABS
+        lbl_abs_m = QtWidgets.QLabel("m")
+        lbl_abs_m.setStyleSheet("color: #FF9800; font-size: 20px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+        h_abs.addWidget(self.lbl_distance_abs)
+        h_abs.addWidget(lbl_abs_m)
+        h_abs.setAlignment(QtCore.Qt.AlignCenter)
+        
+        abs_layout.addWidget(lbl_abs_title)
+        abs_layout.addLayout(h_abs)
+        
+        disp3_layout.addLayout(rel_layout)
+        disp3_layout.addWidget(v_line_dist)
+        disp3_layout.addLayout(abs_layout)
+        
         col3_layout.addWidget(disp3)
+        # --------------------------------------------
         
         lbl_fn = QtWidgets.QLabel("Filename:")
         lbl_fn.setStyleSheet(label_style)

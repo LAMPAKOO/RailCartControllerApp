@@ -4,7 +4,7 @@ import csv
 import os
 import sys
 import json
-import time # Dodane dla wstrzymania działania portu na ułamek sekundy przy zamykaniu
+import time 
 from datetime import datetime
 from collections import deque
 from PySide6 import QtWidgets, QtCore, QtGui
@@ -22,6 +22,7 @@ class IndustrialControlApp(AppUI):
         self.csv_writer = None
         self.current_full_path = ""
         
+        # Używamy starych buforów dla plotu (w tle), żeby nic się nie wysypało
         self.data_distance = deque([0] * 100, maxlen=100)
         self.data_speed = deque([0] * 100, maxlen=100)
         self.data_rpm = deque([0] * 100, maxlen=100)
@@ -38,31 +39,21 @@ class IndustrialControlApp(AppUI):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
 
-    # =========================================================
-    # EVENT ZAMYKANIA APLIKACJI (Krzyżyk, Alt+F4, przycisk EXIT)
-    # =========================================================
     def closeEvent(self, event):
-        """Zatrzymuje silniki, zapisuje nagranie i zamyka port przy wyjściu."""
-        # 1. Jeśli trwa nagrywanie, zapisz je bezpiecznie
         if self.is_recording:
             self.stop_recording()
             
-        # 2. Jeśli jesteśmy połączeni, wyślij sygnał STOP do wszystkiego
         if self.ser and self.ser.is_open:
             try:
                 self.send_cmd("STOP")
                 self.send_cmd("VFD_STOP")
-                
-                # Czekamy krótką chwilę, aby upewnić się, że komendy "wyleciały" przewodem
                 time.sleep(0.1) 
-                
                 self.ser.close()
             except Exception:
                 pass
                 
         event.accept()
 
-    # ------------------ KONFIGURACJA PLIKÓW ------------------
     def init_config(self):
         if os.path.exists(self.config_file):
             try:
@@ -95,7 +86,6 @@ class IndustrialControlApp(AppUI):
             self.save_path_input.setText(path)
             self.save_config()
 
-    # ------------------ LOGIKA GŁÓWNA (UART) ------------------
     def log(self, msg):
         time_str = datetime.now().strftime('%H:%M:%S')
         self.terminal.appendPlainText(f" {time_str} | {msg}")
@@ -117,7 +107,6 @@ class IndustrialControlApp(AppUI):
 
     def toggle_connection(self):
         if self.ser and self.ser.is_open:
-            # Zabezpieczenie: Przy rozłączeniu automatycznie kończymy nagrywanie, jeśli trwa
             if self.is_recording:
                 self.stop_recording()
                 
@@ -125,7 +114,7 @@ class IndustrialControlApp(AppUI):
             self.ser = None
             self.timer.stop()
             self.btn_connect.setText("Connect")
-            self.btn_start_rec.setEnabled(False) # Zablokowanie guzika nagrywania
+            self.btn_start_rec.setEnabled(False) 
             self.log("Disconnected")
         else:
             try:
@@ -137,7 +126,7 @@ class IndustrialControlApp(AppUI):
                 self.ser.reset_output_buffer()
                 
                 self.btn_connect.setText("Disconnect")
-                self.btn_start_rec.setEnabled(True) # Odblokowanie guzika nagrywania
+                self.btn_start_rec.setEnabled(True) 
                 self.timer.start(30)
                 
                 if self.btn_manual.isChecked():
@@ -182,21 +171,25 @@ class IndustrialControlApp(AppUI):
                         raw_data = line.replace("DATA:", "").strip()
                         parts = raw_data.split(",")
                         
-                        if len(parts) >= 3:
-                            dist = float(parts[0])
-                            speed = float(parts[1])
+                        # Nowy format z 4/5 elementami: rel_dist, abs_dist, rpm, speed, [freq]
+                        if len(parts) >= 4:
+                            dist_rel = float(parts[0])
+                            dist_abs = float(parts[1])
                             rpm = float(parts[2])
+                            speed = float(parts[3])
                             freq = 0.0
                             
-                            if len(parts) >= 4:
-                                freq = float(parts[3])
+                            if len(parts) >= 5:
+                                freq = float(parts[4])
                                 self.lbl_vfd_freq.setText(f"{freq:.2f}")
                             
-                            self.lbl_distance.setText(f"{dist:.2f}")
-                            self.lbl_speed.setText(f"{speed:.2f}")
+                            self.lbl_distance_rel.setText(f"{dist_rel:.2f}")
+                            self.lbl_distance_abs.setText(f"{dist_abs:.2f}")
                             self.lbl_rpm.setText(f"{rpm:.2f}")
+                            self.lbl_speed.setText(f"{speed:.2f}")
                             
-                            self.data_distance.append(dist)
+                            # (Opcjonalne, tło)
+                            self.data_distance.append(dist_rel)
                             self.data_speed.append(speed)
                             self.data_rpm.append(rpm)
                             self.curve_distance.setData(list(self.data_distance))
@@ -206,7 +199,7 @@ class IndustrialControlApp(AppUI):
                             if self.is_recording:
                                 self.csv_writer.writerow([
                                     datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3], 
-                                    dist, speed, rpm, freq
+                                    dist_rel, dist_abs, speed, rpm, freq
                                 ])
                     except ValueError:
                         pass
@@ -246,7 +239,8 @@ class IndustrialControlApp(AppUI):
             self.csv_file = open(self.current_full_path, mode='w', newline='')
             self.csv_writer = csv.writer(self.csv_file)
             
-            self.csv_writer.writerow(["Timestamp", "Distance", "Speed", "RPM", "Frequency"])
+            # Zmiana nagłówka CSV na obsługujący REL i ABS distance
+            self.csv_writer.writerow(["Timestamp", "Distance_REL", "Distance_ABS", "Speed", "RPM", "Frequency"])
             self.is_recording = True
             self.send_cmd("START_RECORDING")
             
