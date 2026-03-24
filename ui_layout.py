@@ -54,7 +54,7 @@ class AppUI(QtWidgets.QMainWindow):
         col1_layout.setContentsMargins(15, 15, 15, 15)
         col1_layout.setSpacing(15)
         
-        lbl_title_1 = QtWidgets.QLabel("MOTOR CONTROL")
+        lbl_title_1 = QtWidgets.QLabel("GLUE CONTROL")
         lbl_title_1.setStyleSheet(header_style)
         col1_layout.addWidget(lbl_title_1, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
@@ -66,7 +66,7 @@ class AppUI(QtWidgets.QMainWindow):
         disp1_layout.setSpacing(15)
         
         h_spd = QtWidgets.QHBoxLayout()
-        lbl_s_pfx = QtWidgets.QLabel("GLUE [RPM]: ")
+        lbl_s_pfx = QtWidgets.QLabel("GLUE: ")
         lbl_s_pfx.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
         self.lbl_speed = QtWidgets.QLabel("0.00")
         self.lbl_speed.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -75,7 +75,7 @@ class AppUI(QtWidgets.QMainWindow):
         h_spd.addStretch()
         
         h_rpm = QtWidgets.QHBoxLayout()
-        lbl_r_pfx = QtWidgets.QLabel("M/min: ")
+        lbl_r_pfx = QtWidgets.QLabel("SPEED [m/min]: ")
         lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
         self.lbl_rpm = QtWidgets.QLabel("0.00")
         self.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -115,10 +115,33 @@ class AppUI(QtWidgets.QMainWindow):
         mode_h.addWidget(self.btn_auto)
         col1_layout.addLayout(mode_h)
         
+        # --- POWIĘKSZONE ZAKŁADKI ---
         self.tabs = QtWidgets.QTabWidget()
+        self.tabs.setStyleSheet("""
+            QTabBar::tab {
+                font-size: 16px;
+                font-weight: bold;
+                padding: 12px 25px;
+                background-color: #333333;
+                color: #aaaaaa;
+                border-top-left-radius: 6px;
+                border-top-right-radius: 6px;
+                margin-right: 4px;
+            }
+            QTabBar::tab:selected {
+                background-color: #2196F3;
+                color: white;
+            }
+            QTabWidget::pane {
+                border: 1px solid #444444;
+                border-radius: 4px;
+            }
+        """)
         
+        # TAB: BASIC
         tab_basic = QtWidgets.QWidget()
         basic_layout = QtWidgets.QVBoxLayout(tab_basic)
+        basic_layout.setContentsMargins(15, 15, 15, 15)
         
         inc_layout = QtWidgets.QHBoxLayout()
         
@@ -127,7 +150,7 @@ class AppUI(QtWidgets.QMainWindow):
         lbl_inc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
         
         self.speed_inc = QtWidgets.QSpinBox()
-        self.speed_inc.setRange(10, 1000)
+        self.speed_inc.setRange(1, 1000)
         self.speed_inc.setValue(50)
         self.speed_inc.setFixedSize(120, 50) 
         self.speed_inc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
@@ -149,21 +172,21 @@ class AppUI(QtWidgets.QMainWindow):
         inc_layout.addStretch()
         basic_layout.addLayout(inc_layout)
         
-        self.fwd_speed = self.create_step_control(basic_layout, "Forward Speed:", "forwardSpeed")
-        self.bwd_speed = self.create_step_control(basic_layout, "Backward Speed:", "backwardSpeed")
+        self.fwd_speed = self.create_step_control(basic_layout, "Dispense Speed:", "forwardSpeed")
+        self.bwd_speed = self.create_step_control(basic_layout, "Retract Speed:", "backwardSpeed")
         
         basic_layout.addSpacing(15)
         
         move_layout = QtWidgets.QHBoxLayout()
         move_layout.setSpacing(15)
         
-        btn_fwd = QtWidgets.QPushButton("▲\nMOVE FWD")
+        btn_fwd = QtWidgets.QPushButton("▲\nDISPENSE GLUE")
         btn_fwd.setFixedHeight(140) 
         btn_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_fwd.setStyleSheet(move_btn_style)
         btn_fwd.clicked.connect(lambda: self.send_cmd("MOVE_FORWARD"))
         
-        btn_bwd = QtWidgets.QPushButton("▼\nMOVE BWD")
+        btn_bwd = QtWidgets.QPushButton("▼\nRETRACT")
         btn_bwd.setFixedHeight(140) 
         btn_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_bwd.setStyleSheet(move_btn_style)
@@ -181,24 +204,68 @@ class AppUI(QtWidgets.QMainWindow):
         
         basic_layout.addStretch()
         
+        # --- TAB: ADVANCED (Powiększony i przeprojektowany układ) ---
         tab_adv = QtWidgets.QWidget()
         adv_layout = QtWidgets.QVBoxLayout(tab_adv)
+        adv_layout.setContentsMargins(15, 20, 15, 15)
+        adv_layout.setSpacing(15)
+        
+        # Sekcja Glue Acceleration
+        acc_layout = QtWidgets.QHBoxLayout()
+        lbl_acc = QtWidgets.QLabel("Glue Acceleration:")
+        lbl_acc.setFixedWidth(160)
+        lbl_acc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
         
         self.glue_acc = QtWidgets.QSpinBox()
-        self.glue_acc.setRange(0, 1000000); self.glue_acc.setFixedHeight(30)
-        self.cal_glue = QtWidgets.QLineEdit("0.0000"); self.cal_glue.setFixedHeight(30)
+        self.glue_acc.setRange(0, 1000000)
+        self.glue_acc.setFixedSize(180, 50)
+        self.glue_acc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
         
-        adv_layout.addWidget(QtWidgets.QLabel("Glue Acceleration:"))
-        adv_layout.addWidget(self.glue_acc)
-        adv_layout.addWidget(QtWidgets.QLabel("Glue Calibration:"))
-        adv_layout.addWidget(self.cal_glue)
+        acc_layout.addWidget(lbl_acc)
+        acc_layout.addWidget(self.glue_acc)
+        acc_layout.addStretch()
         
-        btn_apply = QtWidgets.QPushButton("Apply All Parameters")
+        # Sekcja Glue Calibration
+        cal_layout = QtWidgets.QHBoxLayout()
+        lbl_cal = QtWidgets.QLabel("Glue Calibration:")
+        lbl_cal.setFixedWidth(160)
+        lbl_cal.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
+        
+        self.cal_glue = QtWidgets.QLineEdit("0.0000")
+        self.cal_glue.setFixedSize(180, 50)
+        self.cal_glue.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+        self.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 3px; padding: 6px;")
+        
+        cal_layout.addWidget(lbl_cal)
+        cal_layout.addWidget(self.cal_glue)
+        cal_layout.addStretch()
+        
+        adv_layout.addLayout(acc_layout)
+        adv_layout.addLayout(cal_layout)
+        adv_layout.addSpacing(20)
+        
+        # Wielkie przyciski
+        btn_apply = QtWidgets.QPushButton("APPLY ALL PARAMETERS")
+        btn_apply.setFixedHeight(60)
+        btn_apply.setStyleSheet("""
+            QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 16px; border-radius: 8px; }
+            QPushButton:hover { background-color: #66BB6A; }
+            QPushButton:pressed { background-color: #388E3C; }
+        """)
         btn_apply.clicked.connect(self.apply_all)
-        btn_read = QtWidgets.QPushButton("Refresh from NVS")
+        
+        btn_read = QtWidgets.QPushButton("REFRESH FROM NVS")
+        btn_read.setFixedHeight(60)
+        btn_read.setStyleSheet("""
+            QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 8px; }
+            QPushButton:hover { background-color: #42A5F5; }
+            QPushButton:pressed { background-color: #1976D2; }
+        """)
         btn_read.clicked.connect(self.read_nvs)
         
-        adv_layout.addWidget(btn_apply); adv_layout.addWidget(btn_read); adv_layout.addStretch()
+        adv_layout.addWidget(btn_apply)
+        adv_layout.addWidget(btn_read)
+        adv_layout.addStretch()
         
         self.tabs.addTab(tab_basic, "Basic Control")
         self.tabs.addTab(tab_adv, "Settings")
@@ -215,7 +282,7 @@ class AppUI(QtWidgets.QMainWindow):
         col2_layout.setContentsMargins(15, 15, 15, 15)
         col2_layout.setSpacing(15)
         
-        lbl_title_2 = QtWidgets.QLabel("INVERTER CONTROL")
+        lbl_title_2 = QtWidgets.QLabel("DRIVE MOTOR CONTROL")
         lbl_title_2.setStyleSheet(header_style)
         col2_layout.addWidget(lbl_title_2, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         
@@ -283,13 +350,13 @@ class AppUI(QtWidgets.QMainWindow):
         vfd_move_layout = QtWidgets.QHBoxLayout()
         vfd_move_layout.setSpacing(15)
         
-        btn_vfd_fwd = QtWidgets.QPushButton("▲\nMOVE FWD")
+        btn_vfd_fwd = QtWidgets.QPushButton("▲\nDRIVE FORWARD")
         btn_vfd_fwd.setFixedHeight(140) 
         btn_vfd_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_vfd_fwd.setStyleSheet(move_btn_style)
         btn_vfd_fwd.clicked.connect(lambda: self.send_cmd("VFD_FORWARD"))
         
-        btn_vfd_bwd = QtWidgets.QPushButton("▼\nMOVE BWD")
+        btn_vfd_bwd = QtWidgets.QPushButton("▼\nDRIVE BACKWARD")
         btn_vfd_bwd.setFixedHeight(140) 
         btn_vfd_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         btn_vfd_bwd.setStyleSheet(move_btn_style)
@@ -336,7 +403,7 @@ class AppUI(QtWidgets.QMainWindow):
         self.btn_exit.clicked.connect(self.close) 
         col3_layout.addWidget(self.btn_exit, alignment=QtCore.Qt.AlignRight)
         
-        lbl_title_3 = QtWidgets.QLabel("DATA RECORDING")
+        lbl_title_3 = QtWidgets.QLabel("DISTANCE RECORDING")
         lbl_title_3.setStyleSheet(header_style)
         lbl_title_3.setContentsMargins(0, 10, 0, 0)
         col3_layout.addWidget(lbl_title_3, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
@@ -348,10 +415,9 @@ class AppUI(QtWidgets.QMainWindow):
         disp3_layout = QtWidgets.QHBoxLayout(disp3)
         disp3_layout.setContentsMargins(10, 15, 10, 15)
         
-        # Sekcja REL
         rel_layout = QtWidgets.QVBoxLayout()
         rel_layout.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_rel_title = QtWidgets.QLabel("REL")
+        lbl_rel_title = QtWidgets.QLabel("RELATIVE")
         lbl_rel_title.setStyleSheet("color: #aaaaaa; font-size: 14px; font-weight: bold; background: transparent;")
         lbl_rel_title.setAlignment(QtCore.Qt.AlignCenter)
         
@@ -367,21 +433,19 @@ class AppUI(QtWidgets.QMainWindow):
         rel_layout.addWidget(lbl_rel_title)
         rel_layout.addLayout(h_rel)
         
-        # Pionowa linia rozdzielająca
         v_line_dist = QtWidgets.QFrame()
         v_line_dist.setFrameShape(QtWidgets.QFrame.VLine)
         v_line_dist.setStyleSheet("color: #333333;")
         
-        # Sekcja ABS
         abs_layout = QtWidgets.QVBoxLayout()
         abs_layout.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_abs_title = QtWidgets.QLabel("ABS")
+        lbl_abs_title = QtWidgets.QLabel("ABSOLUTE")
         lbl_abs_title.setStyleSheet("color: #aaaaaa; font-size: 14px; font-weight: bold; background: transparent;")
         lbl_abs_title.setAlignment(QtCore.Qt.AlignCenter)
         
         h_abs = QtWidgets.QHBoxLayout()
         self.lbl_distance_abs = QtWidgets.QLabel("0.00")
-        self.lbl_distance_abs.setStyleSheet("color: #FF9800; font-size: 36px; font-weight: bold; font-family: 'Consolas'; background: transparent;") # Inny kolor dla ABS
+        self.lbl_distance_abs.setStyleSheet("color: #FF9800; font-size: 36px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
         lbl_abs_m = QtWidgets.QLabel("m")
         lbl_abs_m.setStyleSheet("color: #FF9800; font-size: 20px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
         h_abs.addWidget(self.lbl_distance_abs)
@@ -431,13 +495,13 @@ class AppUI(QtWidgets.QMainWindow):
             QPushButton:hover:enabled { background-color: #555555; }
         """
         
-        self.btn_start_rec = QtWidgets.QPushButton("START REC")
+        self.btn_start_rec = QtWidgets.QPushButton("START RECORDING")
         self.btn_start_rec.setFixedHeight(40)
         self.btn_start_rec.setStyleSheet(rec_btn_style)
         self.btn_start_rec.setEnabled(False)
         self.btn_start_rec.clicked.connect(self.start_recording)
         
-        self.btn_stop_rec = QtWidgets.QPushButton("STOP REC")
+        self.btn_stop_rec = QtWidgets.QPushButton("STOP RECORDING")
         self.btn_stop_rec.setFixedHeight(40)
         self.btn_stop_rec.setStyleSheet(rec_btn_style)
         self.btn_stop_rec.setEnabled(False)
@@ -501,8 +565,8 @@ class AppUI(QtWidgets.QMainWindow):
         lbl.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
         h_layout.addWidget(lbl)
         
-        spin = QtWidgets.QDoubleSpinBox()
-        spin.setRange(0, 10000)
+        spin = QtWidgets.QSpinBox()
+        spin.setRange(0, 2000)
         spin.setFixedSize(120, 50) 
         spin.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
         
@@ -532,7 +596,7 @@ class AppUI(QtWidgets.QMainWindow):
         lbl.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
         h_layout.addWidget(lbl)
         
-        spin = QtWidgets.QDoubleSpinBox()
+        spin = QtWidgets.QSpinBox()
         spin.setRange(0, 100) 
         spin.setFixedSize(120, 50) 
         spin.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
