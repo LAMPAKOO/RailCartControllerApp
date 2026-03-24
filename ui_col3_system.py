@@ -64,6 +64,7 @@ def setup_system_column(ui, parent_layout):
     ui.btn_load_prof = QtWidgets.QPushButton("LOAD SELECTED")
     ui.btn_load_prof.setFixedHeight(35)
     ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE)
+    ui.btn_load_prof.setEnabled(False)
     ui.btn_load_prof.clicked.connect(ui.load_profile)
     
     action_layout.addWidget(ui.btn_save_prof)
@@ -82,20 +83,43 @@ def setup_system_column(ui, parent_layout):
     lbl_title_conn.setStyleSheet(HEADER_STYLE)
     col3_layout.addWidget(lbl_title_conn, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
     
+    # --- POWIĘKSZONY PANEL ŁĄCZNOŚCI ---
     conn_layout = QtWidgets.QHBoxLayout()
+    
     ui.port_combo = QtWidgets.QComboBox()
-    ui.port_combo.setFixedHeight(30)
+    ui.port_combo.setFixedHeight(45)
+    ui.port_combo.setStyleSheet("""
+        QComboBox {
+            background-color: #333333; color: white; 
+            font-size: 16px; font-weight: bold; 
+            border: 1px solid #444; border-radius: 5px; padding-left: 10px;
+        }
+        QComboBox::drop-down { border: none; }
+    """)
+    
     ui.btn_refresh = QtWidgets.QPushButton("🔄")
-    ui.btn_refresh.setFixedSize(35, 30)
+    ui.btn_refresh.setFixedSize(50, 45)
+    ui.btn_refresh.setStyleSheet("""
+        QPushButton { background-color: #444444; color: white; font-size: 20px; border-radius: 5px; }
+        QPushButton:hover { background-color: #555555; }
+        QPushButton:pressed { background-color: #2196F3; }
+    """)
     ui.btn_refresh.clicked.connect(ui.refresh_ports)
-    ui.btn_connect = QtWidgets.QPushButton("Connect")
-    ui.btn_connect.setFixedHeight(30)
+    
+    ui.btn_connect = QtWidgets.QPushButton("CONNECT")
+    ui.btn_connect.setFixedHeight(45)
+    ui.btn_connect.setStyleSheet("""
+        QPushButton { background-color: #444444; color: white; font-size: 16px; font-weight: bold; border-radius: 5px; }
+        QPushButton:hover { background-color: #555555; }
+        QPushButton:pressed { background-color: #2196F3; }
+    """)
     ui.btn_connect.clicked.connect(ui.toggle_connection)
     
     conn_layout.addWidget(ui.port_combo)
     conn_layout.addWidget(ui.btn_refresh)
     conn_layout.addWidget(ui.btn_connect)
     col3_layout.addLayout(conn_layout)
+    # ------------------------------------
     
     lbl_term = QtWidgets.QLabel("Terminal:")
     lbl_term.setStyleSheet(LABEL_STYLE)

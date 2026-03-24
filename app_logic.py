@@ -28,8 +28,11 @@ class IndustrialControlApp(AppUI):
         self.base_dir = os.path.abspath(os.path.dirname(__file__))
         self.config_file = os.path.join(self.base_dir, "config.json")
         
-        # Puste gniazda profili w pamięci RAM
+        # Pamięć globalna i gniazda profili
         self.config_data = {
+            "last_port": "",
+            "global_filename": "motor_test",
+            "global_save_dir": self.base_dir,
             "profiles": {
                 f"Profile {i}": {
                     "filename": "motor_test",
@@ -46,8 +49,9 @@ class IndustrialControlApp(AppUI):
         }
         
         self.init_ui()
-        self.init_config() # Tylko ładuje z pliku JSON do RAMu, nie aktualizuje UI
-        self.refresh_ports()
+        self.init_config()           # Ładuje JSON do RAM
+        self.setup_initial_state()   # Wpisuje zapamiętany plik/katalog do UI i włącza automatyczny zapis
+        self.refresh_ports()         # Wykrywa porty i przypisuje ten ostatnio zapamiętany
         
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
@@ -68,20 +72,44 @@ class IndustrialControlApp(AppUI):
         event.accept()
 
     # =========================================================
-    # LOGIKA SYSTEMU PROFILI (TYLKO RĘCZNY ZAPIS I ODCZYT)
+    # ZARZĄDZANIE PAMIĘCIĄ I PROFILAMI
     # =========================================================
     def init_config(self):
-        """Tylko wczytuje plik JSON do RAM. Nie nadpisuje UI na starcie."""
+        """Wczytuje z pliku JSON ustawienia globalne oraz zapamiętane profile M1-M4."""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     loaded = json.load(f)
+                    
                     if "profiles" in loaded:
                         for p in loaded["profiles"]:
                             if p in self.config_data["profiles"]:
                                 self.config_data["profiles"][p].update(loaded["profiles"][p])
+                    if "last_port" in loaded:
+                        self.config_data["last_port"] = loaded["last_port"]
+                    if "global_filename" in loaded:
+                        self.config_data["global_filename"] = loaded["global_filename"]
+                    if "global_save_dir" in loaded:
+                        self.config_data["global_save_dir"] = loaded["global_save_dir"]
             except Exception as e:
                 self.log(f"Config Load Error: {str(e)}")
+
+    def setup_initial_state(self):
+        """Wpisuje globalne ustawienia do interfejsu i podpina automatyczny zapis 'na żywo'."""
+        self.filename_input.setText(self.config_data["global_filename"])
+        self.save_path_input.setText(self.config_data["global_save_dir"])
+        
+        # Podłącz nasłuchiwacze, aby każda zmiana znaków zapisywała się od razu
+        self.filename_input.textChanged.connect(self.save_global_state)
+        self.save_path_input.textChanged.connect(self.save_global_state)
+        self.port_combo.currentTextChanged.connect(self.save_global_state)
+
+    def save_global_state(self, *args):
+        """Zapisuje ścieżki i port (na żywo) do JSONa bez tykania zawartości profili M1-M4."""
+        self.config_data["global_filename"] = self.filename_input.text()
+        self.config_data["global_save_dir"] = self.save_path_input.text()
+        self.config_data["last_port"] = self.port_combo.currentText()
+        self.save_config()
 
     def save_config(self):
         """Fizyczny zapis JSONa na dysk."""
@@ -92,12 +120,10 @@ class IndustrialControlApp(AppUI):
             self.log(f"Config Save Error: {str(e)}")
 
     def get_selected_profile(self):
-        """Sprawdza, który przycisk (M1-M4) jest zaznaczony."""
         mem_id = self.mem_group.checkedId()
         return f"Profile {mem_id}" if mem_id > 0 else "Profile 1"
 
     def save_profile(self):
-        """Akcja dla przycisku SAVE: Pobiera dane z UI i nadpisuje gniazdo w JSON."""
         current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
@@ -112,19 +138,22 @@ class IndustrialControlApp(AppUI):
         prof["vfd_freq"] = self.vfd_freq.value()
         prof["glue_acc"] = self.glue_acc.value()
         prof["cal_glue"] = self.cal_glue.text()
-        
+
         self.save_config()
-        self.log(f"SYSTEM: Konfiguracja zapisana do slotu {current_prof.replace('Profile ', 'M')}")
+        self.log(f"SYSTEM: Saved configuration to slot {current_prof.replace('Profile ', 'M')}")
+
 
     def load_profile(self):
-        """Akcja dla przycisku LOAD: Wpisuje dane z wybranego gniazda do UI."""
         current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
         prof = self.config_data["profiles"][current_prof]
         
+        # Ze względu na .textChanged, modyfikacja pól tekstowych poniżej
+        # automatycznie nadpisze też 'global_filename' i zapamięta je na przyszłość.
         self.filename_input.setText(prof.get("filename", "motor_test"))
         self.save_path_input.setText(prof.get("save_dir", self.base_dir))
+        
         self.speed_inc.setValue(prof.get("speed_inc", 50))
         self.fwd_speed.setValue(prof.get("fwd_speed", 0))
         self.bwd_speed.setValue(prof.get("bwd_speed", 0))
@@ -150,7 +179,10 @@ class IndustrialControlApp(AppUI):
         self.terminal.moveCursor(QtGui.QTextCursor.End)
 
     def refresh_ports(self):
+        # Blokujemy sygnały, by wyczyszczenie listy nagle nie zapisało do JSONa "pustego" portu.
+        self.port_combo.blockSignals(True)
         self.port_combo.clear()
+        
         ports = []
         for p in serial.tools.list_ports.comports():
             if sys.platform.startswith('linux'):
@@ -158,7 +190,18 @@ class IndustrialControlApp(AppUI):
                     ports.append(p.device)
             else:
                 ports.append(p.device)
+        
         self.port_combo.addItems(ports)
+        
+        # Jeśli pamiętamy stary port i wciąż jest podłączony do maszyny - załaduj go automatycznie
+        saved_port = self.config_data.get("last_port", "")
+        if saved_port in ports:
+            self.port_combo.setCurrentText(saved_port)
+        elif ports:
+            self.port_combo.setCurrentIndex(0)
+            
+        self.port_combo.blockSignals(False)
+        self.save_global_state() # Wymuś zapis tego, co faktycznie załadowało UI
         self.log("SYSTEM: Port list updated")
 
     def toggle_connection(self):
@@ -169,7 +212,7 @@ class IndustrialControlApp(AppUI):
             self.ser.close()
             self.ser = None
             self.timer.stop()
-            self.btn_connect.setText("Connect")
+            self.btn_connect.setText("CONNECT")
             self.btn_start_rec.setEnabled(False) 
             
             self.btn_manual.setEnabled(False)
@@ -179,7 +222,8 @@ class IndustrialControlApp(AppUI):
             self.btn_vfd_fwd.setEnabled(False)
             self.btn_vfd_bwd.setEnabled(False)
             self.btn_motor_stop.setEnabled(False) 
-            self.btn_vfd_stop.setEnabled(False)   
+            self.btn_vfd_stop.setEnabled(False)
+            self.btn_load_prof.setEnabled(False)
             
             self.log("Disconnected")
         else:
@@ -191,7 +235,7 @@ class IndustrialControlApp(AppUI):
                 self.ser.reset_input_buffer()
                 self.ser.reset_output_buffer()
                 
-                self.btn_connect.setText("Disconnect")
+                self.btn_connect.setText("DISCONNECT")
                 self.btn_start_rec.setEnabled(True) 
                 self.timer.start(30)
                 
@@ -205,6 +249,7 @@ class IndustrialControlApp(AppUI):
                 self.btn_vfd_stop.setEnabled(True)   
                 self.btn_glue_fwd.setEnabled(True)
                 self.btn_glue_bwd.setEnabled(True)
+                self.btn_load_prof.setEnabled(True)
                 
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")

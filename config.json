@@ -1,15 +1,18 @@
 {
+    "last_port": "COM3",
+    "global_filename": "motor_test",
+    "global_save_dir": "c:\\Users\\DELL\\Documents\\SHM System\\RailCartControllerApp",
     "profiles": {
         "Profile 1": {
-            "filename": "",
-            "save_dir": "",
+            "filename": "motor222",
+            "save_dir": "c:\\Users\\DELL\\Documents\\SHM System\\RailCartControllerApp",
             "speed_inc": 50,
-            "fwd_speed": 200,
-            "bwd_speed": 50,
+            "fwd_speed": 1550,
+            "bwd_speed": 1550,
             "vfd_inc": 5,
-            "vfd_freq": 0,
-            "glue_acc": 0,
-            "cal_glue": "0.0000"
+            "vfd_freq": 100,
+            "glue_acc": 200000,
+            "cal_glue": "9.0000"
         },
         "Profile 2": {
             "filename": "motor_test",
