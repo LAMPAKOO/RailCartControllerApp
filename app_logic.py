@@ -174,8 +174,29 @@ class IndustrialControlApp(AppUI):
     # =========================================================
 
     def log(self, msg):
+        import html # Używamy do konwersji znaków '<' i '>' na bezpieczne dla HTML
+        
         time_str = datetime.now().strftime('%H:%M:%S')
-        self.terminal.appendPlainText(f" {time_str} | {msg}")
+        color = "#e0e0e0"  # Domyślny jasnoszary dla odbieranych danych i reszty
+        
+        msg_lower = msg.lower()
+        
+        # Logika dobierania kolorów (priorytety)
+        if "error" in msg_lower or "err:" in msg_lower:
+            color = "#d32f2f"  # Czerwony (identyczny jak przycisk STOP)
+        elif msg.startswith(">>"):
+            color = "#4FC3F7"  # Subtelny, jasny niebieski dla wysyłanych komend
+        elif "system:" in msg_lower or "connected" in msg_lower or "disconnected" in msg_lower or "recording" in msg_lower:
+            color = "#FFCA28"  # Zgaszony, czytelny pomarańczowy/bursztynowy dla statusów
+            
+        # Zabezpieczamy znaki >> oraz << przed byciem odczytanym jako ukryte tagi HTML
+        safe_msg = html.escape(msg)
+        
+        # Składanie linijki: Czas jest ciemnoszary, kreska też, tekst w wybranym kolorze
+        html_line = f'<span style="color: #666666;">{time_str} |</span> <span style="color: {color};">{safe_msg}</span>'
+        
+        # Używamy appendHtml zamiast appendPlainText
+        self.terminal.appendHtml(html_line)
         self.terminal.moveCursor(QtGui.QTextCursor.End)
 
     def refresh_ports(self):
@@ -254,6 +275,7 @@ class IndustrialControlApp(AppUI):
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")
                 self.read_nvs()
+                self.send_cmd("VFD GET STATUS")
                 
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Error", str(e))

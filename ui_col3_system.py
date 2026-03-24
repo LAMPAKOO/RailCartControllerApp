@@ -127,7 +127,7 @@ def setup_system_column(ui, parent_layout):
     
     ui.terminal = QtWidgets.QPlainTextEdit()
     ui.terminal.setReadOnly(True)
-    ui.terminal.setStyleSheet("background-color: #171717; color: #00ff00; font-family: 'Consolas'; font-size: 10pt; border: 1px solid #333; border-radius: 5px;")
+    ui.terminal.setStyleSheet("background-color: #171717; color: #e0e0e0; font-family: 'Consolas'; font-size: 10pt; border: 1px solid #333; border-radius: 5px;")
     col3_layout.addWidget(ui.terminal, 1)
 
     parent_layout.addWidget(col3, 1)

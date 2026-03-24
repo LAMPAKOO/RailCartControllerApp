@@ -133,7 +133,7 @@ def setup_motor_column(ui, parent_layout):
     basic_layout.addLayout(move_layout)
     
     ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
-    ui.btn_motor_stop.setFixedHeight(60) # Ustalona sztywna wysokość dla obu
+    ui.btn_motor_stop.setFixedHeight(100) # Ustalona sztywna wysokość dla obu
     ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE) # <--- Użycie nowego stylu
     ui.btn_motor_stop.setEnabled(False)             # <--- Domyślne wyszarzenie
     ui.btn_motor_stop.clicked.connect(ui.stop_motor)
