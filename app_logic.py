@@ -28,9 +28,8 @@ class IndustrialControlApp(AppUI):
         self.base_dir = os.path.abspath(os.path.dirname(__file__))
         self.config_file = os.path.join(self.base_dir, "config.json")
         
-        # --- NOWA STRUKTURA DANYCH DLA PROFILI ---
+        # Puste gniazda profili w pamięci RAM
         self.config_data = {
-            "last_profile": "Profile 1",
             "profiles": {
                 f"Profile {i}": {
                     "filename": "motor_test",
@@ -47,7 +46,7 @@ class IndustrialControlApp(AppUI):
         }
         
         self.init_ui()
-        self.init_config()
+        self.init_config() # Tylko ładuje z pliku JSON do RAMu, nie aktualizuje UI
         self.refresh_ports()
         
         self.timer = QtCore.QTimer()
@@ -69,45 +68,41 @@ class IndustrialControlApp(AppUI):
         event.accept()
 
     # =========================================================
-    # LOGIKA SYSTEMU PROFILI (ZAPIS/WCZYTYWANIE)
+    # LOGIKA SYSTEMU PROFILI (TYLKO RĘCZNY ZAPIS I ODCZYT)
     # =========================================================
     def init_config(self):
-        """Wczytuje z dysku główny plik JSON, aby odtworzyć profile na starcie."""
+        """Tylko wczytuje plik JSON do RAM. Nie nadpisuje UI na starcie."""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     loaded = json.load(f)
-                    
-                    # Wczytanie profili jeśli istnieją (zapewnia kompatybilność wsteczną)
                     if "profiles" in loaded:
                         for p in loaded["profiles"]:
                             if p in self.config_data["profiles"]:
                                 self.config_data["profiles"][p].update(loaded["profiles"][p])
-                    if "last_profile" in loaded:
-                        self.config_data["last_profile"] = loaded["last_profile"]
             except Exception as e:
                 self.log(f"Config Load Error: {str(e)}")
 
-        # Ustaw combo box na ten, który używany był przed zamknięciem
-        self.profile_combo.setCurrentText(self.config_data["last_profile"])
-
     def save_config(self):
-        """Nadpisuje główny plik JSON z powrotem na dysk."""
+        """Fizyczny zapis JSONa na dysk."""
         try:
-            self.config_data["last_profile"] = self.profile_combo.currentText()
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config_data, f, indent=4)
         except Exception as e:
             self.log(f"Config Save Error: {str(e)}")
 
+    def get_selected_profile(self):
+        """Sprawdza, który przycisk (M1-M4) jest zaznaczony."""
+        mem_id = self.mem_group.checkedId()
+        return f"Profile {mem_id}" if mem_id > 0 else "Profile 1"
+
     def save_profile(self):
-        """Akcja dla przycisku SAVE: Pobiera aktualne wartości i zapisuje w gnieździe."""
-        current_prof = self.profile_combo.currentText()
+        """Akcja dla przycisku SAVE: Pobiera dane z UI i nadpisuje gniazdo w JSON."""
+        current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
         prof = self.config_data["profiles"][current_prof]
         
-        # Pobieranie z okienek
         prof["filename"] = self.filename_input.text()
         prof["save_dir"] = self.save_path_input.text()
         prof["speed_inc"] = self.speed_inc.value()
@@ -119,16 +114,15 @@ class IndustrialControlApp(AppUI):
         prof["cal_glue"] = self.cal_glue.text()
         
         self.save_config()
-        self.log(f"SYSTEM: Konfiguracja nadpisana i zapisana jako '{current_prof}'")
+        self.log(f"SYSTEM: Konfiguracja zapisana do slotu {current_prof.replace('Profile ', 'M')}")
 
     def load_profile(self):
-        """Akcja dla przycisku LOAD: Aktualizuje interfejs wczytując wybrane gniazdo."""
-        current_prof = self.profile_combo.currentText()
+        """Akcja dla przycisku LOAD: Wpisuje dane z wybranego gniazda do UI."""
+        current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
         prof = self.config_data["profiles"][current_prof]
         
-        # Wpisywanie do okienek
         self.filename_input.setText(prof.get("filename", "motor_test"))
         self.save_path_input.setText(prof.get("save_dir", self.base_dir))
         self.speed_inc.setValue(prof.get("speed_inc", 50))
@@ -139,8 +133,7 @@ class IndustrialControlApp(AppUI):
         self.glue_acc.setValue(prof.get("glue_acc", 0))
         self.cal_glue.setText(prof.get("cal_glue", "0.0000"))
         
-        self.save_config()  # Remember which profile was loaded
-        self.log(f"SYSTEM: Configuration '{current_prof}' loaded successfully")
+        self.log(f"SYSTEM: Loaded configuration from slot {current_prof.replace('Profile ', 'M')}")
 
     def select_save_path(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", self.save_path_input.text())
@@ -148,7 +141,7 @@ class IndustrialControlApp(AppUI):
             self.save_path_input.setText(path)
 
     # =========================================================
-    # RESZTA LOGIKI (BEZ ZMIAN)
+    # RESZTA LOGIKI UART
     # =========================================================
 
     def log(self, msg):
@@ -158,7 +151,6 @@ class IndustrialControlApp(AppUI):
 
     def refresh_ports(self):
         self.port_combo.clear()
-        
         ports = []
         for p in serial.tools.list_ports.comports():
             if sys.platform.startswith('linux'):
@@ -166,7 +158,6 @@ class IndustrialControlApp(AppUI):
                     ports.append(p.device)
             else:
                 ports.append(p.device)
-                
         self.port_combo.addItems(ports)
         self.log("SYSTEM: Port list updated")
 
@@ -328,7 +319,6 @@ class IndustrialControlApp(AppUI):
                 elif name == "backwardSpeed": self.bwd_speed.setValue(val_f)
                 elif name == "accGlue": self.glue_acc.setValue(int(val_f))
                 elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.4f}")
-                
                 elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
                     self.lbl_vfd_freq.setText(f"{val_f:.2f}")
                     self.vfd_freq.setValue(val_f)

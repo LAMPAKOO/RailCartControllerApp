@@ -23,33 +23,54 @@ def setup_system_column(ui, parent_layout):
     col3_layout.addWidget(line_col3)
     
     # =========================================================
-    # NOWE: SEKCJA KONFIGURACJI (PROFILI)
+    # SEKCJA KONFIGURACJI (PROFILI M1-M4)
     # =========================================================
     lbl_title_prof = QtWidgets.QLabel("CONFIGURATIONS")
     lbl_title_prof.setStyleSheet(HEADER_STYLE)
     col3_layout.addWidget(lbl_title_prof, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
     
-    prof_layout = QtWidgets.QHBoxLayout()
-    ui.profile_combo = QtWidgets.QComboBox()
-    ui.profile_combo.addItems(["Profile 1", "Profile 2", "Profile 3", "Profile 4"])
-    ui.profile_combo.setFixedHeight(30)
-    ui.profile_combo.setStyleSheet(INPUT_STYLE)
+    prof_container = QtWidgets.QVBoxLayout()
+    prof_container.setSpacing(10)
     
-    ui.btn_save_prof = QtWidgets.QPushButton("SAVE")
-    ui.btn_save_prof.setFixedHeight(30)
+    # Rząd przycisków M1-M4
+    m_layout = QtWidgets.QHBoxLayout()
+    ui.mem_group = QtWidgets.QButtonGroup(ui)
+    ui.mem_group.setExclusive(True)
+    
+    ui.btn_m1 = QtWidgets.QPushButton("M1")
+    ui.btn_m2 = QtWidgets.QPushButton("M2")
+    ui.btn_m3 = QtWidgets.QPushButton("M3")
+    ui.btn_m4 = QtWidgets.QPushButton("M4")
+    
+    for i, btn in enumerate([ui.btn_m1, ui.btn_m2, ui.btn_m3, ui.btn_m4]):
+        btn.setCheckable(True)
+        btn.setFixedHeight(35)
+        btn.setStyleSheet(MEM_BTN_STYLE)
+        ui.mem_group.addButton(btn, i + 1)
+        m_layout.addWidget(btn)
+        
+    ui.btn_m1.setChecked(True) # Domyślnie zaznaczony pierwszy
+    
+    prof_container.addLayout(m_layout)
+    
+    # Rząd przycisków SAVE/LOAD
+    action_layout = QtWidgets.QHBoxLayout()
+    
+    ui.btn_save_prof = QtWidgets.QPushButton("SAVE TO SELECTED")
+    ui.btn_save_prof.setFixedHeight(35)
     ui.btn_save_prof.setStyleSheet(REC_BTN_STYLE) 
     ui.btn_save_prof.clicked.connect(ui.save_profile)
     
-    ui.btn_load_prof = QtWidgets.QPushButton("LOAD")
-    ui.btn_load_prof.setFixedHeight(30)
+    ui.btn_load_prof = QtWidgets.QPushButton("LOAD SELECTED")
+    ui.btn_load_prof.setFixedHeight(35)
     ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE)
     ui.btn_load_prof.clicked.connect(ui.load_profile)
     
-    prof_layout.addWidget(ui.profile_combo, 2)
-    prof_layout.addWidget(ui.btn_save_prof, 1)
-    prof_layout.addWidget(ui.btn_load_prof, 1)
+    action_layout.addWidget(ui.btn_save_prof)
+    action_layout.addWidget(ui.btn_load_prof)
     
-    col3_layout.addLayout(prof_layout)
+    prof_container.addLayout(action_layout)
+    col3_layout.addLayout(prof_container)
     
     line_col3_2 = QtWidgets.QFrame()
     line_col3_2.setFrameShape(QtWidgets.QFrame.HLine)
