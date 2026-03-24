@@ -27,7 +27,24 @@ class IndustrialControlApp(AppUI):
         
         self.base_dir = os.path.abspath(os.path.dirname(__file__))
         self.config_file = os.path.join(self.base_dir, "config.json")
-        self.config_data = {"filename": "motor_test", "save_dir": self.base_dir}
+        
+        # --- NOWA STRUKTURA DANYCH DLA PROFILI ---
+        self.config_data = {
+            "last_profile": "Profile 1",
+            "profiles": {
+                f"Profile {i}": {
+                    "filename": "motor_test",
+                    "save_dir": self.base_dir,
+                    "speed_inc": 50,
+                    "fwd_speed": 0,
+                    "bwd_speed": 0,
+                    "vfd_inc": 5,
+                    "vfd_freq": 0,
+                    "glue_acc": 0,
+                    "cal_glue": "0.0000"
+                } for i in range(1, 5)
+            }
+        }
         
         self.init_ui()
         self.init_config()
@@ -51,37 +68,88 @@ class IndustrialControlApp(AppUI):
                 
         event.accept()
 
+    # =========================================================
+    # LOGIKA SYSTEMU PROFILI (ZAPIS/WCZYTYWANIE)
+    # =========================================================
     def init_config(self):
+        """Wczytuje z dysku główny plik JSON, aby odtworzyć profile na starcie."""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     loaded = json.load(f)
-                    if os.path.isdir(loaded.get("save_dir", "")):
-                        self.config_data["save_dir"] = loaded["save_dir"]
-                    self.config_data["filename"] = loaded.get("filename", "motor_test")
+                    
+                    # Wczytanie profili jeśli istnieją (zapewnia kompatybilność wsteczną)
+                    if "profiles" in loaded:
+                        for p in loaded["profiles"]:
+                            if p in self.config_data["profiles"]:
+                                self.config_data["profiles"][p].update(loaded["profiles"][p])
+                    if "last_profile" in loaded:
+                        self.config_data["last_profile"] = loaded["last_profile"]
             except Exception as e:
                 self.log(f"Config Load Error: {str(e)}")
 
-        self.filename_input.setText(self.config_data["filename"])
-        self.save_path_input.setText(self.config_data["save_dir"])
-        
-        self.filename_input.textChanged.connect(self.save_config)
-        self.save_path_input.textChanged.connect(self.save_config)
+        # Ustaw combo box na ten, który używany był przed zamknięciem
+        self.profile_combo.setCurrentText(self.config_data["last_profile"])
 
     def save_config(self):
-        self.config_data["filename"] = self.filename_input.text()
-        self.config_data["save_dir"] = self.save_path_input.text()
+        """Nadpisuje główny plik JSON z powrotem na dysk."""
         try:
+            self.config_data["last_profile"] = self.profile_combo.currentText()
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config_data, f, indent=4)
         except Exception as e:
             self.log(f"Config Save Error: {str(e)}")
 
+    def save_profile(self):
+        """Akcja dla przycisku SAVE: Pobiera aktualne wartości i zapisuje w gnieździe."""
+        current_prof = self.profile_combo.currentText()
+        if current_prof not in self.config_data["profiles"]: return
+        
+        prof = self.config_data["profiles"][current_prof]
+        
+        # Pobieranie z okienek
+        prof["filename"] = self.filename_input.text()
+        prof["save_dir"] = self.save_path_input.text()
+        prof["speed_inc"] = self.speed_inc.value()
+        prof["fwd_speed"] = self.fwd_speed.value()
+        prof["bwd_speed"] = self.bwd_speed.value()
+        prof["vfd_inc"] = self.vfd_inc.value()
+        prof["vfd_freq"] = self.vfd_freq.value()
+        prof["glue_acc"] = self.glue_acc.value()
+        prof["cal_glue"] = self.cal_glue.text()
+        
+        self.save_config()
+        self.log(f"SYSTEM: Konfiguracja nadpisana i zapisana jako '{current_prof}'")
+
+    def load_profile(self):
+        """Akcja dla przycisku LOAD: Aktualizuje interfejs wczytując wybrane gniazdo."""
+        current_prof = self.profile_combo.currentText()
+        if current_prof not in self.config_data["profiles"]: return
+        
+        prof = self.config_data["profiles"][current_prof]
+        
+        # Wpisywanie do okienek
+        self.filename_input.setText(prof.get("filename", "motor_test"))
+        self.save_path_input.setText(prof.get("save_dir", self.base_dir))
+        self.speed_inc.setValue(prof.get("speed_inc", 50))
+        self.fwd_speed.setValue(prof.get("fwd_speed", 0))
+        self.bwd_speed.setValue(prof.get("bwd_speed", 0))
+        self.vfd_inc.setValue(prof.get("vfd_inc", 5))
+        self.vfd_freq.setValue(prof.get("vfd_freq", 0))
+        self.glue_acc.setValue(prof.get("glue_acc", 0))
+        self.cal_glue.setText(prof.get("cal_glue", "0.0000"))
+        
+        self.save_config()  # Remember which profile was loaded
+        self.log(f"SYSTEM: Configuration '{current_prof}' loaded successfully")
+
     def select_save_path(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", self.save_path_input.text())
         if path:
             self.save_path_input.setText(path)
-            self.save_config()
+
+    # =========================================================
+    # RESZTA LOGIKI (BEZ ZMIAN)
+    # =========================================================
 
     def log(self, msg):
         time_str = datetime.now().strftime('%H:%M:%S')
@@ -113,16 +181,14 @@ class IndustrialControlApp(AppUI):
             self.btn_connect.setText("Connect")
             self.btn_start_rec.setEnabled(False) 
             
-            # --- BLOKADA PRZYCISKÓW PO ROZŁĄCZENIU ---
             self.btn_manual.setEnabled(False)
             self.btn_auto.setEnabled(False)
             self.btn_glue_fwd.setEnabled(False)
             self.btn_glue_bwd.setEnabled(False)
             self.btn_vfd_fwd.setEnabled(False)
             self.btn_vfd_bwd.setEnabled(False)
-            self.btn_motor_stop.setEnabled(False) # <--- DODANO
-            self.btn_vfd_stop.setEnabled(False)   # <--- DODANO
-            # -----------------------------------------
+            self.btn_motor_stop.setEnabled(False) 
+            self.btn_vfd_stop.setEnabled(False)   
             
             self.log("Disconnected")
         else:
@@ -138,20 +204,17 @@ class IndustrialControlApp(AppUI):
                 self.btn_start_rec.setEnabled(True) 
                 self.timer.start(30)
                 
-                # --- 1. NAJPIERW LOG O POŁĄCZENIU ---
                 self.log(f"Connected to {port}")
                 
-                # --- 2. ODBLOKOWANIE PRZYCISKÓW ---
                 self.btn_manual.setEnabled(True)
                 self.btn_auto.setEnabled(True)
                 self.btn_vfd_fwd.setEnabled(True)
                 self.btn_vfd_bwd.setEnabled(True)
+                self.btn_motor_stop.setEnabled(True) 
+                self.btn_vfd_stop.setEnabled(True)   
                 self.btn_glue_fwd.setEnabled(True)
                 self.btn_glue_bwd.setEnabled(True)
-                self.btn_motor_stop.setEnabled(True) # <--- DODANO
-                self.btn_vfd_stop.setEnabled(True)   # <--- DODANO
                 
-                # --- 3. WYSŁANIE TYLKO TRYBU I READNVS ---
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")
                 self.read_nvs()
@@ -174,7 +237,6 @@ class IndustrialControlApp(AppUI):
         
     def switch_to_manual(self):
         self.btn_manual.setChecked(True)
-        # Odblokuj przyciski silnika krokowego, o ile port jest połączony
         if self.ser and self.ser.is_open:
             self.btn_glue_fwd.setEnabled(True)
             self.btn_glue_bwd.setEnabled(True)
@@ -187,14 +249,12 @@ class IndustrialControlApp(AppUI):
 
     def switch_to_auto(self):
         self.btn_auto.setChecked(True)
-        # Całkowicie zablokuj Dispense / Retract w trybie Auto
         self.btn_glue_fwd.setEnabled(False)
         self.btn_glue_bwd.setEnabled(False)
         self.send_cmd("MODE_AUTO")
 
     def stop_motor(self):
         self.send_cmd("STOP")
-        # Powrót do manuala, jeśli wciśnięto "STOP MOTOR" w trakcie trybu AUTO
         if self.btn_auto.isChecked():
             self.switch_to_manual()
 

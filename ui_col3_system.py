@@ -22,6 +22,41 @@ def setup_system_column(ui, parent_layout):
     line_col3.setStyleSheet("color: #444444;")
     col3_layout.addWidget(line_col3)
     
+    # =========================================================
+    # NOWE: SEKCJA KONFIGURACJI (PROFILI)
+    # =========================================================
+    lbl_title_prof = QtWidgets.QLabel("CONFIGURATIONS")
+    lbl_title_prof.setStyleSheet(HEADER_STYLE)
+    col3_layout.addWidget(lbl_title_prof, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+    
+    prof_layout = QtWidgets.QHBoxLayout()
+    ui.profile_combo = QtWidgets.QComboBox()
+    ui.profile_combo.addItems(["Profile 1", "Profile 2", "Profile 3", "Profile 4"])
+    ui.profile_combo.setFixedHeight(30)
+    ui.profile_combo.setStyleSheet(INPUT_STYLE)
+    
+    ui.btn_save_prof = QtWidgets.QPushButton("SAVE")
+    ui.btn_save_prof.setFixedHeight(30)
+    ui.btn_save_prof.setStyleSheet(REC_BTN_STYLE) 
+    ui.btn_save_prof.clicked.connect(ui.save_profile)
+    
+    ui.btn_load_prof = QtWidgets.QPushButton("LOAD")
+    ui.btn_load_prof.setFixedHeight(30)
+    ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE)
+    ui.btn_load_prof.clicked.connect(ui.load_profile)
+    
+    prof_layout.addWidget(ui.profile_combo, 2)
+    prof_layout.addWidget(ui.btn_save_prof, 1)
+    prof_layout.addWidget(ui.btn_load_prof, 1)
+    
+    col3_layout.addLayout(prof_layout)
+    
+    line_col3_2 = QtWidgets.QFrame()
+    line_col3_2.setFrameShape(QtWidgets.QFrame.HLine)
+    line_col3_2.setStyleSheet("color: #444444;")
+    col3_layout.addWidget(line_col3_2)
+    # =========================================================
+    
     lbl_title_conn = QtWidgets.QLabel("CONNECTIVITY")
     lbl_title_conn.setStyleSheet(HEADER_STYLE)
     col3_layout.addWidget(lbl_title_conn, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
