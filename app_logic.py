@@ -15,19 +15,16 @@ class IndustrialControlApp(AppUI):
     def __init__(self):
         super().__init__()
         
-        # --- Internal States ---
         self.ser = None
         self.is_recording = False
         self.csv_file = None
         self.csv_writer = None
         self.current_full_path = ""
         
-        # Używamy starych buforów dla plotu (w tle), żeby nic się nie wysypało
         self.data_distance = deque([0] * 100, maxlen=100)
         self.data_speed = deque([0] * 100, maxlen=100)
         self.data_rpm = deque([0] * 100, maxlen=100)
         
-        # --- Config States ---
         self.base_dir = os.path.abspath(os.path.dirname(__file__))
         self.config_file = os.path.join(self.base_dir, "config.json")
         self.config_data = {"filename": "motor_test", "save_dir": self.base_dir}
@@ -115,6 +112,16 @@ class IndustrialControlApp(AppUI):
             self.timer.stop()
             self.btn_connect.setText("Connect")
             self.btn_start_rec.setEnabled(False) 
+            
+            # --- BLOKADA PRZYCISKÓW PO ROZŁĄCZENIU ---
+            self.btn_manual.setEnabled(False)
+            self.btn_auto.setEnabled(False)
+            self.btn_glue_fwd.setEnabled(False)
+            self.btn_glue_bwd.setEnabled(False)
+            self.btn_vfd_fwd.setEnabled(False)
+            self.btn_vfd_bwd.setEnabled(False)
+            # -----------------------------------------
+            
             self.log("Disconnected")
         else:
             try:
@@ -129,13 +136,22 @@ class IndustrialControlApp(AppUI):
                 self.btn_start_rec.setEnabled(True) 
                 self.timer.start(30)
                 
-                if self.btn_manual.isChecked():
-                    self.send_cmd("MODE_MANUAL")
-                else:
-                    self.send_cmd("MODE_AUTO")
-                
-                self.read_nvs()
+                # --- 1. NAJPIERW LOG O POŁĄCZENIU ---
                 self.log(f"Connected to {port}")
+                
+                # --- 2. ODBLOKOWANIE PRZYCISKÓW ---
+                self.btn_manual.setEnabled(True)
+                self.btn_auto.setEnabled(True)
+                self.btn_vfd_fwd.setEnabled(True)
+                self.btn_vfd_bwd.setEnabled(True)
+                self.btn_glue_fwd.setEnabled(True)
+                self.btn_glue_bwd.setEnabled(True)
+                
+                # --- 3. WYSŁANIE TYLKO TRYBU I READNVS ---
+                self.btn_manual.setChecked(True)
+                self.send_cmd("MODE_MANUAL")
+                self.read_nvs()
+                
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Error", str(e))
 
@@ -153,11 +169,38 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"{cmd} {new_val}")
         
     def switch_to_manual(self):
+        self.btn_manual.setChecked(True)
+        # Odblokuj przyciski silnika krokowego, o ile port jest połączony
+        if self.ser and self.ser.is_open:
+            self.btn_glue_fwd.setEnabled(True)
+            self.btn_glue_bwd.setEnabled(True)
+            
         self.send_cmd("MODE_MANUAL")
         self.send_cmd("STOP")
         if self.ser and self.ser.is_open:
             self.send_cmd(f"forwardSpeed {self.fwd_speed.value()}")
             self.send_cmd(f"backwardSpeed {self.bwd_speed.value()}")
+
+    def switch_to_auto(self):
+        self.btn_auto.setChecked(True)
+        # Całkowicie zablokuj Dispense / Retract w trybie Auto
+        self.btn_glue_fwd.setEnabled(False)
+        self.btn_glue_bwd.setEnabled(False)
+        self.send_cmd("MODE_AUTO")
+
+    def stop_motor(self):
+        self.send_cmd("STOP")
+        # Powrót do manuala, jeśli wciśnięto "STOP MOTOR" w trakcie trybu AUTO
+        if self.btn_auto.isChecked():
+            self.switch_to_manual()
+
+    def start_dispense(self):
+        self.send_cmd(f"forwardSpeed {self.fwd_speed.value()}")
+        self.send_cmd("MOVE_FORWARD")
+
+    def start_retract(self):
+        self.send_cmd(f"backwardSpeed {self.bwd_speed.value()}")
+        self.send_cmd("MOVE_BACKWARD")
 
     def listen_to_uart(self):
         if not self.ser or not self.ser.is_open: return
@@ -171,7 +214,6 @@ class IndustrialControlApp(AppUI):
                         raw_data = line.replace("DATA:", "").strip()
                         parts = raw_data.split(",")
                         
-                        # Nowy format z 4/5 elementami: rel_dist, abs_dist, rpm, speed, [freq]
                         if len(parts) >= 4:
                             dist_rel = float(parts[0])
                             dist_abs = float(parts[1])
@@ -188,7 +230,6 @@ class IndustrialControlApp(AppUI):
                             self.lbl_rpm.setText(f"{rpm:.2f}")
                             self.lbl_speed.setText(f"{speed:.2f}")
                             
-                            # (Opcjonalne, tło)
                             self.data_distance.append(dist_rel)
                             self.data_speed.append(speed)
                             self.data_rpm.append(rpm)
@@ -239,7 +280,6 @@ class IndustrialControlApp(AppUI):
             self.csv_file = open(self.current_full_path, mode='w', newline='')
             self.csv_writer = csv.writer(self.csv_file)
             
-            # Zmiana nagłówka CSV na obsługujący REL i ABS distance
             self.csv_writer.writerow(["Timestamp", "Distance_REL", "Distance_ABS", "Speed", "RPM", "Frequency"])
             self.is_recording = True
             self.send_cmd("START_RECORDING")

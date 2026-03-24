@@ -52,13 +52,15 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_manual.setChecked(True)
     ui.btn_manual.setFixedHeight(45)
     ui.btn_manual.setStyleSheet(MODE_BTN_STYLE)
+    ui.btn_manual.setEnabled(False) # <--- ZABLOKOWANE PRZED POŁĄCZENIEM
     ui.btn_manual.clicked.connect(ui.switch_to_manual)
     
     ui.btn_auto = QtWidgets.QPushButton("AUTO")
     ui.btn_auto.setCheckable(True)
     ui.btn_auto.setFixedHeight(45)
     ui.btn_auto.setStyleSheet(MODE_BTN_STYLE)
-    ui.btn_auto.clicked.connect(lambda: ui.send_cmd("MODE_AUTO"))
+    ui.btn_auto.setEnabled(False) # <--- ZABLOKOWANE PRZED POŁĄCZENIEM
+    ui.btn_auto.clicked.connect(ui.switch_to_auto) # <--- NOWA FUNKCJA W LOGICE
     
     ui.mode_btn_group = QtWidgets.QButtonGroup()
     ui.mode_btn_group.addButton(ui.btn_manual)
@@ -111,26 +113,29 @@ def setup_motor_column(ui, parent_layout):
     move_layout = QtWidgets.QHBoxLayout()
     move_layout.setSpacing(15)
     
-    btn_fwd = QtWidgets.QPushButton("▲\nDISPENSE GLUE")
-    btn_fwd.setFixedHeight(140) 
-    btn_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-    btn_fwd.setStyleSheet(MOVE_BTN_STYLE)
-    btn_fwd.clicked.connect(lambda: ui.send_cmd("MOVE_FORWARD"))
+    # --- PRZYPISANIE DO ui. ORAZ ZABLOKOWANIE ---
+    ui.btn_glue_fwd = QtWidgets.QPushButton("▲\nDISPENSE GLUE")
+    ui.btn_glue_fwd.setFixedHeight(140) 
+    ui.btn_glue_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    ui.btn_glue_fwd.setStyleSheet(MOVE_BTN_STYLE)
+    ui.btn_glue_fwd.setEnabled(False)
+    ui.btn_glue_fwd.clicked.connect(ui.start_dispense)
     
-    btn_bwd = QtWidgets.QPushButton("▼\nRETRACT")
-    btn_bwd.setFixedHeight(140) 
-    btn_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-    btn_bwd.setStyleSheet(MOVE_BTN_STYLE)
-    btn_bwd.clicked.connect(lambda: ui.send_cmd("MOVE_BACKWARD"))
+    ui.btn_glue_bwd = QtWidgets.QPushButton("▼\nRETRACT")
+    ui.btn_glue_bwd.setFixedHeight(140) 
+    ui.btn_glue_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    ui.btn_glue_bwd.setStyleSheet(MOVE_BTN_STYLE)
+    ui.btn_glue_bwd.setEnabled(False)
+    ui.btn_glue_bwd.clicked.connect(ui.start_retract)
     
-    move_layout.addWidget(btn_fwd, 1)
-    move_layout.addWidget(btn_bwd, 1)
+    move_layout.addWidget(ui.btn_glue_fwd, 1)
+    move_layout.addWidget(ui.btn_glue_bwd, 1)
     basic_layout.addLayout(move_layout)
     
     ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
     ui.btn_motor_stop.setFixedHeight(60)
     ui.btn_motor_stop.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; margin-top: 10px;")
-    ui.btn_motor_stop.clicked.connect(lambda: ui.send_cmd("STOP"))
+    ui.btn_motor_stop.clicked.connect(ui.stop_motor) # <--- ZMIANA NA NOWĄ FUNKCJĘ
     basic_layout.addWidget(ui.btn_motor_stop)
     
     basic_layout.addStretch()
