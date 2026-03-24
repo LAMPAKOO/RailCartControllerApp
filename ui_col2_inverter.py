@@ -101,8 +101,9 @@ def setup_inverter_column(ui, parent_layout):
     col2_layout.addWidget(vfd_container)
     
     ui.btn_vfd_stop = QtWidgets.QPushButton("STOP INVERTER")
-    ui.btn_vfd_stop.setFixedHeight(70)
-    ui.btn_vfd_stop.setStyleSheet("background-color: #d32f2f; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; margin-top: 10px;")
+    ui.btn_vfd_stop.setFixedHeight(60) # Zmienione z 70 na 60, aby był IDENTYCZNY jak w col1
+    ui.btn_vfd_stop.setStyleSheet(STOP_BTN_STYLE) # <--- Użycie nowego stylu
+    ui.btn_vfd_stop.setEnabled(False)             # <--- Domyślne wyszarzenie
     ui.btn_vfd_stop.clicked.connect(lambda: ui.send_cmd("VFD_STOP"))
     col2_layout.addWidget(ui.btn_vfd_stop)
 

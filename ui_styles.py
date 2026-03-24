@@ -4,47 +4,67 @@ HEADER_STYLE = "color: #00E5FF; font-size: 18px; font-weight: bold; font-family:
 INPUT_STYLE = "background-color: #333333; color: white; border: 1px solid #444; border-radius: 3px; padding: 6px; font-size: 14px;"
 LABEL_STYLE = "color: #aaaaaa; background: transparent; font-size: 12px;"
 
+# --- STYLE PRZYCISKÓW (Z WYRAŹNYM TRYBEM ZABLOKOWANYM) ---
+
 MOVE_BTN_STYLE = """
     QPushButton { 
         font-size: 20px; 
         font-weight: bold; 
-        background-color: #444444; 
-        color: white; 
         border-radius: 8px; 
+        background-color: #333333; 
+        color: #666666; 
     }
-    QPushButton:hover { background-color: #555555; }
-    QPushButton:pressed { background-color: #2196F3; }
+    QPushButton:enabled { background-color: #444444; color: white; }
+    QPushButton:hover:enabled { background-color: #555555; }
+    QPushButton:pressed:enabled { background-color: #2196F3; }
+"""
+
+# --- NOWY STYL DLA OBU PRZYCISKÓW STOP ---
+STOP_BTN_STYLE = """
+    QPushButton { 
+        font-size: 18px; 
+        font-weight: bold; 
+        border-radius: 8px; 
+        margin-top: 10px;
+        /* Wygląd zablokowany (domyślny) */
+        background-color: #333333; 
+        color: #666666; 
+    }
+    /* Wygląd odblokowany (czerwony) */
+    QPushButton:enabled { 
+        background-color: #d32f2f; 
+        color: white; 
+    }
+    /* Hover - rozjaśnienie */
+    QPushButton:hover:enabled { 
+        background-color: #f44336; 
+    }
+    /* Wciśnięty - pociemnienie */
+    QPushButton:pressed:enabled { 
+        background-color: #b71c1c; 
+    }
 """
 
 MODE_BTN_STYLE = """
-    QPushButton { font-size: 16px; font-weight: bold; background-color: #444444; color: white; border-radius: 5px; border: none; }
-    QPushButton:checked { background-color: #2196F3; color: white; }
+    QPushButton { font-size: 16px; font-weight: bold; border-radius: 5px; border: none; background-color: #333333; color: #666666; }
+    QPushButton:enabled { background-color: #444444; color: white; }
+    QPushButton:checked:enabled { background-color: #2196F3; color: white; }
 """
 
 REC_BTN_STYLE = """
-    QPushButton { background-color: #444444; color: #aaaaaa; font-size: 14px; border-radius: 5px; border: none; }
-    QPushButton:enabled { color: white; }
+    QPushButton { font-size: 14px; border-radius: 5px; border: none; background-color: #333333; color: #666666; }
+    QPushButton:enabled { background-color: #444444; color: white; }
     QPushButton:hover:enabled { background-color: #555555; }
 """
 
 BTN_EXIT_STYLE = """
-    QPushButton { 
-        background-color: #4a0000; 
-        color: #ffaaaa; 
-        font-size: 18px; 
-        font-weight: bold; 
-        border-radius: 8px; 
-    }
+    QPushButton { background-color: #4a0000; color: #ffaaaa; font-size: 18px; font-weight: bold; border-radius: 8px; }
     QPushButton:hover { background-color: #660000; color: white; }
     QPushButton:pressed { background-color: #ff0000; color: white; }
 """
 
 TABS_STYLE = """
-    QTabBar::tab {
-        font-size: 16px; font-weight: bold; padding: 12px 25px;
-        background-color: #333333; color: #aaaaaa;
-        border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 4px;
-    }
+    QTabBar::tab { font-size: 16px; font-weight: bold; padding: 12px 25px; background-color: #333333; color: #aaaaaa; border-top-left-radius: 6px; border-top-right-radius: 6px; margin-right: 4px; }
     QTabBar::tab:selected { background-color: #2196F3; color: white; }
     QTabWidget::pane { border: 1px solid #444444; border-radius: 4px; }
 """

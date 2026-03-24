@@ -120,6 +120,8 @@ class IndustrialControlApp(AppUI):
             self.btn_glue_bwd.setEnabled(False)
             self.btn_vfd_fwd.setEnabled(False)
             self.btn_vfd_bwd.setEnabled(False)
+            self.btn_motor_stop.setEnabled(False) # <--- DODANO
+            self.btn_vfd_stop.setEnabled(False)   # <--- DODANO
             # -----------------------------------------
             
             self.log("Disconnected")
@@ -146,6 +148,8 @@ class IndustrialControlApp(AppUI):
                 self.btn_vfd_bwd.setEnabled(True)
                 self.btn_glue_fwd.setEnabled(True)
                 self.btn_glue_bwd.setEnabled(True)
+                self.btn_motor_stop.setEnabled(True) # <--- DODANO
+                self.btn_vfd_stop.setEnabled(True)   # <--- DODANO
                 
                 # --- 3. WYSŁANIE TYLKO TRYBU I READNVS ---
                 self.btn_manual.setChecked(True)
