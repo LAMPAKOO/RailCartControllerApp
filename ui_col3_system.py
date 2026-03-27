@@ -44,7 +44,7 @@ def setup_system_column(ui, parent_layout):
     
     for i, btn in enumerate([ui.btn_m1, ui.btn_m2, ui.btn_m3, ui.btn_m4]):
         btn.setCheckable(True)
-        btn.setFixedHeight(35)
+        btn.setFixedHeight(70)
         btn.setStyleSheet(MEM_BTN_STYLE)
         ui.mem_group.addButton(btn, i + 1)
         m_layout.addWidget(btn)
@@ -57,12 +57,12 @@ def setup_system_column(ui, parent_layout):
     action_layout = QtWidgets.QHBoxLayout()
     
     ui.btn_save_prof = QtWidgets.QPushButton("SAVE TO SELECTED")
-    ui.btn_save_prof.setFixedHeight(35)
+    ui.btn_save_prof.setFixedHeight(70)
     ui.btn_save_prof.setStyleSheet(REC_BTN_STYLE) 
     ui.btn_save_prof.clicked.connect(ui.save_profile)
     
     ui.btn_load_prof = QtWidgets.QPushButton("LOAD SELECTED")
-    ui.btn_load_prof.setFixedHeight(35)
+    ui.btn_load_prof.setFixedHeight(70)
     ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE)
     ui.btn_load_prof.setEnabled(False)
     ui.btn_load_prof.clicked.connect(ui.load_profile)

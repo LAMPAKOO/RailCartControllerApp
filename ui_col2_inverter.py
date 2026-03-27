@@ -201,13 +201,13 @@ def setup_inverter_column(ui, parent_layout):
     rec_h = QtWidgets.QHBoxLayout()
     
     ui.btn_start_rec = QtWidgets.QPushButton("START RECORDING")
-    ui.btn_start_rec.setFixedHeight(40)
+    ui.btn_start_rec.setFixedHeight(70)
     ui.btn_start_rec.setStyleSheet(REC_BTN_STYLE)
     ui.btn_start_rec.setEnabled(False)
     ui.btn_start_rec.clicked.connect(ui.start_recording)
     
     ui.btn_stop_rec = QtWidgets.QPushButton("STOP RECORDING")
-    ui.btn_stop_rec.setFixedHeight(40)
+    ui.btn_stop_rec.setFixedHeight(70)
     ui.btn_stop_rec.setStyleSheet(REC_BTN_STYLE)
     ui.btn_stop_rec.setEnabled(False)
     ui.btn_stop_rec.clicked.connect(ui.stop_recording)

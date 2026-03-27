@@ -38,7 +38,7 @@ MODE_BTN_STYLE = """
 """
 
 REC_BTN_STYLE = """
-    QPushButton { font-size: 14px; border-radius: 5px; border: none; background-color: #333333; color: #666666; }
+    QPushButton { font-size: 16px; font-weight: bold; border-radius: 5px; border: none; background-color: #333333; color: #666666; }
     QPushButton:enabled { background-color: #444444; color: white; }
     QPushButton:hover:enabled { background-color: #555555; }
 """

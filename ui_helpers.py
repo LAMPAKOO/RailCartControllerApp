@@ -12,7 +12,7 @@ def create_step_control(ui, layout, label, cmd_name):
     h_layout.addWidget(lbl)
     
     spin = QtWidgets.QSpinBox()
-    spin.setRange(0, 2000)
+    spin.setRange(0, 10000)
     spin.setFixedSize(120, 50) 
     spin.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
     
