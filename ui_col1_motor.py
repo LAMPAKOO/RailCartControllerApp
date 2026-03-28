@@ -32,7 +32,7 @@ def setup_motor_column(ui, parent_layout):
     h_spd.addStretch()
     
     h_rpm = QtWidgets.QHBoxLayout()
-    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/min]: ")
+    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/h]: ")
     lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     ui.lbl_rpm = QtWidgets.QLabel("0.00")
     ui.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")

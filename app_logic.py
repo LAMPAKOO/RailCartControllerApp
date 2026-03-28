@@ -273,8 +273,9 @@ class IndustrialControlApp(AppUI):
                 self.btn_load_prof.setEnabled(True)
                 
                 self.btn_manual.setChecked(True)
-                self.send_cmd("MODE_MANUAL")
+                
                 self.read_nvs()
+                self.send_cmd("MODE_MANUAL")
                 self.send_cmd("VFD GET STATUS")
                 
             except Exception as e:
@@ -388,7 +389,15 @@ class IndustrialControlApp(AppUI):
                 elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.4f}")
                 elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
                     self.lbl_vfd_freq.setText(f"{val_f:.2f}")
-                    self.vfd_freq.setValue(val_f)
+                    
+                    # Aktualizujemy interfejs
+                    if self.vfd_freq.value() != val_f:
+                        self.vfd_freq.blockSignals(True) # Żeby nie wyzwolić niechcianych eventów
+                        self.vfd_freq.setValue(val_f)
+                        self.vfd_freq.blockSignals(False)
+                    
+                    # Odsyłamy odczytaną z NVS wartość od razu do falownika
+                    self.send_cmd(f"HZ {val_f}")
             except: pass
 
     def start_recording(self):
