@@ -48,21 +48,22 @@ def setup_inverter_column(ui, parent_layout):
     lbl_vfd_inc.setFixedWidth(140) 
     lbl_vfd_inc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
     
-    ui.vfd_inc = QtWidgets.QSpinBox()
-    ui.vfd_inc.setRange(1, 100)
-    ui.vfd_inc.setValue(5)
+    ui.vfd_inc = QtWidgets.QLineEdit("5")
     ui.vfd_inc.setFixedSize(120, 50) 
     ui.vfd_inc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+    ui.vfd_inc.setAlignment(QtCore.Qt.AlignCenter)
+    ui.vfd_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    ui.vfd_inc.setValidator(QtGui.QIntValidator(1, 100))
     
     btn_vfd_inc_minus = QtWidgets.QPushButton("-")
     btn_vfd_inc_minus.setFixedSize(50, 50) 
     btn_vfd_inc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    btn_vfd_inc_minus.clicked.connect(lambda: ui.vfd_inc.setValue(ui.vfd_inc.value() - 1))
+    btn_vfd_inc_minus.clicked.connect(lambda: ui.vfd_inc.setText(str(max(1, int(ui.vfd_inc.text() or 0) - 1))))
     
     btn_vfd_inc_plus = QtWidgets.QPushButton("+")
     btn_vfd_inc_plus.setFixedSize(50, 50) 
     btn_vfd_inc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    btn_vfd_inc_plus.clicked.connect(lambda: ui.vfd_inc.setValue(ui.vfd_inc.value() + 1))
+    btn_vfd_inc_plus.clicked.connect(lambda: ui.vfd_inc.setText(str(min(100, int(ui.vfd_inc.text() or 0) + 1))))
     
     vfd_inc_layout.addWidget(lbl_vfd_inc)
     vfd_inc_layout.addWidget(btn_vfd_inc_minus)
@@ -79,7 +80,6 @@ def setup_inverter_column(ui, parent_layout):
     vfd_move_layout = QtWidgets.QHBoxLayout()
     vfd_move_layout.setSpacing(15)
     
-    # --- PRZYPISANIE DO ui. ORAZ ZABLOKOWANIE ---
     ui.btn_vfd_fwd = QtWidgets.QPushButton("▲\nDRIVE FORWARD")
     ui.btn_vfd_fwd.setFixedHeight(140) 
     ui.btn_vfd_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -101,9 +101,9 @@ def setup_inverter_column(ui, parent_layout):
     col2_layout.addWidget(vfd_container)
     
     ui.btn_vfd_stop = QtWidgets.QPushButton("STOP INVERTER")
-    ui.btn_vfd_stop.setFixedHeight(100) # Zmienione z 70 na 60, aby był IDENTYCZNY jak w col1
-    ui.btn_vfd_stop.setStyleSheet(STOP_BTN_STYLE) # <--- Użycie nowego stylu
-    ui.btn_vfd_stop.setEnabled(False)             # <--- Domyślne wyszarzenie
+    ui.btn_vfd_stop.setFixedHeight(60)
+    ui.btn_vfd_stop.setStyleSheet(STOP_BTN_STYLE)
+    ui.btn_vfd_stop.setEnabled(False)
     ui.btn_vfd_stop.clicked.connect(lambda: ui.send_cmd("VFD_STOP"))
     col2_layout.addWidget(ui.btn_vfd_stop)
 
@@ -114,7 +114,6 @@ def setup_inverter_column(ui, parent_layout):
     line_col2.setStyleSheet("color: #444444;")
     col2_layout.addWidget(line_col2)
 
-    # --- SEKCJA RECORDING ---
     lbl_title_3 = QtWidgets.QLabel("DISTANCE RECORDING")
     lbl_title_3.setStyleSheet(HEADER_STYLE)
     lbl_title_3.setContentsMargins(0, 10, 0, 0)
@@ -201,13 +200,13 @@ def setup_inverter_column(ui, parent_layout):
     rec_h = QtWidgets.QHBoxLayout()
     
     ui.btn_start_rec = QtWidgets.QPushButton("START RECORDING")
-    ui.btn_start_rec.setFixedHeight(70)
+    ui.btn_start_rec.setFixedHeight(40)
     ui.btn_start_rec.setStyleSheet(REC_BTN_STYLE)
     ui.btn_start_rec.setEnabled(False)
     ui.btn_start_rec.clicked.connect(ui.start_recording)
     
     ui.btn_stop_rec = QtWidgets.QPushButton("STOP RECORDING")
-    ui.btn_stop_rec.setFixedHeight(70)
+    ui.btn_stop_rec.setFixedHeight(40)
     ui.btn_stop_rec.setStyleSheet(REC_BTN_STYLE)
     ui.btn_stop_rec.setEnabled(False)
     ui.btn_stop_rec.clicked.connect(ui.stop_recording)

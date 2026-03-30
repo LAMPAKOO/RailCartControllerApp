@@ -5,6 +5,7 @@ import os
 import sys
 import json
 import time 
+import html
 from datetime import datetime
 from collections import deque
 from PySide6 import QtWidgets, QtCore, QtGui
@@ -28,7 +29,6 @@ class IndustrialControlApp(AppUI):
         self.base_dir = os.path.abspath(os.path.dirname(__file__))
         self.config_file = os.path.join(self.base_dir, "config.json")
         
-        # Pamięć globalna i gniazda profili
         self.config_data = {
             "last_port": "",
             "global_filename": "motor_test",
@@ -49,9 +49,9 @@ class IndustrialControlApp(AppUI):
         }
         
         self.init_ui()
-        self.init_config()           # Ładuje JSON do RAM
-        self.setup_initial_state()   # Wpisuje zapamiętany plik/katalog do UI i włącza automatyczny zapis
-        self.refresh_ports()         # Wykrywa porty i przypisuje ten ostatnio zapamiętany
+        self.init_config()           
+        self.setup_initial_state()   
+        self.refresh_ports()         
         
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
@@ -71,11 +71,7 @@ class IndustrialControlApp(AppUI):
                 
         event.accept()
 
-    # =========================================================
-    # ZARZĄDZANIE PAMIĘCIĄ I PROFILAMI
-    # =========================================================
     def init_config(self):
-        """Wczytuje z pliku JSON ustawienia globalne oraz zapamiętane profile M1-M4."""
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -95,24 +91,20 @@ class IndustrialControlApp(AppUI):
                 self.log(f"Config Load Error: {str(e)}")
 
     def setup_initial_state(self):
-        """Wpisuje globalne ustawienia do interfejsu i podpina automatyczny zapis 'na żywo'."""
         self.filename_input.setText(self.config_data["global_filename"])
         self.save_path_input.setText(self.config_data["global_save_dir"])
         
-        # Podłącz nasłuchiwacze, aby każda zmiana znaków zapisywała się od razu
         self.filename_input.textChanged.connect(self.save_global_state)
         self.save_path_input.textChanged.connect(self.save_global_state)
         self.port_combo.currentTextChanged.connect(self.save_global_state)
 
     def save_global_state(self, *args):
-        """Zapisuje ścieżki i port (na żywo) do JSONa bez tykania zawartości profili M1-M4."""
         self.config_data["global_filename"] = self.filename_input.text()
         self.config_data["global_save_dir"] = self.save_path_input.text()
         self.config_data["last_port"] = self.port_combo.currentText()
         self.save_config()
 
     def save_config(self):
-        """Fizyczny zapis JSONa na dysk."""
         try:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config_data, f, indent=4)
@@ -131,17 +123,17 @@ class IndustrialControlApp(AppUI):
         
         prof["filename"] = self.filename_input.text()
         prof["save_dir"] = self.save_path_input.text()
-        prof["speed_inc"] = self.speed_inc.value()
-        prof["fwd_speed"] = self.fwd_speed.value()
-        prof["bwd_speed"] = self.bwd_speed.value()
-        prof["vfd_inc"] = self.vfd_inc.value()
-        prof["vfd_freq"] = self.vfd_freq.value()
-        prof["glue_acc"] = self.glue_acc.value()
+        # Wyciągamy wartości tekstowe (lub int) z QLineEdit
+        prof["speed_inc"] = int(self.speed_inc.text() or 0)
+        prof["fwd_speed"] = int(self.fwd_speed.text() or 0)
+        prof["bwd_speed"] = int(self.bwd_speed.text() or 0)
+        prof["vfd_inc"] = int(self.vfd_inc.text() or 0)
+        prof["vfd_freq"] = int(self.vfd_freq.text() or 0)
+        prof["glue_acc"] = int(self.glue_acc.text() or 0)
         prof["cal_glue"] = self.cal_glue.text()
-
+        
         self.save_config()
-        self.log(f"SYSTEM: Saved configuration to slot {current_prof.replace('Profile ', 'M')}")
-
+        self.log(f"SYSTEM: Konfiguracja zapisana do slotu {current_prof.replace('Profile ', 'M')}")
 
     def load_profile(self):
         current_prof = self.get_selected_profile()
@@ -149,58 +141,43 @@ class IndustrialControlApp(AppUI):
         
         prof = self.config_data["profiles"][current_prof]
         
-        # Ze względu na .textChanged, modyfikacja pól tekstowych poniżej
-        # automatycznie nadpisze też 'global_filename' i zapamięta je na przyszłość.
         self.filename_input.setText(prof.get("filename", "motor_test"))
         self.save_path_input.setText(prof.get("save_dir", self.base_dir))
         
-        self.speed_inc.setValue(prof.get("speed_inc", 50))
-        self.fwd_speed.setValue(prof.get("fwd_speed", 0))
-        self.bwd_speed.setValue(prof.get("bwd_speed", 0))
-        self.vfd_inc.setValue(prof.get("vfd_inc", 5))
-        self.vfd_freq.setValue(prof.get("vfd_freq", 0))
-        self.glue_acc.setValue(prof.get("glue_acc", 0))
+        self.speed_inc.setText(str(prof.get("speed_inc", 50)))
+        self.fwd_speed.setText(str(prof.get("fwd_speed", 0)))
+        self.bwd_speed.setText(str(prof.get("bwd_speed", 0)))
+        self.vfd_inc.setText(str(prof.get("vfd_inc", 5)))
+        self.vfd_freq.setText(str(prof.get("vfd_freq", 0)))
+        self.glue_acc.setText(str(prof.get("glue_acc", 0)))
         self.cal_glue.setText(prof.get("cal_glue", "0.0000"))
         
-        self.log(f"SYSTEM: Loaded configuration from slot {current_prof.replace('Profile ', 'M')}")
+        self.log(f"SYSTEM: Wczytano konfigurację ze slotu {current_prof.replace('Profile ', 'M')}")
 
     def select_save_path(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", self.save_path_input.text())
         if path:
             self.save_path_input.setText(path)
 
-    # =========================================================
-    # RESZTA LOGIKI UART
-    # =========================================================
-
     def log(self, msg):
-        import html # Używamy do konwersji znaków '<' i '>' na bezpieczne dla HTML
-        
         time_str = datetime.now().strftime('%H:%M:%S')
-        color = "#e0e0e0"  # Domyślny jasnoszary dla odbieranych danych i reszty
-        
+        color = "#e0e0e0"  
         msg_lower = msg.lower()
         
-        # Logika dobierania kolorów (priorytety)
         if "error" in msg_lower or "err:" in msg_lower:
-            color = "#d32f2f"  # Czerwony (identyczny jak przycisk STOP)
+            color = "#d32f2f" 
         elif msg.startswith(">>"):
-            color = "#4FC3F7"  # Subtelny, jasny niebieski dla wysyłanych komend
+            color = "#4FC3F7"  
         elif "system:" in msg_lower or "connected" in msg_lower or "disconnected" in msg_lower or "recording" in msg_lower:
-            color = "#FFCA28"  # Zgaszony, czytelny pomarańczowy/bursztynowy dla statusów
+            color = "#FFCA28"  
             
-        # Zabezpieczamy znaki >> oraz << przed byciem odczytanym jako ukryte tagi HTML
         safe_msg = html.escape(msg)
-        
-        # Składanie linijki: Czas jest ciemnoszary, kreska też, tekst w wybranym kolorze
         html_line = f'<span style="color: #666666;">{time_str} |</span> <span style="color: {color};">{safe_msg}</span>'
         
-        # Używamy appendHtml zamiast appendPlainText
         self.terminal.appendHtml(html_line)
         self.terminal.moveCursor(QtGui.QTextCursor.End)
 
     def refresh_ports(self):
-        # Blokujemy sygnały, by wyczyszczenie listy nagle nie zapisało do JSONa "pustego" portu.
         self.port_combo.blockSignals(True)
         self.port_combo.clear()
         
@@ -214,7 +191,6 @@ class IndustrialControlApp(AppUI):
         
         self.port_combo.addItems(ports)
         
-        # Jeśli pamiętamy stary port i wciąż jest podłączony do maszyny - załaduj go automatycznie
         saved_port = self.config_data.get("last_port", "")
         if saved_port in ports:
             self.port_combo.setCurrentText(saved_port)
@@ -222,7 +198,7 @@ class IndustrialControlApp(AppUI):
             self.port_combo.setCurrentIndex(0)
             
         self.port_combo.blockSignals(False)
-        self.save_global_state() # Wymuś zapis tego, co faktycznie załadowało UI
+        self.save_global_state() 
         self.log("SYSTEM: Port list updated")
 
     def toggle_connection(self):
@@ -243,7 +219,7 @@ class IndustrialControlApp(AppUI):
             self.btn_vfd_fwd.setEnabled(False)
             self.btn_vfd_bwd.setEnabled(False)
             self.btn_motor_stop.setEnabled(False) 
-            self.btn_vfd_stop.setEnabled(False)
+            self.btn_vfd_stop.setEnabled(False)   
             self.btn_load_prof.setEnabled(False)
             
             self.log("Disconnected")
@@ -273,10 +249,8 @@ class IndustrialControlApp(AppUI):
                 self.btn_load_prof.setEnabled(True)
                 
                 self.btn_manual.setChecked(True)
-                
-                self.read_nvs()
                 self.send_cmd("MODE_MANUAL")
-                self.send_cmd("VFD GET STATUS")
+                self.read_nvs()
                 
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Error", str(e))
@@ -286,12 +260,14 @@ class IndustrialControlApp(AppUI):
             self.ser.write((cmd + "\n").encode())
             self.log(f">> {cmd}")
 
-    def adjust_value(self, spin, cmd, delta):
-        new_val = max(0, spin.value() + delta)
+    def adjust_value(self, edit, cmd, delta):
+        # Pobieranie wartości tekstowej QLineEdit i zwiększanie
+        current_val = int(edit.text() or 0)
+        new_val = max(0, current_val + delta)
         if cmd == "HZ":
             new_val = min(100, new_val)
             
-        spin.setValue(new_val)
+        edit.setText(str(new_val))
         self.send_cmd(f"{cmd} {new_val}")
         
     def switch_to_manual(self):
@@ -303,8 +279,8 @@ class IndustrialControlApp(AppUI):
         self.send_cmd("MODE_MANUAL")
         self.send_cmd("STOP")
         if self.ser and self.ser.is_open:
-            self.send_cmd(f"forwardSpeed {self.fwd_speed.value()}")
-            self.send_cmd(f"backwardSpeed {self.bwd_speed.value()}")
+            self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+            self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
 
     def switch_to_auto(self):
         self.btn_auto.setChecked(True)
@@ -318,11 +294,11 @@ class IndustrialControlApp(AppUI):
             self.switch_to_manual()
 
     def start_dispense(self):
-        self.send_cmd(f"forwardSpeed {self.fwd_speed.value()}")
+        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
         self.send_cmd("MOVE_FORWARD")
 
     def start_retract(self):
-        self.send_cmd(f"backwardSpeed {self.bwd_speed.value()}")
+        self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
         self.send_cmd("MOVE_BACKWARD")
 
     def listen_to_uart(self):
@@ -383,20 +359,18 @@ class IndustrialControlApp(AppUI):
                 val_f = float(val)
                 name_lower = name.lower()
                 
-                if name == "forwardSpeed": self.fwd_speed.setValue(val_f)
-                elif name == "backwardSpeed": self.bwd_speed.setValue(val_f)
-                elif name == "accGlue": self.glue_acc.setValue(int(val_f))
+                if name == "forwardSpeed": self.fwd_speed.setText(str(int(val_f)))
+                elif name == "backwardSpeed": self.bwd_speed.setText(str(int(val_f)))
+                elif name == "accGlue": self.glue_acc.setText(str(int(val_f)))
                 elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.4f}")
                 elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
                     self.lbl_vfd_freq.setText(f"{val_f:.2f}")
                     
-                    # Aktualizujemy interfejs
-                    if self.vfd_freq.value() != val_f:
-                        self.vfd_freq.blockSignals(True) # Żeby nie wyzwolić niechcianych eventów
-                        self.vfd_freq.setValue(val_f)
+                    if float(self.vfd_freq.text() or 0) != val_f:
+                        self.vfd_freq.blockSignals(True)
+                        self.vfd_freq.setText(str(int(val_f)))
                         self.vfd_freq.blockSignals(False)
                     
-                    # Odsyłamy odczytaną z NVS wartość od razu do falownika
                     self.send_cmd(f"HZ {val_f}")
             except: pass
 
@@ -436,11 +410,11 @@ class IndustrialControlApp(AppUI):
         self.log(f"RECORDING SAVED: {os.path.basename(final_path)}")
 
     def apply_all(self):
-        self.send_cmd(f"forwardSpeed {self.fwd_speed.value()}")
-        self.send_cmd(f"backwardSpeed {self.bwd_speed.value()}")
-        self.send_cmd(f"glueAcc {self.glue_acc.value()}")
+        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+        self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
+        self.send_cmd(f"glueAcc {self.glue_acc.text() or 0}")
         self.send_cmd(f"calGlue {self.cal_glue.text()}")
-        self.send_cmd(f"HZ {self.vfd_freq.value()}")
+        self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
 
     def read_nvs(self):
         self.send_cmd("READNVS")

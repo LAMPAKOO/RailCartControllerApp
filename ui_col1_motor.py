@@ -32,7 +32,7 @@ def setup_motor_column(ui, parent_layout):
     h_spd.addStretch()
     
     h_rpm = QtWidgets.QHBoxLayout()
-    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/h]: ")
+    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/min]: ")
     lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     ui.lbl_rpm = QtWidgets.QLabel("0.00")
     ui.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -52,15 +52,15 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_manual.setChecked(True)
     ui.btn_manual.setFixedHeight(45)
     ui.btn_manual.setStyleSheet(MODE_BTN_STYLE)
-    ui.btn_manual.setEnabled(False) # <--- ZABLOKOWANE PRZED POŁĄCZENIEM
+    ui.btn_manual.setEnabled(False)
     ui.btn_manual.clicked.connect(ui.switch_to_manual)
     
     ui.btn_auto = QtWidgets.QPushButton("AUTO")
     ui.btn_auto.setCheckable(True)
     ui.btn_auto.setFixedHeight(45)
     ui.btn_auto.setStyleSheet(MODE_BTN_STYLE)
-    ui.btn_auto.setEnabled(False) # <--- ZABLOKOWANE PRZED POŁĄCZENIEM
-    ui.btn_auto.clicked.connect(ui.switch_to_auto) # <--- NOWA FUNKCJA W LOGICE
+    ui.btn_auto.setEnabled(False)
+    ui.btn_auto.clicked.connect(ui.switch_to_auto)
     
     ui.mode_btn_group = QtWidgets.QButtonGroup()
     ui.mode_btn_group.addButton(ui.btn_manual)
@@ -73,6 +73,9 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
     
+    # ==========================================
+    # ZAKŁADKA BASIC
+    # ==========================================
     tab_basic = QtWidgets.QWidget()
     basic_layout = QtWidgets.QVBoxLayout(tab_basic)
     basic_layout.setContentsMargins(15, 15, 15, 15)
@@ -82,21 +85,22 @@ def setup_motor_column(ui, parent_layout):
     lbl_inc.setFixedWidth(140) 
     lbl_inc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
     
-    ui.speed_inc = QtWidgets.QSpinBox()
-    ui.speed_inc.setRange(1, 1000)
-    ui.speed_inc.setValue(50)
+    ui.speed_inc = QtWidgets.QLineEdit("50")
     ui.speed_inc.setFixedSize(120, 50) 
     ui.speed_inc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+    ui.speed_inc.setAlignment(QtCore.Qt.AlignCenter)
+    ui.speed_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    ui.speed_inc.setValidator(QtGui.QIntValidator(1, 1000))
     
     btn_inc_minus = QtWidgets.QPushButton("-")
     btn_inc_minus.setFixedSize(50, 50) 
     btn_inc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    btn_inc_minus.clicked.connect(lambda: ui.speed_inc.setValue(ui.speed_inc.value() - 10))
+    btn_inc_minus.clicked.connect(lambda: ui.speed_inc.setText(str(max(1, int(ui.speed_inc.text() or 0) - 10))))
     
     btn_inc_plus = QtWidgets.QPushButton("+")
     btn_inc_plus.setFixedSize(50, 50) 
     btn_inc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    btn_inc_plus.clicked.connect(lambda: ui.speed_inc.setValue(ui.speed_inc.value() + 10))
+    btn_inc_plus.clicked.connect(lambda: ui.speed_inc.setText(str(min(1000, int(ui.speed_inc.text() or 0) + 10))))
     
     inc_layout.addWidget(lbl_inc)
     inc_layout.addWidget(btn_inc_minus)
@@ -113,7 +117,6 @@ def setup_motor_column(ui, parent_layout):
     move_layout = QtWidgets.QHBoxLayout()
     move_layout.setSpacing(15)
     
-    # --- PRZYPISANIE DO ui. ORAZ ZABLOKOWANIE ---
     ui.btn_glue_fwd = QtWidgets.QPushButton("▲\nDISPENSE GLUE")
     ui.btn_glue_fwd.setFixedHeight(140) 
     ui.btn_glue_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -133,33 +136,42 @@ def setup_motor_column(ui, parent_layout):
     basic_layout.addLayout(move_layout)
     
     ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
-    ui.btn_motor_stop.setFixedHeight(100) # Ustalona sztywna wysokość dla obu
-    ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE) # <--- Użycie nowego stylu
-    ui.btn_motor_stop.setEnabled(False)             # <--- Domyślne wyszarzenie
-    ui.btn_motor_stop.clicked.connect(ui.stop_motor)
+    ui.btn_motor_stop.setFixedHeight(60)
+    ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE)
+    ui.btn_motor_stop.setEnabled(False)
+    ui.btn_motor_stop.clicked.connect(ui.stop_motor) 
     basic_layout.addWidget(ui.btn_motor_stop)
     
     basic_layout.addStretch()
     
+    # ==========================================
+    # ZAKŁADKA ADVANCED / SETTINGS
+    # ==========================================
     tab_adv = QtWidgets.QWidget()
     adv_layout = QtWidgets.QVBoxLayout(tab_adv)
     adv_layout.setContentsMargins(15, 20, 15, 15)
     adv_layout.setSpacing(15)
     
+    # --- Sekcja Glue Acceleration ---
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("Glue Acceleration:")
     lbl_acc.setFixedWidth(160)
     lbl_acc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
     
-    ui.glue_acc = QtWidgets.QSpinBox()
-    ui.glue_acc.setRange(0, 1000000)
+    ui.glue_acc = QtWidgets.QLineEdit("0")
     ui.glue_acc.setFixedSize(180, 50)
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+    ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) # Tekst na środku
+    ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    
+    # Walidator dla liczb całkowitych (od 0 do miliona)
+    ui.glue_acc.setValidator(QtGui.QIntValidator(0, 1000000))
     
     acc_layout.addWidget(lbl_acc)
     acc_layout.addWidget(ui.glue_acc)
     acc_layout.addStretch()
     
+    # --- Sekcja Glue Calibration ---
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("Glue Calibration:")
     lbl_cal.setFixedWidth(160)
@@ -168,7 +180,12 @@ def setup_motor_column(ui, parent_layout):
     ui.cal_glue = QtWidgets.QLineEdit("0.0000")
     ui.cal_glue.setFixedSize(180, 50)
     ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
-    ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 3px; padding: 6px;")
+    ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) # Tekst na środku
+    ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    
+    # Zabezpieczenie: Walidator Regex pozwalający na ułamek TYLKO z kropką (np. 1.2345)
+    regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
+    ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
     
     cal_layout.addWidget(lbl_cal)
     cal_layout.addWidget(ui.cal_glue)
@@ -178,6 +195,7 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.addLayout(cal_layout)
     adv_layout.addSpacing(20)
     
+    # --- Przyciski Apply / Refresh ---
     btn_apply = QtWidgets.QPushButton("APPLY ALL PARAMETERS")
     btn_apply.setFixedHeight(60)
     btn_apply.setStyleSheet("""
