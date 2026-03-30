@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from ui_styles import *
-from ui_helpers import create_step_control
+from ui_helpers import create_step_control, add_touch_keyboard
 
 def setup_motor_column(ui, parent_layout):
     col1 = QtWidgets.QFrame()
@@ -91,6 +91,7 @@ def setup_motor_column(ui, parent_layout):
     ui.speed_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.speed_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.speed_inc.setValidator(QtGui.QIntValidator(1, 1000))
+    add_touch_keyboard(ui.speed_inc) # <--- DODANO KLAWIATURĘ
     
     btn_inc_minus = QtWidgets.QPushButton("-")
     btn_inc_minus.setFixedSize(50, 50) 
@@ -152,7 +153,6 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.setContentsMargins(15, 20, 15, 15)
     adv_layout.setSpacing(15)
     
-    # --- Sekcja Glue Acceleration ---
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("Glue Acceleration:")
     lbl_acc.setFixedWidth(160)
@@ -161,17 +161,15 @@ def setup_motor_column(ui, parent_layout):
     ui.glue_acc = QtWidgets.QLineEdit("0")
     ui.glue_acc.setFixedSize(180, 50)
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
-    ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) # Tekst na środku
+    ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    
-    # Walidator dla liczb całkowitych (od 0 do miliona)
     ui.glue_acc.setValidator(QtGui.QIntValidator(0, 1000000))
+    add_touch_keyboard(ui.glue_acc) # <--- DODANO KLAWIATURĘ
     
     acc_layout.addWidget(lbl_acc)
     acc_layout.addWidget(ui.glue_acc)
     acc_layout.addStretch()
     
-    # --- Sekcja Glue Calibration ---
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("Glue Calibration:")
     lbl_cal.setFixedWidth(160)
@@ -180,12 +178,11 @@ def setup_motor_column(ui, parent_layout):
     ui.cal_glue = QtWidgets.QLineEdit("0.0000")
     ui.cal_glue.setFixedSize(180, 50)
     ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
-    ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) # Tekst na środku
+    ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    
-    # Zabezpieczenie: Walidator Regex pozwalający na ułamek TYLKO z kropką (np. 1.2345)
     regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
+    add_touch_keyboard(ui.cal_glue) # <--- DODANO KLAWIATURĘ
     
     cal_layout.addWidget(lbl_cal)
     cal_layout.addWidget(ui.cal_glue)
@@ -195,7 +192,6 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.addLayout(cal_layout)
     adv_layout.addSpacing(20)
     
-    # --- Przyciski Apply / Refresh ---
     btn_apply = QtWidgets.QPushButton("APPLY ALL PARAMETERS")
     btn_apply.setFixedHeight(60)
     btn_apply.setStyleSheet("""

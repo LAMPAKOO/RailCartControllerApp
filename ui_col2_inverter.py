@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from ui_styles import *
-from ui_helpers import create_vfd_step_control
+from ui_helpers import create_vfd_step_control, add_touch_keyboard
 
 def setup_inverter_column(ui, parent_layout):
     col2 = QtWidgets.QFrame()
@@ -54,6 +54,7 @@ def setup_inverter_column(ui, parent_layout):
     ui.vfd_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.vfd_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.vfd_inc.setValidator(QtGui.QIntValidator(1, 100))
+    add_touch_keyboard(ui.vfd_inc) # <--- DODANO KLAWIATURĘ
     
     btn_vfd_inc_minus = QtWidgets.QPushButton("-")
     btn_vfd_inc_minus.setFixedSize(50, 50) 
@@ -178,12 +179,14 @@ def setup_inverter_column(ui, parent_layout):
     lbl_fn.setStyleSheet(LABEL_STYLE)
     ui.filename_input = QtWidgets.QLineEdit()
     ui.filename_input.setStyleSheet(INPUT_STYLE)
+    add_touch_keyboard(ui.filename_input) # <--- DODANO KLAWIATURĘ
     
     lbl_dir = QtWidgets.QLabel("Save Dir:")
     lbl_dir.setStyleSheet(LABEL_STYLE)
     lbl_dir.setContentsMargins(10, 0, 0, 0)
     ui.save_path_input = QtWidgets.QLineEdit()
     ui.save_path_input.setStyleSheet(INPUT_STYLE)
+    add_touch_keyboard(ui.save_path_input) # <--- DODANO KLAWIATURĘ
     
     btn_browse = QtWidgets.QPushButton("Browse")
     btn_browse.setStyleSheet("background-color: #444444; color: white; border-radius: 3px; padding: 6px; font-size: 14px;")

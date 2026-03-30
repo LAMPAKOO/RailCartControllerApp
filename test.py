@@ -1,32 +1,68 @@
-import tkinter as tk
-import subprocess
+import sys
 import os
-import os
-import platform
+from PySide6 import QtWidgets, QtCore, QtGui
 
-import os
+# --- 1. Definicja naszego filtra zdarzeń ---
+class KeyboardEventFilter(QtCore.QObject):
+    def eventFilter(self, obj, event):
+        # Przechwytujemy zdarzenie wciśnięcia lewego przycisku myszy (lub "kliknięcia" palcem w ekran USB)
+        if event.type() == QtCore.QEvent.Type.MouseButtonPress:
+            if event.button() == QtCore.Qt.MouseButton.LeftButton:
+                try:
+                    # Twarde wywołanie systemowej klawiatury dotykowej
+                    sciezka_tabtip = r"C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe"
+                    os.startfile(sciezka_tabtip)
+                    print("Klawiatura wywołana!")
+                except Exception as e:
+                    print(f"Nie udało się uruchomić klawiatury: {e}")
+                    
+        # Ważne: zwracamy standardowe zachowanie, aby kursor pojawił się w polu tekstowym
+        return super().eventFilter(obj, event)
 
-def pokaz_klawiature(event):
-    try:
-        sciezka_tabtip = r"C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe"
-        os.startfile(sciezka_tabtip)
-    except Exception as e:
-        print(f"Nie udało się uruchomić klawiatury: {e}")
-# Tworzenie głównego okna
-root = tk.Tk()
-root.title("Test klawiatury")
-root.geometry("400x200")
 
-# Etykieta
-label = tk.Label(root, text="Kliknij w pole poniżej:")
-label.pack(pady=10)
+# --- 2. Główne okno aplikacji ---
+class MainWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Test Klawiatury USB")
+        self.resize(400, 300)
 
-# Pole tekstowe
-pole_tekstowe = tk.Entry(root, font=("Arial", 14))
-pole_tekstowe.pack(pady=10)
+        # Główny layout
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(20)
 
-# Bindowanie zdarzenia <FocusIn> (gdy pole staje się aktywne) 
-# lub <Button-1> (kliknięcie lewym przyciskiem myszy)
-pole_tekstowe.bind("<FocusIn>", pokaz_klawiature)
+        # Etykieta informacyjna
+        label = QtWidgets.QLabel("Kliknij w pole poniżej (myszką lub palcem):")
+        label.setFont(QtGui.QFont("Segoe UI", 12))
+        layout.addWidget(label)
 
-root.mainloop()
+        # Tworzymy pole tekstowe (QLineEdit)
+        self.pole_tekstowe = QtWidgets.QLineEdit()
+        self.pole_tekstowe.setFixedSize(300, 50)
+        self.pole_tekstowe.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Weight.Bold))
+        self.pole_tekstowe.setPlaceholderText("Wpisz wartość...")
+        self.pole_tekstowe.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.pole_tekstowe)
+
+        # --- 3. PODPIĘCIE FILTRA ---
+        # Tworzymy instancję naszego filtra i przypisujemy ją do okna (self)
+        self.keyboard_filter = KeyboardEventFilter(self)
+        
+        # Instalujemy filtr na konkretnym polu tekstowym
+        self.pole_tekstowe.installEventFilter(self.keyboard_filter)
+
+        # Dodajemy pustą przestrzeń na dole, żeby okno ładnie wyglądało
+        layout.addStretch()
+
+
+# --- 4. Uruchomienie aplikacji ---
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    
+    # Tworzymy i pokazujemy główne okno
+    window = MainWindow()
+    window.show()
+    
+    # Uruchamiamy główną pętlę programu
+    sys.exit(app.exec())
