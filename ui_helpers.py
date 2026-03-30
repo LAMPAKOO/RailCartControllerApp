@@ -70,7 +70,7 @@ def create_vfd_step_control(ui, layout, label, cmd_name):
     edit.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
     edit.setAlignment(QtCore.Qt.AlignCenter)
     edit.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    edit.setValidator(QtGui.QIntValidator(0, 100))
+    edit.setValidator(QtGui.QIntValidator(0, 300))
     
     add_touch_keyboard(edit) # <--- DODANO KLAWIATURĘ
     

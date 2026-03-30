@@ -265,7 +265,7 @@ class IndustrialControlApp(AppUI):
         current_val = int(edit.text() or 0)
         new_val = max(0, current_val + delta)
         if cmd == "HZ":
-            new_val = min(100, new_val)
+            new_val = min(300, new_val)
             
         edit.setText(str(new_val))
         self.send_cmd(f"{cmd} {new_val}")

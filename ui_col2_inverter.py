@@ -53,7 +53,7 @@ def setup_inverter_column(ui, parent_layout):
     ui.vfd_inc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
     ui.vfd_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.vfd_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    ui.vfd_inc.setValidator(QtGui.QIntValidator(1, 100))
+    ui.vfd_inc.setValidator(QtGui.QIntValidator(1, 300))
     add_touch_keyboard(ui.vfd_inc) # <--- DODANO KLAWIATURĘ
     
     btn_vfd_inc_minus = QtWidgets.QPushButton("-")
@@ -64,7 +64,7 @@ def setup_inverter_column(ui, parent_layout):
     btn_vfd_inc_plus = QtWidgets.QPushButton("+")
     btn_vfd_inc_plus.setFixedSize(50, 50) 
     btn_vfd_inc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    btn_vfd_inc_plus.clicked.connect(lambda: ui.vfd_inc.setText(str(min(100, int(ui.vfd_inc.text() or 0) + 1))))
+    btn_vfd_inc_plus.clicked.connect(lambda: ui.vfd_inc.setText(str(min(300, int(ui.vfd_inc.text() or 0) + 1))))
     
     vfd_inc_layout.addWidget(lbl_vfd_inc)
     vfd_inc_layout.addWidget(btn_vfd_inc_minus)
