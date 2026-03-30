@@ -10,7 +10,7 @@ def setup_system_column(ui, parent_layout):
     col3_layout.setContentsMargins(15, 15, 15, 15)
     col3_layout.setSpacing(15)
     
-    ui.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
+    ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
     ui.btn_exit.setFixedWidth(200)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
