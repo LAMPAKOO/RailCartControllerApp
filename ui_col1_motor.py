@@ -24,18 +24,18 @@ def setup_motor_column(ui, parent_layout):
     
     h_spd = QtWidgets.QHBoxLayout()
     lbl_s_pfx = QtWidgets.QLabel("GLUE: ")
-    lbl_s_pfx.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+    lbl_s_pfx.setStyleSheet("color: #ff5722; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     ui.lbl_speed = QtWidgets.QLabel("0.00")
-    ui.lbl_speed.setStyleSheet("color: #ff5722; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+    ui.lbl_speed.setStyleSheet("color: #ff5722; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     h_spd.addWidget(lbl_s_pfx)
     h_spd.addWidget(ui.lbl_speed)
     h_spd.addStretch()
     
     h_rpm = QtWidgets.QHBoxLayout()
     lbl_r_pfx = QtWidgets.QLabel("SPEED [m/min]: ")
-    lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+    lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     ui.lbl_rpm = QtWidgets.QLabel("0.00")
-    ui.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 32px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
+    ui.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     h_rpm.addWidget(lbl_r_pfx)
     h_rpm.addWidget(ui.lbl_rpm)
     h_rpm.addStretch()
@@ -50,14 +50,14 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_manual = QtWidgets.QPushButton("MANUAL")
     ui.btn_manual.setCheckable(True)
     ui.btn_manual.setChecked(True)
-    ui.btn_manual.setFixedHeight(45)
+    ui.btn_manual.setFixedHeight(60)
     ui.btn_manual.setStyleSheet(MODE_BTN_STYLE)
     ui.btn_manual.setEnabled(False)
     ui.btn_manual.clicked.connect(ui.switch_to_manual)
     
     ui.btn_auto = QtWidgets.QPushButton("AUTO")
     ui.btn_auto.setCheckable(True)
-    ui.btn_auto.setFixedHeight(45)
+    ui.btn_auto.setFixedHeight(60)
     ui.btn_auto.setStyleSheet(MODE_BTN_STYLE)
     ui.btn_auto.setEnabled(False)
     ui.btn_auto.clicked.connect(ui.switch_to_auto)
@@ -73,34 +73,31 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
     
-    # ==========================================
-    # ZAKŁADKA BASIC
-    # ==========================================
     tab_basic = QtWidgets.QWidget()
     basic_layout = QtWidgets.QVBoxLayout(tab_basic)
     basic_layout.setContentsMargins(15, 15, 15, 15)
     
     inc_layout = QtWidgets.QHBoxLayout()
     lbl_inc = QtWidgets.QLabel("Step Increment:")
-    lbl_inc.setFixedWidth(140) 
-    lbl_inc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
+    lbl_inc.setFixedWidth(160) 
+    lbl_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.speed_inc = QtWidgets.QLineEdit("50")
-    ui.speed_inc.setFixedSize(120, 50) 
-    ui.speed_inc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+    ui.speed_inc.setFixedSize(140, 70) 
+    ui.speed_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.speed_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.speed_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.speed_inc.setValidator(QtGui.QIntValidator(1, 1000))
-    add_touch_keyboard(ui.speed_inc) # <--- DODANO KLAWIATURĘ
+    add_touch_keyboard(ui.speed_inc)
     
     btn_inc_minus = QtWidgets.QPushButton("-")
-    btn_inc_minus.setFixedSize(50, 50) 
-    btn_inc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    btn_inc_minus.setFixedSize(70, 70) 
+    btn_inc_minus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
     btn_inc_minus.clicked.connect(lambda: ui.speed_inc.setText(str(max(1, int(ui.speed_inc.text() or 0) - 10))))
     
     btn_inc_plus = QtWidgets.QPushButton("+")
-    btn_inc_plus.setFixedSize(50, 50) 
-    btn_inc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    btn_inc_plus.setFixedSize(70, 70) 
+    btn_inc_plus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
     btn_inc_plus.clicked.connect(lambda: ui.speed_inc.setText(str(min(1000, int(ui.speed_inc.text() or 0) + 10))))
     
     inc_layout.addWidget(lbl_inc)
@@ -136,8 +133,9 @@ def setup_motor_column(ui, parent_layout):
     move_layout.addWidget(ui.btn_glue_bwd, 1)
     basic_layout.addLayout(move_layout)
     
+    # KILKUKROTNIE POWIĘKSZONY PRZYCISK STOP
     ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
-    ui.btn_motor_stop.setFixedHeight(60)
+    ui.btn_motor_stop.setFixedHeight(140)
     ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE)
     ui.btn_motor_stop.setEnabled(False)
     ui.btn_motor_stop.clicked.connect(ui.stop_motor) 
@@ -145,9 +143,6 @@ def setup_motor_column(ui, parent_layout):
     
     basic_layout.addStretch()
     
-    # ==========================================
-    # ZAKŁADKA ADVANCED / SETTINGS
-    # ==========================================
     tab_adv = QtWidgets.QWidget()
     adv_layout = QtWidgets.QVBoxLayout(tab_adv)
     adv_layout.setContentsMargins(15, 20, 15, 15)
@@ -155,16 +150,16 @@ def setup_motor_column(ui, parent_layout):
     
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("Glue Acceleration:")
-    lbl_acc.setFixedWidth(160)
-    lbl_acc.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
+    lbl_acc.setFixedWidth(180)
+    lbl_acc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.glue_acc = QtWidgets.QLineEdit("0")
-    ui.glue_acc.setFixedSize(180, 50)
-    ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+    ui.glue_acc.setFixedSize(220, 70)
+    ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.glue_acc.setValidator(QtGui.QIntValidator(0, 1000000))
-    add_touch_keyboard(ui.glue_acc) # <--- DODANO KLAWIATURĘ
+    add_touch_keyboard(ui.glue_acc) 
     
     acc_layout.addWidget(lbl_acc)
     acc_layout.addWidget(ui.glue_acc)
@@ -172,17 +167,17 @@ def setup_motor_column(ui, parent_layout):
     
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("Glue Calibration:")
-    lbl_cal.setFixedWidth(160)
-    lbl_cal.setStyleSheet("font-size: 16px; font-weight: bold; color: #cccccc;")
+    lbl_cal.setFixedWidth(180)
+    lbl_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.cal_glue = QtWidgets.QLineEdit("0.0000")
-    ui.cal_glue.setFixedSize(180, 50)
-    ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 16, QtGui.QFont.Bold))
+    ui.cal_glue.setFixedSize(220, 70)
+    ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
-    add_touch_keyboard(ui.cal_glue) # <--- DODANO KLAWIATURĘ
+    add_touch_keyboard(ui.cal_glue)
     
     cal_layout.addWidget(lbl_cal)
     cal_layout.addWidget(ui.cal_glue)
@@ -193,18 +188,18 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.addSpacing(20)
     
     btn_apply = QtWidgets.QPushButton("APPLY ALL PARAMETERS")
-    btn_apply.setFixedHeight(60)
+    btn_apply.setFixedHeight(80)
     btn_apply.setStyleSheet("""
-        QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 16px; border-radius: 8px; }
+        QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
         QPushButton:hover { background-color: #66BB6A; }
         QPushButton:pressed { background-color: #388E3C; }
     """)
     btn_apply.clicked.connect(ui.apply_all)
     
     btn_read = QtWidgets.QPushButton("REFRESH FROM NVS")
-    btn_read.setFixedHeight(60)
+    btn_read.setFixedHeight(80)
     btn_read.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 8px; }
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
         QPushButton:hover { background-color: #42A5F5; }
         QPushButton:pressed { background-color: #1976D2; }
     """)
