@@ -12,9 +12,24 @@ def setup_system_column(ui, parent_layout):
     col3_layout.setSpacing(15)
     
     # =========================================================
-    # NOWY GÓRNY PASEK: LOGO + PRZYCISK EXIT
+    # NOWY GÓRNY PASEK: BIAŁE LOGO + PRZYCISK EXIT
     # =========================================================
     top_bar = QtWidgets.QHBoxLayout()
+    
+    # --- NOWE: Biały kontener na logo ---
+    ui.logo_container_widget = QtWidgets.QFrame()
+    
+    # Kluczowe linie: Ustawiamy białe tło, pasujący radius i brak ramki
+    ui.logo_container_widget.setStyleSheet("background-color: white; border-radius: 8px; border: none;")
+    
+    # KILKUKROTNIE POWIĘKSZONY PRZYCISK STOP
+    # Najważniejsza linia: Ustawiamy wysokość DOKŁADNIE na 80 px, tak jak przycisk Exit
+    ui.logo_container_widget.setFixedHeight(80) 
+    
+    # Tworzymy wewnętrzny układ dla białej ramki, aby wyśrodkować logo
+    logo_internal_layout = QtWidgets.QHBoxLayout(ui.logo_container_widget)
+    logo_internal_layout.setContentsMargins(15, 5, 15, 5) # Dodajemy wewnętrzne marginesy
+    logo_internal_layout.setAlignment(QtCore.Qt.AlignCenter) # Środkujemy logo
     
     # Etykieta na Logo
     ui.lbl_logo = QtWidgets.QLabel()
@@ -26,23 +41,39 @@ def setup_system_column(ui, parent_layout):
         # 1. Ustawia ikonę aplikacji (pasek zadań Windows i róg okna)
         ui.setWindowIcon(QtGui.QIcon(logo_path))
         
-        # 2. Wyświetla logo w interfejsie (skalowane do max 200x80 px z zachowaniem proporcji)
-        pixmap = QtGui.QPixmap(logo_path).scaled(200, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        # 2. Skalujemy logo, ale nieco mniejsze (max 70px) wewnątrz 80px ramki dla paddingu
+        pixmap = QtGui.QPixmap(logo_path).scaled(
+            200, 70, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+        )
         ui.lbl_logo.setPixmap(pixmap)
+        
+        # Upewniamy się, że tło obrazka jest przezroczyste na białej ramce
+        ui.lbl_logo.setStyleSheet("background: transparent;")
+        
     else:
         # Tekst zastępczy, jeśli pliku obrazka nie ma w folderze
-        ui.lbl_logo.setText("SHM SYSTEM") 
-        ui.lbl_logo.setStyleSheet("color: #aaaaaa; font-size: 26px; font-weight: bold; background: transparent;")
+        ui.lbl_logo.setText("⚙️ SHM SYSTEM") 
+        
+        # ZMIANA: Tekst jest teraz czarny, bo tło jest białe
+        ui.lbl_logo.setStyleSheet("color: black; font-size: 26px; font-weight: bold; background: transparent;")
     
-    top_bar.addWidget(ui.lbl_logo, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+    # Dodajemy etykietę do wewnętrznego układu białej ramki
+    logo_internal_layout.addWidget(ui.lbl_logo)
+    # ------------------------------------
+    
+    # Dodajemy biały kontener na lewo
+    top_bar.addWidget(ui.logo_container_widget, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+    
     top_bar.addStretch() # Rozpycha elementy na lewo i prawo
     
-    # Przycisk EXIT APP
-    ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
+    # Przycisk EXIT APP (pozostaje bez zmian)
+    ui.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
     ui.btn_exit.setFixedWidth(200)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
+    
+    # Dodajemy przycisk na prawo
     top_bar.addWidget(ui.btn_exit, alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
     
     col3_layout.addLayout(top_bar)
