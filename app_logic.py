@@ -527,3 +527,6 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"glueAcc {self.glue_acc.text() or 0}")
         self.send_cmd(f"calGlue {self.cal_glue.text()}")
         self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
+
+    def read_nvs(self):
+        self.send_cmd("READNVS")
