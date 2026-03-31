@@ -48,7 +48,7 @@ def setup_inverter_column(ui, parent_layout):
     lbl_vfd_inc.setFixedWidth(160) 
     lbl_vfd_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
-    ui.vfd_inc = QtWidgets.QLineEdit(str(MIN_VFD_INC))
+    ui.vfd_inc = QtWidgets.QLineEdit(str(DEFAULT_VFD_INC))
     ui.vfd_inc.setFixedSize(140, 70) 
     ui.vfd_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.vfd_inc.setAlignment(QtCore.Qt.AlignCenter)
