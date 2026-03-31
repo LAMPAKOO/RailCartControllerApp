@@ -415,11 +415,11 @@ class IndustrialControlApp(AppUI):
 
     def start_vfd_forward(self):
         self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
-        self.send_cmd("VFD_FORWARD")
+        QtCore.QTimer.singleShot(150, lambda: self.send_cmd("VFD_FORWARD"))
 
     def start_vfd_reverse(self):
         self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
-        self.send_cmd("VFD_REVERSE")
+        QtCore.QTimer.singleShot(150, lambda: self.send_cmd("VFD_REVERSE"))
 
     def listen_to_uart(self):
         if not self.ser or not self.ser.is_open: return
