@@ -359,7 +359,8 @@ class IndustrialControlApp(AppUI):
                 
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")
-                # usunięto self.read_nvs()
+                
+                self.read_nvs() 
                 
             except Exception as e:
                 self.show_modern_error("Connection Error", str(e))
