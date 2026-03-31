@@ -24,16 +24,21 @@ def setup_system_column(ui, parent_layout):
     
     # Wewnętrzny układ dla białej ramki
     logo_internal_layout = QtWidgets.QHBoxLayout(ui.logo_container_widget)
-    logo_internal_layout.setContentsMargins(15, 5, 15, 5) 
-    logo_internal_layout.setAlignment(QtCore.Qt.AlignCenter) # Środkuje logo wewnątrz długiego paska
+    
+    # ZMIANA 1: Marginesy pionowe na 0, zostawiamy tylko delikatny margines po bokach (10px)
+    logo_internal_layout.setContentsMargins(10, 0, 10, 0) 
+    logo_internal_layout.setAlignment(QtCore.Qt.AlignCenter) 
     
     ui.lbl_logo = QtWidgets.QLabel()
     logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
     
     if os.path.exists(logo_path):
         ui.setWindowIcon(QtGui.QIcon(logo_path))
+        
+        # ZMIANA 2: Pozwalamy logo rozrosnąć się do 800px na szerokość i idealnie 80px na wysokość.
+        # Dzięki "KeepAspectRatio" zachowa proporcje, ale maksymalnie wypełni ramkę w pionie.
         pixmap = QtGui.QPixmap(logo_path).scaled(
-            200, 70, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+            800, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
         )
         ui.lbl_logo.setPixmap(pixmap)
         ui.lbl_logo.setStyleSheet("background: transparent;")
