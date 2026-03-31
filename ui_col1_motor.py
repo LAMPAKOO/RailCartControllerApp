@@ -82,13 +82,11 @@ def setup_motor_column(ui, parent_layout):
     lbl_inc.setFixedWidth(160) 
     lbl_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
-    ui.speed_inc = QtWidgets.QLineEdit(str(DEFAULT_SPEED_INC))
+    ui.speed_inc = QtWidgets.QLineEdit("50")
     ui.speed_inc.setFixedSize(140, 70) 
     ui.speed_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.speed_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.speed_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    
-    # UŻYCIE GLOBALNEGO LIMITU
     ui.speed_inc.setValidator(QtGui.QIntValidator(MIN_SPEED_INC, MAX_SPEED_INC))
     add_touch_keyboard(ui.speed_inc)
     
@@ -159,8 +157,6 @@ def setup_motor_column(ui, parent_layout):
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    
-    # UŻYCIE GLOBALNEGO LIMITU
     ui.glue_acc.setValidator(QtGui.QIntValidator(MIN_GLUE_ACC, MAX_GLUE_ACC))
     add_touch_keyboard(ui.glue_acc) 
     
@@ -198,18 +194,13 @@ def setup_motor_column(ui, parent_layout):
         QPushButton:pressed { background-color: #388E3C; }
     """)
     btn_apply.clicked.connect(ui.apply_all)
-    
-    btn_read = QtWidgets.QPushButton("REFRESH FROM NVS")
-    btn_read.setFixedHeight(80)
-    btn_read.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
-        QPushButton:hover { background-color: #42A5F5; }
-        QPushButton:pressed { background-color: #1976D2; }
-    """)
-    btn_read.clicked.connect(ui.read_nvs)
-    
     adv_layout.addWidget(btn_apply)
-    adv_layout.addWidget(btn_read)
+    
+    # === ZMIANA: ZAMIAST PRZYCISKU NVS, WSTAWIAMY PUSTY ODSTĘP ===
+    # Dzięki temu przycisk APPLY i cała reszta nie zmieni swojej pozycji
+    adv_layout.addSpacing(80) 
+    # ==============================================================
+    
     adv_layout.addStretch()
     
     ui.tabs.addTab(tab_basic, "Basic Control")

@@ -54,12 +54,37 @@ class IndustrialControlApp(AppUI):
         self.setup_initial_state()   
         self.refresh_ports()         
         
+        # ==========================================
+        # NOWE: LOGI TERMINALA (OSOBNY PLIK)
+        # ==========================================
+        self.logs_dir = os.path.join(self.base_dir, "logs")
+        os.makedirs(self.logs_dir, exist_ok=True)
+        self.log_file_path = os.path.join(self.logs_dir, f"terminal_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+        self.log_file = open(self.log_file_path, "a", encoding="utf-8")
+        
+        # ==========================================
+        # NOWE: AUTO-SAVE (ZABEZPIECZENIE DANYCH)
+        # ==========================================
+        self.autosave_timer = QtCore.QTimer()
+        self.autosave_timer.timeout.connect(self.autosave_files)
+        self.autosave_timer.start(5000) # Co 5 sekund twardy zapis na dysk
+
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
 
-   # ==========================================
-    # NOWOCZESNE OKIENKA WERYFIKACYJNE I BŁĘDÓW
-    # ==========================================
+    def autosave_files(self):
+        """Wymusza twardy zapis buforów plików na dysk (ochrona przed utratą zasilania)"""
+        try:
+            if self.is_recording and self.csv_file and not self.csv_file.closed:
+                self.csv_file.flush()
+                os.fsync(self.csv_file.fileno())
+                
+            if hasattr(self, 'log_file') and self.log_file and not self.log_file.closed:
+                self.log_file.flush()
+                os.fsync(self.log_file.fileno())
+        except Exception:
+            pass # Ignoruje ewentualne konflikty zapisu
+
     def show_modern_question(self, title, text):
         msg = QtWidgets.QMessageBox(self)
         msg.setWindowTitle(title)
@@ -99,10 +124,8 @@ class IndustrialControlApp(AppUI):
             QPushButton:pressed { background-color: #b71c1c; }
         """)
         msg.exec()
-    # ==========================================
 
     def closeEvent(self, event):
-        # 1. ZASTOSOWANIE NOWOCZESNEGO OKIENKA WYJŚCIA
         reply = self.show_modern_question(
             'Exit Confirmation', 
             'Are you sure you want to exit the application?'
@@ -120,6 +143,11 @@ class IndustrialControlApp(AppUI):
                     self.ser.close()
                 except Exception:
                     pass
+            
+            # Zamykamy plik z logami
+            if hasattr(self, 'log_file') and self.log_file and not self.log_file.closed:
+                self.log_file.close()
+                
             event.accept()
         else:
             event.ignore()
@@ -172,7 +200,6 @@ class IndustrialControlApp(AppUI):
         current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
-        # 2. ZASTOSOWANIE NOWOCZESNEGO OKIENKA ZAPISU
         reply = self.show_modern_question(
             'Save Confirmation', 
             f'Are you sure you want to OVERWRITE settings in {current_prof}?'
@@ -199,7 +226,6 @@ class IndustrialControlApp(AppUI):
         current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
-        # 3. ZASTOSOWANIE NOWOCZESNEGO OKIENKA ODCZYTU
         reply = self.show_modern_question(
             'Load Confirmation', 
             f'Are you sure you want to LOAD {current_prof}?\nCurrent unsaved parameters will be lost.'
@@ -239,6 +265,13 @@ class IndustrialControlApp(AppUI):
         elif "system:" in msg_lower or "connected" in msg_lower or "disconnected" in msg_lower or "recording" in msg_lower:
             color = "#FFCA28"  
             
+        # Zapisujemy niezmodyfikowaną wiadomość do pliku .log
+        try:
+            if hasattr(self, 'log_file') and self.log_file and not self.log_file.closed:
+                self.log_file.write(f"[{time_str}] {msg}\n")
+        except Exception:
+            pass
+            
         safe_msg = html.escape(msg)
         html_line = f'<div style="text-indent: -85px; margin-left: 85px;"><span style="color: #666666;">{time_str} | </span><span style="color: {color};">{safe_msg}</span></div>'
         
@@ -272,7 +305,6 @@ class IndustrialControlApp(AppUI):
     def toggle_connection(self):
         if self.ser and self.ser.is_open:
             
-            # 4. ZASTOSOWANIE NOWOCZESNEGO OKIENKA ROZŁĄCZENIA
             reply = self.show_modern_question(
                 'Disconnect Confirmation', 
                 'Are you sure you want to DISCONNECT from the machine?'
@@ -327,10 +359,9 @@ class IndustrialControlApp(AppUI):
                 
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")
-                self.read_nvs()
+                # usunięto self.read_nvs()
                 
             except Exception as e:
-                # ZASTOSOWANIE NOWOCZESNEGO OKIENKA BŁĘDU
                 self.show_modern_error("Connection Error", str(e))
 
     def send_cmd(self, cmd):
@@ -472,7 +503,6 @@ class IndustrialControlApp(AppUI):
             self.btn_stop_rec.setEnabled(True)
             self.log(f"RECORDING STARTED: {os.path.basename(self.current_full_path)}")
         except Exception as e:
-            # ZASTOSOWANIE NOWOCZESNEGO OKIENKA BŁĘDU
             self.show_modern_error("File Error", str(e))
 
     def stop_recording(self):
@@ -496,6 +526,3 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"glueAcc {self.glue_acc.text() or 0}")
         self.send_cmd(f"calGlue {self.cal_glue.text()}")
         self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
-
-    def read_nvs(self):
-        self.send_cmd("READNVS")
