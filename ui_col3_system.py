@@ -1,3 +1,4 @@
+import os
 from PySide6 import QtWidgets, QtCore, QtGui
 from ui_styles import *
 
@@ -10,12 +11,42 @@ def setup_system_column(ui, parent_layout):
     col3_layout.setContentsMargins(15, 15, 15, 15)
     col3_layout.setSpacing(15)
     
-    ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
+    # =========================================================
+    # NOWY GÓRNY PASEK: LOGO + PRZYCISK EXIT
+    # =========================================================
+    top_bar = QtWidgets.QHBoxLayout()
+    
+    # Etykieta na Logo
+    ui.lbl_logo = QtWidgets.QLabel()
+    
+    # Szukamy pliku logo.png w folderze z aplikacją
+    logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
+    
+    if os.path.exists(logo_path):
+        # 1. Ustawia ikonę aplikacji (pasek zadań Windows i róg okna)
+        ui.setWindowIcon(QtGui.QIcon(logo_path))
+        
+        # 2. Wyświetla logo w interfejsie (skalowane do max 200x80 px z zachowaniem proporcji)
+        pixmap = QtGui.QPixmap(logo_path).scaled(200, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        ui.lbl_logo.setPixmap(pixmap)
+    else:
+        # Tekst zastępczy, jeśli pliku obrazka nie ma w folderze
+        ui.lbl_logo.setText("SHM SYSTEM") 
+        ui.lbl_logo.setStyleSheet("color: #aaaaaa; font-size: 26px; font-weight: bold; background: transparent;")
+    
+    top_bar.addWidget(ui.lbl_logo, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+    top_bar.addStretch() # Rozpycha elementy na lewo i prawo
+    
+    # Przycisk EXIT APP
+    ui.btn_exit = QtWidgets.QPushButton("⏻ EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
     ui.btn_exit.setFixedWidth(200)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
-    col3_layout.addWidget(ui.btn_exit, alignment=QtCore.Qt.AlignRight)
+    top_bar.addWidget(ui.btn_exit, alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+    
+    col3_layout.addLayout(top_bar)
+    # =========================================================
     
     line_col3 = QtWidgets.QFrame()
     line_col3.setFrameShape(QtWidgets.QFrame.HLine)

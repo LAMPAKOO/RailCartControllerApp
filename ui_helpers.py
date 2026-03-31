@@ -9,7 +9,7 @@ class KeyboardEventFilter(QtCore.QObject):
                     sciezka_tabtip = r"C:\Program Files\Common Files\microsoft shared\ink\TabTip.exe"
                     os.startfile(sciezka_tabtip)
                 except Exception as e:
-                    print(f"Nie udało się uruchomić klawiatury: {e}")
+                    print(f"Failed to launch touch keyboard: {e}")
         return super().eventFilter(obj, event)
 
 def add_touch_keyboard(widget):

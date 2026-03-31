@@ -133,7 +133,7 @@ class IndustrialControlApp(AppUI):
         prof["cal_glue"] = self.cal_glue.text()
         
         self.save_config()
-        self.log(f"SYSTEM: Konfiguracja zapisana do slotu {current_prof.replace('Profile ', 'M')}")
+        self.log(f"SYSTEM: Configuration saved to slot {current_prof.replace('Profile ', 'M')}")
 
     def load_profile(self):
         current_prof = self.get_selected_profile()
@@ -152,7 +152,7 @@ class IndustrialControlApp(AppUI):
         self.glue_acc.setText(str(prof.get("glue_acc", 0)))
         self.cal_glue.setText(prof.get("cal_glue", "0.0000"))
         
-        self.log(f"SYSTEM: Wczytano konfigurację ze slotu {current_prof.replace('Profile ', 'M')}")
+        self.log(f"SYSTEM: Configuration loaded from slot {current_prof.replace('Profile ', 'M')}")
 
     def select_save_path(self):
         path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", self.save_path_input.text())
@@ -160,10 +160,12 @@ class IndustrialControlApp(AppUI):
             self.save_path_input.setText(path)
 
     def log(self, msg):
+        import html
         time_str = datetime.now().strftime('%H:%M:%S')
         color = "#e0e0e0"  
         msg_lower = msg.lower()
         
+        # Wyłapywanie angielskich słów kluczowych do kolorowania
         if "error" in msg_lower or "err:" in msg_lower:
             color = "#d32f2f" 
         elif msg.startswith(">>"):
@@ -172,7 +174,9 @@ class IndustrialControlApp(AppUI):
             color = "#FFCA28"  
             
         safe_msg = html.escape(msg)
-        html_line = f'<span style="color: #666666;">{time_str} |</span> <span style="color: {color};">{safe_msg}</span>'
+        
+        # Zastosowanie wiszącego wcięcia (hanging indent) do idealnego wyrównania tekstu
+        html_line = f'<div style="text-indent: -85px; margin-left: 85px;"><span style="color: #666666;">{time_str} | </span><span style="color: {color};">{safe_msg}</span></div>'
         
         self.terminal.appendHtml(html_line)
         self.terminal.moveCursor(QtGui.QTextCursor.End)
