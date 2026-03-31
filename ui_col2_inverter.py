@@ -88,14 +88,14 @@ def setup_inverter_column(ui, parent_layout):
     ui.btn_vfd_fwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_vfd_fwd.setStyleSheet(MOVE_BTN_STYLE)
     ui.btn_vfd_fwd.setEnabled(False)
-    ui.btn_vfd_fwd.clicked.connect(lambda: ui.send_cmd("VFD_FORWARD"))
+    ui.btn_vfd_fwd.clicked.connect(ui.start_vfd_forward)
     
     ui.btn_vfd_bwd = QtWidgets.QPushButton("▼\nDRIVE BACKWARD")
     ui.btn_vfd_bwd.setFixedHeight(140) 
     ui.btn_vfd_bwd.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_vfd_bwd.setStyleSheet(MOVE_BTN_STYLE)
     ui.btn_vfd_bwd.setEnabled(False)
-    ui.btn_vfd_bwd.clicked.connect(lambda: ui.send_cmd("VFD_REVERSE"))
+    ui.btn_vfd_bwd.clicked.connect(ui.start_vfd_reverse)
     
     vfd_move_layout.addWidget(ui.btn_vfd_fwd, 1)
     vfd_move_layout.addWidget(ui.btn_vfd_bwd, 1)
