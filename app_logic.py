@@ -11,7 +11,7 @@ from collections import deque
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from ui_layout import AppUI
-from ui_styles import * # <--- IMPORT NOWYCH LIMITÓW
+from ui_styles import * 
 
 class IndustrialControlApp(AppUI):
     def __init__(self):
@@ -57,20 +57,72 @@ class IndustrialControlApp(AppUI):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
 
+   # ==========================================
+    # NOWOCZESNE OKIENKA WERYFIKACYJNE I BŁĘDÓW
+    # ==========================================
+    def show_modern_question(self, title, text):
+        msg = QtWidgets.QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(QtWidgets.QMessageBox.Question)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        msg.setDefaultButton(QtWidgets.QMessageBox.No)
+        
+        msg.setStyleSheet("""
+            QMessageBox { background-color: #2b2b2b; }
+            QLabel { color: #ffffff; font-size: 20px; font-weight: bold; font-family: 'Segoe UI'; margin-right: 20px; margin-bottom: 5px; }
+            QPushButton { 
+                background-color: #444444; color: white; font-size: 18px; 
+                font-weight: bold; border-radius: 6px; padding: 10px 25px; 
+                min-width: 100px; margin: 10px 5px; 
+            }
+            QPushButton:hover { background-color: #2196F3; }
+            QPushButton:pressed { background-color: #1976D2; }
+        """)
+        return msg.exec()
+
+    def show_modern_error(self, title, text):
+        msg = QtWidgets.QMessageBox(self)
+        msg.setWindowTitle(title)
+        msg.setText(text)
+        msg.setIcon(QtWidgets.QMessageBox.Critical)
+        
+        msg.setStyleSheet("""
+            QMessageBox { background-color: #2b2b2b; }
+            QLabel { color: #ff5252; font-size: 20px; font-weight: bold; font-family: 'Segoe UI'; margin-right: 20px; margin-bottom: 5px; }
+            QPushButton { 
+                background-color: #444444; color: white; font-size: 18px; 
+                font-weight: bold; border-radius: 6px; padding: 10px 25px; 
+                min-width: 100px; margin: 10px 5px; 
+            }
+            QPushButton:hover { background-color: #d32f2f; }
+            QPushButton:pressed { background-color: #b71c1c; }
+        """)
+        msg.exec()
+    # ==========================================
+
     def closeEvent(self, event):
-        if self.is_recording:
-            self.stop_recording()
-            
-        if self.ser and self.ser.is_open:
-            try:
-                self.send_cmd("STOP")
-                self.send_cmd("VFD_STOP")
-                time.sleep(0.1) 
-                self.ser.close()
-            except Exception:
-                pass
+        # 1. ZASTOSOWANIE NOWOCZESNEGO OKIENKA WYJŚCIA
+        reply = self.show_modern_question(
+            'Exit Confirmation', 
+            'Are you sure you want to exit the application?'
+        )
+        
+        if reply == QtWidgets.QMessageBox.Yes:
+            if self.is_recording:
+                self.stop_recording()
                 
-        event.accept()
+            if self.ser and self.ser.is_open:
+                try:
+                    self.send_cmd("STOP")
+                    self.send_cmd("VFD_STOP")
+                    time.sleep(0.1) 
+                    self.ser.close()
+                except Exception:
+                    pass
+            event.accept()
+        else:
+            event.ignore()
 
     def init_config(self):
         if os.path.exists(self.config_file):
@@ -120,6 +172,14 @@ class IndustrialControlApp(AppUI):
         current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
+        # 2. ZASTOSOWANIE NOWOCZESNEGO OKIENKA ZAPISU
+        reply = self.show_modern_question(
+            'Save Confirmation', 
+            f'Are you sure you want to OVERWRITE settings in {current_prof}?'
+        )
+        if reply == QtWidgets.QMessageBox.No:
+            return
+            
         prof = self.config_data["profiles"][current_prof]
         
         prof["filename"] = self.filename_input.text()
@@ -139,6 +199,14 @@ class IndustrialControlApp(AppUI):
         current_prof = self.get_selected_profile()
         if current_prof not in self.config_data["profiles"]: return
         
+        # 3. ZASTOSOWANIE NOWOCZESNEGO OKIENKA ODCZYTU
+        reply = self.show_modern_question(
+            'Load Confirmation', 
+            f'Are you sure you want to LOAD {current_prof}?\nCurrent unsaved parameters will be lost.'
+        )
+        if reply == QtWidgets.QMessageBox.No:
+            return
+            
         prof = self.config_data["profiles"][current_prof]
         
         self.filename_input.setText(prof.get("filename", "motor_test"))
@@ -203,6 +271,15 @@ class IndustrialControlApp(AppUI):
 
     def toggle_connection(self):
         if self.ser and self.ser.is_open:
+            
+            # 4. ZASTOSOWANIE NOWOCZESNEGO OKIENKA ROZŁĄCZENIA
+            reply = self.show_modern_question(
+                'Disconnect Confirmation', 
+                'Are you sure you want to DISCONNECT from the machine?'
+            )
+            if reply == QtWidgets.QMessageBox.No:
+                return
+
             if self.is_recording:
                 self.stop_recording()
                 
@@ -253,7 +330,8 @@ class IndustrialControlApp(AppUI):
                 self.read_nvs()
                 
             except Exception as e:
-                QtWidgets.QMessageBox.critical(self, "Error", str(e))
+                # ZASTOSOWANIE NOWOCZESNEGO OKIENKA BŁĘDU
+                self.show_modern_error("Connection Error", str(e))
 
     def send_cmd(self, cmd):
         if self.ser and self.ser.is_open:
@@ -261,7 +339,6 @@ class IndustrialControlApp(AppUI):
             self.log(f">> {cmd}")
 
     def adjust_value(self, edit, cmd, delta):
-        # UŻYCIE GLOBALNYCH LIMITÓW
         current_val = int(edit.text() or 0)
         new_val = current_val + delta
         
@@ -395,7 +472,8 @@ class IndustrialControlApp(AppUI):
             self.btn_stop_rec.setEnabled(True)
             self.log(f"RECORDING STARTED: {os.path.basename(self.current_full_path)}")
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "File Error", str(e))
+            # ZASTOSOWANIE NOWOCZESNEGO OKIENKA BŁĘDU
+            self.show_modern_error("File Error", str(e))
 
     def stop_recording(self):
         if not self.is_recording: return

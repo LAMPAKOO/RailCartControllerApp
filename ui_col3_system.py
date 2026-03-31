@@ -15,17 +15,13 @@ def setup_system_column(ui, parent_layout):
     # GÓRNY PASEK: BIAŁE LOGO (ROZCIĄGNIĘTE) + PRZYCISK EXIT
     # =========================================================
     top_bar = QtWidgets.QHBoxLayout()
-    top_bar.setSpacing(15) # Odstęp między białym paskiem a przyciskiem EXIT
+    top_bar.setSpacing(15)
     
-    # --- Biały kontener na logo ---
     ui.logo_container_widget = QtWidgets.QFrame()
     ui.logo_container_widget.setStyleSheet("background-color: white; border-radius: 8px; border: none;")
     ui.logo_container_widget.setFixedHeight(80) 
     
-    # Wewnętrzny układ dla białej ramki
     logo_internal_layout = QtWidgets.QHBoxLayout(ui.logo_container_widget)
-    
-    # ZMIANA 1: Marginesy pionowe na 0, zostawiamy tylko delikatny margines po bokach (10px)
     logo_internal_layout.setContentsMargins(10, 0, 10, 0) 
     logo_internal_layout.setAlignment(QtCore.Qt.AlignCenter) 
     
@@ -34,9 +30,6 @@ def setup_system_column(ui, parent_layout):
     
     if os.path.exists(logo_path):
         ui.setWindowIcon(QtGui.QIcon(logo_path))
-        
-        # ZMIANA 2: Pozwalamy logo rozrosnąć się do 800px na szerokość i idealnie 80px na wysokość.
-        # Dzięki "KeepAspectRatio" zachowa proporcje, ale maksymalnie wypełni ramkę w pionie.
         pixmap = QtGui.QPixmap(logo_path).scaled(
             800, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
         )
@@ -47,20 +40,15 @@ def setup_system_column(ui, parent_layout):
         ui.lbl_logo.setStyleSheet("color: black; font-size: 26px; font-weight: bold; background: transparent;")
     
     logo_internal_layout.addWidget(ui.lbl_logo)
-    
-    # DODAJEMY BIAŁY KONTENER Z PARAMETREM STRETCH = 1 (Wypełnia wolne miejsce)
     top_bar.addWidget(ui.logo_container_widget, 1)
     
-    # Przycisk EXIT APP (usunięto ikonkę z tekstu)
     ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
     ui.btn_exit.setFixedWidth(200)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
     
-    # DODAJEMY PRZYCISK EXIT Z PARAMETREM STRETCH = 0 (Zachowuje swój sztywny rozmiar)
     top_bar.addWidget(ui.btn_exit, 0)
-    
     col3_layout.addLayout(top_bar)
     # =========================================================
     
@@ -85,10 +73,11 @@ def setup_system_column(ui, parent_layout):
     ui.btn_m3 = QtWidgets.QPushButton("M3")
     ui.btn_m4 = QtWidgets.QPushButton("M4")
     
+    # 2x WIĘKSZE PRZYCISKI PAMIĘCI
     for i, btn in enumerate([ui.btn_m1, ui.btn_m2, ui.btn_m3, ui.btn_m4]):
         btn.setCheckable(True)
-        btn.setFixedHeight(50)
-        btn.setStyleSheet(MEM_BTN_STYLE)
+        btn.setFixedHeight(100) # Było 50
+        btn.setStyleSheet(MEM_BTN_STYLE.replace("font-size: 20px;", "font-size: 32px;")) # Większa czcionka
         ui.mem_group.addButton(btn, i + 1)
         m_layout.addWidget(btn)
         
@@ -97,14 +86,16 @@ def setup_system_column(ui, parent_layout):
     
     action_layout = QtWidgets.QHBoxLayout()
     
+    # 2x WIĘKSZY PRZYCISK SAVE
     ui.btn_save_prof = QtWidgets.QPushButton("SAVE TO SELECTED")
-    ui.btn_save_prof.setFixedHeight(50)
-    ui.btn_save_prof.setStyleSheet(REC_BTN_STYLE) 
+    ui.btn_save_prof.setFixedHeight(100) # Było 50
+    ui.btn_save_prof.setStyleSheet(REC_BTN_STYLE.replace("font-size: 18px;", "font-size: 22px;")) 
     ui.btn_save_prof.clicked.connect(ui.save_profile)
     
+    # 2x WIĘKSZY PRZYCISK LOAD
     ui.btn_load_prof = QtWidgets.QPushButton("LOAD SELECTED")
-    ui.btn_load_prof.setFixedHeight(50)
-    ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE)
+    ui.btn_load_prof.setFixedHeight(100) # Było 50
+    ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE.replace("font-size: 18px;", "font-size: 22px;"))
     ui.btn_load_prof.setEnabled(False)
     ui.btn_load_prof.clicked.connect(ui.load_profile)
     
