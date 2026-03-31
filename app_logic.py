@@ -11,6 +11,7 @@ from collections import deque
 from PySide6 import QtWidgets, QtCore, QtGui
 
 from ui_layout import AppUI
+from ui_styles import * # <--- IMPORT NOWYCH LIMITÓW
 
 class IndustrialControlApp(AppUI):
     def __init__(self):
@@ -123,7 +124,6 @@ class IndustrialControlApp(AppUI):
         
         prof["filename"] = self.filename_input.text()
         prof["save_dir"] = self.save_path_input.text()
-        # Wyciągamy wartości tekstowe (lub int) z QLineEdit
         prof["speed_inc"] = int(self.speed_inc.text() or 0)
         prof["fwd_speed"] = int(self.fwd_speed.text() or 0)
         prof["bwd_speed"] = int(self.bwd_speed.text() or 0)
@@ -160,12 +160,10 @@ class IndustrialControlApp(AppUI):
             self.save_path_input.setText(path)
 
     def log(self, msg):
-        import html
         time_str = datetime.now().strftime('%H:%M:%S')
         color = "#e0e0e0"  
         msg_lower = msg.lower()
         
-        # Wyłapywanie angielskich słów kluczowych do kolorowania
         if "error" in msg_lower or "err:" in msg_lower:
             color = "#d32f2f" 
         elif msg.startswith(">>"):
@@ -174,8 +172,6 @@ class IndustrialControlApp(AppUI):
             color = "#FFCA28"  
             
         safe_msg = html.escape(msg)
-        
-        # Zastosowanie wiszącego wcięcia (hanging indent) do idealnego wyrównania tekstu
         html_line = f'<div style="text-indent: -85px; margin-left: 85px;"><span style="color: #666666;">{time_str} | </span><span style="color: {color};">{safe_msg}</span></div>'
         
         self.terminal.appendHtml(html_line)
@@ -265,11 +261,14 @@ class IndustrialControlApp(AppUI):
             self.log(f">> {cmd}")
 
     def adjust_value(self, edit, cmd, delta):
-        # Pobieranie wartości tekstowej QLineEdit i zwiększanie
+        # UŻYCIE GLOBALNYCH LIMITÓW
         current_val = int(edit.text() or 0)
-        new_val = max(0, current_val + delta)
+        new_val = current_val + delta
+        
         if cmd == "HZ":
-            new_val = min(300, new_val)
+            new_val = max(MIN_VFD_FREQ, min(MAX_VFD_FREQ, new_val))
+        else:
+            new_val = max(MIN_SPEED, min(MAX_SPEED, new_val))
             
         edit.setText(str(new_val))
         self.send_cmd(f"{cmd} {new_val}")

@@ -32,7 +32,7 @@ def setup_motor_column(ui, parent_layout):
     h_spd.addStretch()
     
     h_rpm = QtWidgets.QHBoxLayout()
-    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/h]: ")
+    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/min]: ")
     lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     ui.lbl_rpm = QtWidgets.QLabel("0.00")
     ui.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -82,23 +82,25 @@ def setup_motor_column(ui, parent_layout):
     lbl_inc.setFixedWidth(160) 
     lbl_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
-    ui.speed_inc = QtWidgets.QLineEdit("50")
+    ui.speed_inc = QtWidgets.QLineEdit(str(MIN_SPEED_INC))
     ui.speed_inc.setFixedSize(140, 70) 
     ui.speed_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.speed_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.speed_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    ui.speed_inc.setValidator(QtGui.QIntValidator(1, 1000))
+    
+    # UŻYCIE GLOBALNEGO LIMITU
+    ui.speed_inc.setValidator(QtGui.QIntValidator(MIN_SPEED_INC, MAX_SPEED_INC))
     add_touch_keyboard(ui.speed_inc)
     
     btn_inc_minus = QtWidgets.QPushButton("-")
     btn_inc_minus.setFixedSize(70, 70) 
     btn_inc_minus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
-    btn_inc_minus.clicked.connect(lambda: ui.speed_inc.setText(str(max(1, int(ui.speed_inc.text() or 0) - 10))))
+    btn_inc_minus.clicked.connect(lambda: ui.speed_inc.setText(str(max(MIN_SPEED_INC, int(ui.speed_inc.text() or 0) - 10))))
     
     btn_inc_plus = QtWidgets.QPushButton("+")
     btn_inc_plus.setFixedSize(70, 70) 
     btn_inc_plus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
-    btn_inc_plus.clicked.connect(lambda: ui.speed_inc.setText(str(min(1000, int(ui.speed_inc.text() or 0) + 10))))
+    btn_inc_plus.clicked.connect(lambda: ui.speed_inc.setText(str(min(MAX_SPEED_INC, int(ui.speed_inc.text() or 0) + 10))))
     
     inc_layout.addWidget(lbl_inc)
     inc_layout.addWidget(btn_inc_minus)
@@ -133,7 +135,6 @@ def setup_motor_column(ui, parent_layout):
     move_layout.addWidget(ui.btn_glue_bwd, 1)
     basic_layout.addLayout(move_layout)
     
-    # KILKUKROTNIE POWIĘKSZONY PRZYCISK STOP
     ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
     ui.btn_motor_stop.setFixedHeight(140)
     ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE)
@@ -158,7 +159,9 @@ def setup_motor_column(ui, parent_layout):
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    ui.glue_acc.setValidator(QtGui.QIntValidator(0, 1000000))
+    
+    # UŻYCIE GLOBALNEGO LIMITU
+    ui.glue_acc.setValidator(QtGui.QIntValidator(MIN_GLUE_ACC, MAX_GLUE_ACC))
     add_touch_keyboard(ui.glue_acc) 
     
     acc_layout.addWidget(lbl_acc)

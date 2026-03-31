@@ -48,23 +48,25 @@ def setup_inverter_column(ui, parent_layout):
     lbl_vfd_inc.setFixedWidth(160) 
     lbl_vfd_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
-    ui.vfd_inc = QtWidgets.QLineEdit("5")
+    ui.vfd_inc = QtWidgets.QLineEdit(str(MIN_VFD_INC))
     ui.vfd_inc.setFixedSize(140, 70) 
     ui.vfd_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.vfd_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.vfd_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    ui.vfd_inc.setValidator(QtGui.QIntValidator(1, 100))
+    
+    # UŻYCIE GLOBALNEGO LIMITU
+    ui.vfd_inc.setValidator(QtGui.QIntValidator(MIN_VFD_INC, MAX_VFD_INC))
     add_touch_keyboard(ui.vfd_inc)
     
     btn_vfd_inc_minus = QtWidgets.QPushButton("-")
     btn_vfd_inc_minus.setFixedSize(70, 70) 
     btn_vfd_inc_minus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
-    btn_vfd_inc_minus.clicked.connect(lambda: ui.vfd_inc.setText(str(max(1, int(ui.vfd_inc.text() or 0) - 1))))
+    btn_vfd_inc_minus.clicked.connect(lambda: ui.vfd_inc.setText(str(max(MIN_VFD_INC, int(ui.vfd_inc.text() or 0) - 1))))
     
     btn_vfd_inc_plus = QtWidgets.QPushButton("+")
     btn_vfd_inc_plus.setFixedSize(70, 70) 
     btn_vfd_inc_plus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
-    btn_vfd_inc_plus.clicked.connect(lambda: ui.vfd_inc.setText(str(min(100, int(ui.vfd_inc.text() or 0) + 1))))
+    btn_vfd_inc_plus.clicked.connect(lambda: ui.vfd_inc.setText(str(min(MAX_VFD_INC, int(ui.vfd_inc.text() or 0) + 1))))
     
     vfd_inc_layout.addWidget(lbl_vfd_inc)
     vfd_inc_layout.addWidget(btn_vfd_inc_minus)
@@ -101,7 +103,6 @@ def setup_inverter_column(ui, parent_layout):
     
     col2_layout.addWidget(vfd_container)
     
-    # KILKUKROTNIE POWIĘKSZONY PRZYCISK STOP
     ui.btn_vfd_stop = QtWidgets.QPushButton("STOP INVERTER")
     ui.btn_vfd_stop.setFixedHeight(140)
     ui.btn_vfd_stop.setStyleSheet(STOP_BTN_STYLE)

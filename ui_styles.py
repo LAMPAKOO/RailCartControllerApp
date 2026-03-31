@@ -63,3 +63,21 @@ MEM_BTN_STYLE = """
     QPushButton:checked { background-color: #FF9800; color: white; }
     QPushButton:hover:!checked { background-color: #444444; }
 """
+
+# ==========================================
+# GLOBALNE LIMITY PÓL WPISOWYCH (MIN / MAX)
+# ==========================================
+MIN_SPEED = 0
+MAX_SPEED = 2000
+
+MIN_SPEED_INC = 1
+MAX_SPEED_INC = 1000
+
+MIN_VFD_FREQ = 0
+MAX_VFD_FREQ = 115
+
+MIN_VFD_INC = 1
+MAX_VFD_INC = 50
+
+MIN_GLUE_ACC = 0
+MAX_GLUE_ACC = 1000000

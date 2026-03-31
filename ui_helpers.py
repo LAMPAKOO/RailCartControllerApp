@@ -1,5 +1,6 @@
 import os
 from PySide6 import QtWidgets, QtCore, QtGui
+from ui_styles import *
 
 class KeyboardEventFilter(QtCore.QObject):
     def eventFilter(self, obj, event):
@@ -32,7 +33,9 @@ def create_step_control(ui, layout, label, cmd_name):
     edit.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     edit.setAlignment(QtCore.Qt.AlignCenter)
     edit.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    edit.setValidator(QtGui.QIntValidator(0, 2000))
+    
+    # UŻYCIE GLOBALNEGO LIMITU
+    edit.setValidator(QtGui.QIntValidator(MIN_SPEED, MAX_SPEED))
     add_touch_keyboard(edit)
     
     btn_minus = QtWidgets.QPushButton("-")
@@ -66,7 +69,9 @@ def create_vfd_step_control(ui, layout, label, cmd_name):
     edit.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     edit.setAlignment(QtCore.Qt.AlignCenter)
     edit.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    edit.setValidator(QtGui.QIntValidator(0, 100))
+    
+    # UŻYCIE GLOBALNEGO LIMITU
+    edit.setValidator(QtGui.QIntValidator(MIN_VFD_FREQ, MAX_VFD_FREQ))
     add_touch_keyboard(edit)
     
     btn_minus = QtWidgets.QPushButton("-")
