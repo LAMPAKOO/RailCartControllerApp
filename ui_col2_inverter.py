@@ -221,4 +221,5 @@ def setup_inverter_column(ui, parent_layout):
     col2_layout.addLayout(rec_h)
     
     col2_layout.addStretch() 
+    col2.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
     parent_layout.addWidget(col2, 1)

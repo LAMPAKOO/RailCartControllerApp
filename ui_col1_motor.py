@@ -207,4 +207,5 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs.addTab(tab_adv, "Settings")
     col1_layout.addWidget(ui.tabs)
 
+    col1.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
     parent_layout.addWidget(col1, 1)

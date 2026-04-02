@@ -36,7 +36,7 @@ def setup_system_column(ui, parent_layout):
         ui.lbl_logo.setPixmap(pixmap)
         ui.lbl_logo.setStyleSheet("background: transparent;")
     else:
-        ui.lbl_logo.setText("⚙️ SHM SYSTEM") 
+        ui.lbl_logo.setText("SHM SYSTEM") 
         ui.lbl_logo.setStyleSheet("color: black; font-size: 26px; font-weight: bold; background: transparent;")
     
     logo_internal_layout.addWidget(ui.lbl_logo)
@@ -44,7 +44,7 @@ def setup_system_column(ui, parent_layout):
     
     ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
-    ui.btn_exit.setFixedWidth(200)
+    ui.btn_exit.setFixedWidth(150)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
     
@@ -159,4 +159,5 @@ def setup_system_column(ui, parent_layout):
     ui.terminal.setStyleSheet("background-color: #171717; color: #e0e0e0; font-family: 'Consolas'; font-size: 12pt; border: 1px solid #333; border-radius: 5px;")
     col3_layout.addWidget(ui.terminal, 1)
 
+    col3.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
     parent_layout.addWidget(col3, 1)
