@@ -2,6 +2,29 @@ import os
 from PySide6 import QtWidgets, QtCore, QtGui
 from ui_styles import *
 
+# =========================================================
+# NOWA KLASA: Płynnie skalujące się logo
+# =========================================================
+class ResizableLogo(QtWidgets.QLabel):
+    def __init__(self, image_path):
+        super().__init__()
+        self.original_pixmap = QtGui.QPixmap(image_path)
+        # Pozwalamy etykiecie skurczyć się niemal do zera, żeby nie blokowała kolumn
+        self.setMinimumSize(10, 10) 
+        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.setAlignment(QtCore.Qt.AlignCenter)
+        self.setStyleSheet("background: transparent;")
+
+    def resizeEvent(self, event):
+        # Za każdym razem, gdy kolumna zmienia rozmiar, na nowo dopasowujemy obrazek
+        if not self.original_pixmap.isNull():
+            scaled_pixmap = self.original_pixmap.scaled(
+                self.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+            )
+            self.setPixmap(scaled_pixmap)
+        super().resizeEvent(event)
+# =========================================================
+
 def setup_system_column(ui, parent_layout):
     col3 = QtWidgets.QFrame()
     col3.setObjectName("MainPanel")
@@ -12,7 +35,7 @@ def setup_system_column(ui, parent_layout):
     col3_layout.setSpacing(15)
     
     # =========================================================
-    # GÓRNY PASEK: BIAŁE LOGO (ROZCIĄGNIĘTE) + PRZYCISK EXIT
+    # GÓRNY PASEK: BIAŁE LOGO + PRZYCISK EXIT
     # =========================================================
     top_bar = QtWidgets.QHBoxLayout()
     top_bar.setSpacing(15)
@@ -22,22 +45,19 @@ def setup_system_column(ui, parent_layout):
     ui.logo_container_widget.setFixedHeight(80) 
     
     logo_internal_layout = QtWidgets.QHBoxLayout(ui.logo_container_widget)
-    logo_internal_layout.setContentsMargins(10, 0, 10, 0) 
+    logo_internal_layout.setContentsMargins(10, 5, 10, 5) 
     logo_internal_layout.setAlignment(QtCore.Qt.AlignCenter) 
     
-    ui.lbl_logo = QtWidgets.QLabel()
     logo_path = os.path.join(os.path.dirname(__file__), "logo.png")
     
     if os.path.exists(logo_path):
         ui.setWindowIcon(QtGui.QIcon(logo_path))
-        pixmap = QtGui.QPixmap(logo_path).scaled(
-            800, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
-        )
-        ui.lbl_logo.setPixmap(pixmap)
-        ui.lbl_logo.setStyleSheet("background: transparent;")
+        # Używamy naszej nowej, elastycznej klasy!
+        ui.lbl_logo = ResizableLogo(logo_path)
     else:
-        ui.lbl_logo.setText("SHM SYSTEM") 
+        ui.lbl_logo = QtWidgets.QLabel("SHM SYSTEM") 
         ui.lbl_logo.setStyleSheet("color: black; font-size: 26px; font-weight: bold; background: transparent;")
+        ui.lbl_logo.setAlignment(QtCore.Qt.AlignCenter)
     
     logo_internal_layout.addWidget(ui.lbl_logo)
     top_bar.addWidget(ui.logo_container_widget, 1)
@@ -73,11 +93,10 @@ def setup_system_column(ui, parent_layout):
     ui.btn_m3 = QtWidgets.QPushButton("M3")
     ui.btn_m4 = QtWidgets.QPushButton("M4")
     
-    # 2x WIĘKSZE PRZYCISKI PAMIĘCI
     for i, btn in enumerate([ui.btn_m1, ui.btn_m2, ui.btn_m3, ui.btn_m4]):
         btn.setCheckable(True)
-        btn.setFixedHeight(100) # Było 50
-        btn.setStyleSheet(MEM_BTN_STYLE.replace("font-size: 20px;", "font-size: 32px;")) # Większa czcionka
+        btn.setFixedHeight(100) 
+        btn.setStyleSheet(MEM_BTN_STYLE.replace("font-size: 20px;", "font-size: 32px;")) 
         ui.mem_group.addButton(btn, i + 1)
         m_layout.addWidget(btn)
         
@@ -86,15 +105,13 @@ def setup_system_column(ui, parent_layout):
     
     action_layout = QtWidgets.QHBoxLayout()
     
-    # 2x WIĘKSZY PRZYCISK SAVE
     ui.btn_save_prof = QtWidgets.QPushButton("SAVE TO SELECTED")
-    ui.btn_save_prof.setFixedHeight(100) # Było 50
+    ui.btn_save_prof.setFixedHeight(100) 
     ui.btn_save_prof.setStyleSheet(REC_BTN_STYLE.replace("font-size: 18px;", "font-size: 22px;")) 
     ui.btn_save_prof.clicked.connect(ui.save_profile)
     
-    # 2x WIĘKSZY PRZYCISK LOAD
     ui.btn_load_prof = QtWidgets.QPushButton("LOAD SELECTED")
-    ui.btn_load_prof.setFixedHeight(100) # Było 50
+    ui.btn_load_prof.setFixedHeight(100) 
     ui.btn_load_prof.setStyleSheet(REC_BTN_STYLE.replace("font-size: 18px;", "font-size: 22px;"))
     ui.btn_load_prof.setEnabled(False)
     ui.btn_load_prof.clicked.connect(ui.load_profile)
@@ -159,5 +176,6 @@ def setup_system_column(ui, parent_layout):
     ui.terminal.setStyleSheet("background-color: #171717; color: #e0e0e0; font-family: 'Consolas'; font-size: 12pt; border: 1px solid #333; border-radius: 5px;")
     col3_layout.addWidget(ui.terminal, 1)
 
+    # Bezpośrednie wymuszenie sztywnego podziału kolumn 1:1:1
     col3.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
     parent_layout.addWidget(col3, 1)
