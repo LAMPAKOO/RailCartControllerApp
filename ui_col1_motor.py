@@ -73,6 +73,9 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
     
+    # ==========================================
+    # ZAKŁADKA 1: BASIC CONTROL
+    # ==========================================
     tab_basic = QtWidgets.QWidget()
     basic_layout = QtWidgets.QVBoxLayout(tab_basic)
     basic_layout.setContentsMargins(15, 15, 15, 15)
@@ -132,16 +135,102 @@ def setup_motor_column(ui, parent_layout):
     move_layout.addWidget(ui.btn_glue_fwd, 1)
     move_layout.addWidget(ui.btn_glue_bwd, 1)
     basic_layout.addLayout(move_layout)
-    
-    ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
-    ui.btn_motor_stop.setFixedHeight(140)
-    ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE)
-    ui.btn_motor_stop.setEnabled(False)
-    ui.btn_motor_stop.clicked.connect(ui.stop_motor) 
-    basic_layout.addWidget(ui.btn_motor_stop)
-    
     basic_layout.addStretch()
     
+    # ==========================================
+    # ZAKŁADKA 2: AUTO SETTINGS 
+    # ==========================================
+    tab_auto = QtWidgets.QWidget()
+    auto_layout = QtWidgets.QVBoxLayout(tab_auto)
+    auto_layout.setContentsMargins(15, 20, 15, 15)
+    auto_layout.setSpacing(15)
+    
+    # 1. Pole Auto Calib Value
+    auto_cal_layout = QtWidgets.QHBoxLayout()
+    lbl_auto_cal = QtWidgets.QLabel("Auto Calib Value:")
+    lbl_auto_cal.setFixedWidth(180)
+    lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    
+    ui.auto_cal_val = QtWidgets.QLineEdit("0.0000")
+    ui.auto_cal_val.setFixedSize(220, 70)
+    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter) 
+    ui.auto_cal_val.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    add_touch_keyboard(ui.auto_cal_val)
+    
+    auto_cal_layout.addWidget(lbl_auto_cal)
+    auto_cal_layout.addWidget(ui.auto_cal_val)
+    auto_cal_layout.addStretch()
+    
+    # 2. Przyciski CALCULATE i LOAD
+    btn_auto_layout = QtWidgets.QHBoxLayout()
+    
+    ui.btn_calc_auto = QtWidgets.QPushButton("CALCULATE")
+    ui.btn_calc_auto.setFixedHeight(60)
+    ui.btn_calc_auto.setStyleSheet("""
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
+        QPushButton:hover { background-color: #FFB74D; }
+        QPushButton:pressed { background-color: #F57C00; }
+    """)
+    
+    ui.btn_load_auto = QtWidgets.QPushButton("LOAD TO GLUE CALIB")
+    ui.btn_load_auto.setFixedHeight(60)
+    ui.btn_load_auto.setStyleSheet("""
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
+        QPushButton:hover { background-color: #42A5F5; }
+        QPushButton:pressed { background-color: #1E88E5; }
+    """)
+    
+    btn_auto_layout.addWidget(ui.btn_calc_auto)
+    btn_auto_layout.addWidget(ui.btn_load_auto)
+    
+    # 3. Pole Glue Calibration
+    cal_layout = QtWidgets.QHBoxLayout()
+    lbl_cal = QtWidgets.QLabel("Glue Calibration:")
+    lbl_cal.setFixedWidth(180)
+    lbl_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    
+    ui.cal_glue = QtWidgets.QLineEdit("0.0000")
+    ui.cal_glue.setFixedSize(220, 70)
+    ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
+    ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
+    ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
+    add_touch_keyboard(ui.cal_glue)
+    
+    cal_layout.addWidget(lbl_cal)
+    cal_layout.addWidget(ui.cal_glue)
+    cal_layout.addStretch()
+    
+    auto_layout.addLayout(auto_cal_layout)
+    auto_layout.addLayout(btn_auto_layout)
+    auto_layout.addSpacing(15)
+    auto_layout.addLayout(cal_layout)
+    auto_layout.addStretch()
+
+    # LOGIKA PRZYCISKÓW W ZAKŁADCE AUTO
+    def calculate_auto_cal():
+        try:
+            rpm = float(ui.lbl_rpm.text())
+            speed = float(ui.lbl_speed.text())
+            if speed != 0:
+                val = rpm / speed
+                ui.auto_cal_val.setText(f"{val:.4f}")
+            else:
+                ui.auto_cal_val.setText("0.0000")
+        except ValueError:
+            pass
+
+    def load_auto_cal():
+        ui.cal_glue.setText(ui.auto_cal_val.text())
+
+    ui.btn_calc_auto.clicked.connect(calculate_auto_cal)
+    ui.btn_load_auto.clicked.connect(load_auto_cal)
+
+    # ==========================================
+    # ZAKŁADKA 3: SETTINGS
+    # ==========================================
     tab_adv = QtWidgets.QWidget()
     adv_layout = QtWidgets.QVBoxLayout(tab_adv)
     adv_layout.setContentsMargins(15, 20, 15, 15)
@@ -164,33 +253,25 @@ def setup_motor_column(ui, parent_layout):
     acc_layout.addWidget(ui.glue_acc)
     acc_layout.addStretch()
     
-    cal_layout = QtWidgets.QHBoxLayout()
-    lbl_cal = QtWidgets.QLabel("Glue Calibration:")
-    lbl_cal.setFixedWidth(180)
-    lbl_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
-    
-    ui.cal_glue = QtWidgets.QLineEdit("0.0000")
-    ui.cal_glue.setFixedSize(220, 70)
-    ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
-    ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
-    ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
-    add_touch_keyboard(ui.cal_glue)
-    
-    cal_layout.addWidget(lbl_cal)
-    cal_layout.addWidget(ui.cal_glue)
-    cal_layout.addStretch()
-    
     adv_layout.addLayout(acc_layout)
-    adv_layout.addLayout(cal_layout)
-    
-    # Przycisk Apply All został usunięty stąd
+    adv_layout.addSpacing(80) 
     adv_layout.addStretch()
     
+    # --- Dodanie zakładek we właściwej kolejności ---
     ui.tabs.addTab(tab_basic, "Basic Control")
+    ui.tabs.addTab(tab_auto, "Auto Settings")
     ui.tabs.addTab(tab_adv, "Settings")
     col1_layout.addWidget(ui.tabs)
+
+    # ==========================================
+    # POZA ZAKŁADKAMI: PRZYCISK STOP MOTOR
+    # ==========================================
+    ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
+    ui.btn_motor_stop.setFixedHeight(140)
+    ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE)
+    ui.btn_motor_stop.setEnabled(False)
+    ui.btn_motor_stop.clicked.connect(ui.stop_motor) 
+    col1_layout.addWidget(ui.btn_motor_stop)
 
     col1.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
     parent_layout.addWidget(col1, 1)
