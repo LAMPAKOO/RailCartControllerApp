@@ -73,12 +73,17 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
     
-    # Wspólny styl dla małych przycisków APPLY
+    # Wspólny styl dla małych przycisków
     small_apply_style = """
         QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
         QPushButton:hover { background-color: #66BB6A; }
         QPushButton:pressed { background-color: #388E3C; }
         QPushButton:disabled { background-color: #333333; color: #666666; }
+    """
+    perc_btn_style = """
+        QPushButton { background-color: #444444; color: white; font-weight: bold; border-radius: 5px; }
+        QPushButton:hover { background-color: #555555; }
+        QPushButton:pressed { background-color: #2196F3; }
     """
     
     # ==========================================
@@ -153,7 +158,7 @@ def setup_motor_column(ui, parent_layout):
     auto_layout.setContentsMargins(15, 20, 15, 15)
     auto_layout.setSpacing(15)
     
-    # 1. Pole Auto Calib Value (ZABLOKOWANE DO EDYCJI)
+    # 1. Pole Auto Calib Value (Zablokowane do edycji)
     auto_cal_layout = QtWidgets.QHBoxLayout()
     lbl_auto_cal = QtWidgets.QLabel("Auto Calib Value:")
     lbl_auto_cal.setFixedWidth(180)
@@ -163,15 +168,14 @@ def setup_motor_column(ui, parent_layout):
     ui.auto_cal_val.setFixedSize(220, 70)
     ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
-    ui.auto_cal_val.setReadOnly(True) # Odczyt tylko
-    # Pociemniający styl dla pola read-only
+    ui.auto_cal_val.setReadOnly(True) 
     ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
     
     auto_cal_layout.addWidget(lbl_auto_cal)
     auto_cal_layout.addWidget(ui.auto_cal_val)
     auto_cal_layout.addStretch()
     
-    # 2. Przyciski CALCULATE i LOAD
+    # 2. Przyciski CALCULATE i LOAD & APPLY
     btn_auto_layout = QtWidgets.QHBoxLayout()
     
     ui.btn_calc_auto = QtWidgets.QPushButton("CALCULATE")
@@ -182,7 +186,7 @@ def setup_motor_column(ui, parent_layout):
         QPushButton:pressed { background-color: #F57C00; }
     """)
     
-    ui.btn_load_auto = QtWidgets.QPushButton("LOAD TO GLUE CALIB")
+    ui.btn_load_auto = QtWidgets.QPushButton("LOAD & APPLY")
     ui.btn_load_auto.setFixedHeight(60)
     ui.btn_load_auto.setStyleSheet("""
         QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
@@ -192,36 +196,67 @@ def setup_motor_column(ui, parent_layout):
     
     btn_auto_layout.addWidget(ui.btn_calc_auto)
     btn_auto_layout.addWidget(ui.btn_load_auto)
+
+    # 3. Pole Percent Increment
+    perc_layout = QtWidgets.QHBoxLayout()
+    lbl_perc = QtWidgets.QLabel("Percent Increment [%]:")
+    lbl_perc.setFixedWidth(200) 
+    lbl_perc.setStyleSheet("font-size: 18px; font-weight: bold; color: #cccccc;")
     
-    # 3. Pole Glue Calibration + MAŁY PRZYCISK APPLY
+    ui.perc_inc = QtWidgets.QLineEdit("5")
+    ui.perc_inc.setFixedSize(140, 60)
+    ui.perc_inc.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
+    ui.perc_inc.setAlignment(QtCore.Qt.AlignCenter)
+    ui.perc_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    ui.perc_inc.setValidator(QtGui.QIntValidator(1, 100))
+    add_touch_keyboard(ui.perc_inc)
+    
+    perc_layout.addWidget(lbl_perc)
+    perc_layout.addWidget(ui.perc_inc)
+    perc_layout.addStretch()
+    
+    # 4. Pole Glue Calibration + MAŁY PRZYCISK APPLY + PRZYCISKI %
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("Glue Calibration:")
-    lbl_cal.setFixedWidth(180)
-    lbl_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_cal.setFixedWidth(160)
+    lbl_cal.setStyleSheet("font-size: 18px; font-weight: bold; color: #cccccc;")
     
+    ui.btn_perc_minus = QtWidgets.QPushButton("-%")
+    ui.btn_perc_minus.setFixedSize(65, 70)
+    ui.btn_perc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.btn_perc_minus.setStyleSheet(perc_btn_style)
+
     ui.cal_glue = QtWidgets.QLineEdit("0.0000")
-    ui.cal_glue.setFixedSize(220, 70)
-    ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.cal_glue.setFixedSize(190, 70)
+    ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
     ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
     add_touch_keyboard(ui.cal_glue)
     
+    ui.btn_perc_plus = QtWidgets.QPushButton("+%")
+    ui.btn_perc_plus.setFixedSize(65, 70)
+    ui.btn_perc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.btn_perc_plus.setStyleSheet(perc_btn_style)
+
     ui.btn_apply_cal = QtWidgets.QPushButton("APPLY")
-    ui.btn_apply_cal.setFixedSize(100, 70)
+    ui.btn_apply_cal.setFixedSize(80, 70)
     ui.btn_apply_cal.setStyleSheet(small_apply_style)
     ui.btn_apply_cal.setEnabled(False)
     ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"calGlue {ui.cal_glue.text()}"))
     
     cal_layout.addWidget(lbl_cal)
+    cal_layout.addWidget(ui.btn_perc_minus)
     cal_layout.addWidget(ui.cal_glue)
+    cal_layout.addWidget(ui.btn_perc_plus)
     cal_layout.addWidget(ui.btn_apply_cal)
     cal_layout.addStretch()
     
     auto_layout.addLayout(auto_cal_layout)
     auto_layout.addLayout(btn_auto_layout)
     auto_layout.addSpacing(15)
+    auto_layout.addLayout(perc_layout)
     auto_layout.addLayout(cal_layout)
     auto_layout.addStretch()
 
@@ -230,19 +265,38 @@ def setup_motor_column(ui, parent_layout):
         try:
             rpm = float(ui.lbl_rpm.text())
             speed = float(ui.lbl_speed.text())
-            if rpm != 0:
-                val = abs(speed / rpm)
+            if speed != 0:
+                val = rpm / speed
                 ui.auto_cal_val.setText(f"{val:.4f}")
             else:
                 ui.auto_cal_val.setText("0.0000")
         except ValueError:
             pass
 
-    def load_auto_cal():
-        ui.cal_glue.setText(ui.auto_cal_val.text())
+    def load_and_apply_auto_cal():
+        val = ui.auto_cal_val.text()
+        ui.cal_glue.setText(val)
+        ui.send_cmd(f"calGlue {val}")
+
+    def adjust_cal_perc(is_plus):
+        try:
+            current_cal = float(ui.cal_glue.text() or 0)
+            perc = float(ui.perc_inc.text() or 0) / 100.0
+            if is_plus:
+                new_cal = current_cal * (1.0 + perc)
+            else:
+                new_cal = current_cal * (1.0 - perc)
+            
+            val_str = f"{new_cal:.4f}"
+            ui.cal_glue.setText(val_str)
+            ui.send_cmd(f"calGlue {val_str}")
+        except ValueError:
+            pass
 
     ui.btn_calc_auto.clicked.connect(calculate_auto_cal)
-    ui.btn_load_auto.clicked.connect(load_auto_cal)
+    ui.btn_load_auto.clicked.connect(load_and_apply_auto_cal)
+    ui.btn_perc_minus.clicked.connect(lambda: adjust_cal_perc(False))
+    ui.btn_perc_plus.clicked.connect(lambda: adjust_cal_perc(True))
 
     # ==========================================
     # ZAKŁADKA 3: SETTINGS
