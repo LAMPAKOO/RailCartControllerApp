@@ -3,23 +3,24 @@ from PySide6 import QtWidgets, QtCore, QtGui
 from ui_styles import *
 
 # =========================================================
-# NOWA KLASA: Płynnie skalujące się logo
+# NAPRAWIONA KLASA LOGO
 # =========================================================
 class ResizableLogo(QtWidgets.QLabel):
     def __init__(self, image_path):
         super().__init__()
         self.original_pixmap = QtGui.QPixmap(image_path)
-        # Pozwalamy etykiecie skurczyć się niemal do zera, żeby nie blokowała kolumn
-        self.setMinimumSize(10, 10) 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
+        self.setMinimumSize(1, 1) # Zabezpiecza przed skurczeniem do zera
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setStyleSheet("background: transparent;")
 
     def resizeEvent(self, event):
-        # Za każdym razem, gdy kolumna zmienia rozmiar, na nowo dopasowujemy obrazek
-        if not self.original_pixmap.isNull():
+        w = self.width()
+        h = self.height()
+        # Wymusza narysowanie obrazka tylko wtedy, gdy kontener ma już wymiary
+        if not self.original_pixmap.isNull() and w > 0 and h > 0:
             scaled_pixmap = self.original_pixmap.scaled(
-                self.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
+                w, h, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
             )
             self.setPixmap(scaled_pixmap)
         super().resizeEvent(event)
@@ -52,10 +53,9 @@ def setup_system_column(ui, parent_layout):
     
     if os.path.exists(logo_path):
         ui.setWindowIcon(QtGui.QIcon(logo_path))
-        # Używamy naszej nowej, elastycznej klasy!
         ui.lbl_logo = ResizableLogo(logo_path)
     else:
-        ui.lbl_logo = QtWidgets.QLabel("SHM SYSTEM") 
+        ui.lbl_logo = QtWidgets.QLabel("⚙️ SHM SYSTEM") 
         ui.lbl_logo.setStyleSheet("color: black; font-size: 26px; font-weight: bold; background: transparent;")
         ui.lbl_logo.setAlignment(QtCore.Qt.AlignCenter)
     
@@ -64,7 +64,7 @@ def setup_system_column(ui, parent_layout):
     
     ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
-    ui.btn_exit.setFixedWidth(150)
+    ui.btn_exit.setFixedWidth(200)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
     
@@ -171,11 +171,14 @@ def setup_system_column(ui, parent_layout):
     lbl_term.setStyleSheet(LABEL_STYLE)
     col3_layout.addWidget(lbl_term)
     
-    ui.terminal = QtWidgets.QPlainTextEdit()
+    # =========================================================
+    # ZMIANA: Używamy QTextEdit, który potrafi poprawnie renderować tabele HTML
+    # =========================================================
+    ui.terminal = QtWidgets.QTextEdit()
     ui.terminal.setReadOnly(True)
     ui.terminal.setStyleSheet("background-color: #171717; color: #e0e0e0; font-family: 'Consolas'; font-size: 12pt; border: 1px solid #333; border-radius: 5px;")
     col3_layout.addWidget(ui.terminal, 1)
 
-    # Bezpośrednie wymuszenie sztywnego podziału kolumn 1:1:1
+    # Wymuszenie równego podziału kolumn
     col3.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Expanding)
     parent_layout.addWidget(col3, 1)

@@ -265,7 +265,6 @@ class IndustrialControlApp(AppUI):
         elif "system:" in msg_lower or "connected" in msg_lower or "disconnected" in msg_lower or "recording" in msg_lower:
             color = "#FFCA28"  
             
-        # Zapisujemy niezmodyfikowaną wiadomość do pliku .log
         try:
             if hasattr(self, 'log_file') and self.log_file and not self.log_file.closed:
                 self.log_file.write(f"[{time_str}] {msg}\n")
@@ -273,9 +272,18 @@ class IndustrialControlApp(AppUI):
             pass
             
         safe_msg = html.escape(msg)
-        html_line = f'<div style="text-indent: -85px; margin-left: 85px;"><span style="color: #666666;">{time_str} | </span><span style="color: {color};">{safe_msg}</span></div>'
         
-        self.terminal.appendHtml(html_line)
+        # Używamy kuloodpornej tabeli HTML do idealnego wyrównania długiego tekstu
+        html_line = (
+            f'<table width="100%" style="margin:0; padding:0; border:none;">'
+            f'<tr>'
+            f'<td width="95" style="color: #666666; vertical-align: top; white-space: nowrap;">{time_str} | </td>'
+            f'<td style="color: {color}; vertical-align: top;">{safe_msg}</td>'
+            f'</tr>'
+            f'</table>'
+        )
+        
+        self.terminal.append(html_line) # Dla QTextEdit używamy append() zamiast appendHtml()
         self.terminal.moveCursor(QtGui.QTextCursor.End)
 
     def refresh_ports(self):
