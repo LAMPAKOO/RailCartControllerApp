@@ -184,23 +184,8 @@ def setup_motor_column(ui, parent_layout):
     
     adv_layout.addLayout(acc_layout)
     adv_layout.addLayout(cal_layout)
-    adv_layout.addSpacing(20)
     
-    btn_apply = QtWidgets.QPushButton("APPLY ALL PARAMETERS")
-    btn_apply.setFixedHeight(80)
-    btn_apply.setStyleSheet("""
-        QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
-        QPushButton:hover { background-color: #66BB6A; }
-        QPushButton:pressed { background-color: #388E3C; }
-    """)
-    btn_apply.clicked.connect(ui.apply_all)
-    adv_layout.addWidget(btn_apply)
-    
-    # === ZMIANA: ZAMIAST PRZYCISKU NVS, WSTAWIAMY PUSTY ODSTĘP ===
-    # Dzięki temu przycisk APPLY i cała reszta nie zmieni swojej pozycji
-    adv_layout.addSpacing(80) 
-    # ==============================================================
-    
+    # Przycisk Apply All został usunięty stąd
     adv_layout.addStretch()
     
     ui.tabs.addTab(tab_basic, "Basic Control")

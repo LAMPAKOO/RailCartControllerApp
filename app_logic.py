@@ -72,6 +72,26 @@ class IndustrialControlApp(AppUI):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
 
+        self.fwd_speed.textChanged.connect(lambda: self.clamp_val(self.fwd_speed, MAX_SPEED))
+        self.bwd_speed.textChanged.connect(lambda: self.clamp_val(self.bwd_speed, MAX_SPEED))
+        self.vfd_freq.textChanged.connect(lambda: self.clamp_val(self.vfd_freq, MAX_VFD_FREQ))
+        self.speed_inc.textChanged.connect(lambda: self.clamp_val(self.speed_inc, MAX_SPEED_INC))
+        self.vfd_inc.textChanged.connect(lambda: self.clamp_val(self.vfd_inc, MAX_VFD_INC))
+        self.glue_acc.textChanged.connect(lambda: self.clamp_val(self.glue_acc, MAX_GLUE_ACC))
+
+    def clamp_val(self, line_edit, max_limit):
+        """Mechanizm bezpieczeństwa: nie pozwala wpisać więcej niż MAX_LIMIT"""
+        text = line_edit.text()
+        if not text: return
+        try:
+            val = int(text)
+            if val > max_limit:
+                line_edit.setText(str(max_limit))
+                # Przesunięcie kursora na koniec, żeby nie przerywać pisania
+                line_edit.setCursorPosition(len(str(max_limit)))
+        except ValueError:
+            pass
+        
     def autosave_files(self):
         """Wymusza twardy zapis buforów plików na dysk (ochrona przed utratą zasilania)"""
         try:
