@@ -231,7 +231,7 @@ def setup_motor_column(ui, parent_layout):
             rpm = float(ui.lbl_rpm.text())
             speed = float(ui.lbl_speed.text())
             if rpm != 0:
-                val = speed / rpm
+                val = abs(speed / rpm)
                 ui.auto_cal_val.setText(f"{val:.4f}")
             else:
                 ui.auto_cal_val.setText("0.0000")
