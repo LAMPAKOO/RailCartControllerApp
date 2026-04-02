@@ -359,6 +359,11 @@ class IndustrialControlApp(AppUI):
             self.btn_vfd_stop.setEnabled(False)   
             self.btn_load_prof.setEnabled(False)
             
+            # WYSZARZANIE PRZYCISKÓW APPLY PO ROZŁĄCZENIU
+            self.btn_apply.setEnabled(False)
+            self.btn_apply_acc.setEnabled(False)
+            self.btn_apply_cal.setEnabled(False)
+            
             self.log("Disconnected")
         else:
             try:
@@ -385,10 +390,14 @@ class IndustrialControlApp(AppUI):
                 self.btn_glue_bwd.setEnabled(True)
                 self.btn_load_prof.setEnabled(True)
                 
+                # AKTYWOWANIE PRZYCISKÓW APPLY PO POŁĄCZENIU
+                self.btn_apply.setEnabled(True)
+                self.btn_apply_acc.setEnabled(True)
+                self.btn_apply_cal.setEnabled(True)
+                
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")
-                
-                self.read_nvs() 
+                self.read_nvs()
                 
             except Exception as e:
                 self.show_modern_error("Connection Error", str(e))

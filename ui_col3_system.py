@@ -106,13 +106,15 @@ def setup_system_column(ui, parent_layout):
     action_layout.addWidget(ui.btn_load_prof)
     prof_container.addLayout(action_layout)
 
-    # NOWE: Przycisk Apply All pod sekcją profili
+    # Przycisk Apply All
     ui.btn_apply = QtWidgets.QPushButton("APPLY ALL PARAMETERS")
     ui.btn_apply.setFixedHeight(80)
+    ui.btn_apply.setEnabled(False) # DOMYŚLNIE WYSZARZONY
     ui.btn_apply.setStyleSheet("""
         QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
         QPushButton:hover { background-color: #66BB6A; }
         QPushButton:pressed { background-color: #388E3C; }
+        QPushButton:disabled { background-color: #333333; color: #666666; }
     """)
     ui.btn_apply.clicked.connect(ui.apply_all)
     prof_container.addWidget(ui.btn_apply)

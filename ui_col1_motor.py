@@ -73,6 +73,14 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
     
+    # Wspólny styl dla małych przycisków APPLY
+    small_apply_style = """
+        QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton:hover { background-color: #66BB6A; }
+        QPushButton:pressed { background-color: #388E3C; }
+        QPushButton:disabled { background-color: #333333; color: #666666; }
+    """
+    
     # ==========================================
     # ZAKŁADKA 1: BASIC CONTROL
     # ==========================================
@@ -145,7 +153,7 @@ def setup_motor_column(ui, parent_layout):
     auto_layout.setContentsMargins(15, 20, 15, 15)
     auto_layout.setSpacing(15)
     
-    # 1. Pole Auto Calib Value
+    # 1. Pole Auto Calib Value (ZABLOKOWANE DO EDYCJI)
     auto_cal_layout = QtWidgets.QHBoxLayout()
     lbl_auto_cal = QtWidgets.QLabel("Auto Calib Value:")
     lbl_auto_cal.setFixedWidth(180)
@@ -154,9 +162,10 @@ def setup_motor_column(ui, parent_layout):
     ui.auto_cal_val = QtWidgets.QLineEdit("0.0000")
     ui.auto_cal_val.setFixedSize(220, 70)
     ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter) 
-    ui.auto_cal_val.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    add_touch_keyboard(ui.auto_cal_val)
+    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
+    ui.auto_cal_val.setReadOnly(True) # Odczyt tylko
+    # Pociemniający styl dla pola read-only
+    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
     
     auto_cal_layout.addWidget(lbl_auto_cal)
     auto_cal_layout.addWidget(ui.auto_cal_val)
@@ -184,7 +193,7 @@ def setup_motor_column(ui, parent_layout):
     btn_auto_layout.addWidget(ui.btn_calc_auto)
     btn_auto_layout.addWidget(ui.btn_load_auto)
     
-    # 3. Pole Glue Calibration
+    # 3. Pole Glue Calibration + MAŁY PRZYCISK APPLY
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("Glue Calibration:")
     lbl_cal.setFixedWidth(180)
@@ -199,8 +208,15 @@ def setup_motor_column(ui, parent_layout):
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
     add_touch_keyboard(ui.cal_glue)
     
+    ui.btn_apply_cal = QtWidgets.QPushButton("APPLY")
+    ui.btn_apply_cal.setFixedSize(100, 70)
+    ui.btn_apply_cal.setStyleSheet(small_apply_style)
+    ui.btn_apply_cal.setEnabled(False)
+    ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"calGlue {ui.cal_glue.text()}"))
+    
     cal_layout.addWidget(lbl_cal)
     cal_layout.addWidget(ui.cal_glue)
+    cal_layout.addWidget(ui.btn_apply_cal)
     cal_layout.addStretch()
     
     auto_layout.addLayout(auto_cal_layout)
@@ -236,6 +252,7 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.setContentsMargins(15, 20, 15, 15)
     adv_layout.setSpacing(15)
     
+    # Pole Glue Acceleration + MAŁY PRZYCISK APPLY
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("Glue Acceleration:")
     lbl_acc.setFixedWidth(180)
@@ -249,8 +266,15 @@ def setup_motor_column(ui, parent_layout):
     ui.glue_acc.setValidator(QtGui.QIntValidator(MIN_GLUE_ACC, MAX_GLUE_ACC))
     add_touch_keyboard(ui.glue_acc) 
     
+    ui.btn_apply_acc = QtWidgets.QPushButton("APPLY")
+    ui.btn_apply_acc.setFixedSize(100, 70)
+    ui.btn_apply_acc.setStyleSheet(small_apply_style)
+    ui.btn_apply_acc.setEnabled(False)
+    ui.btn_apply_acc.clicked.connect(lambda: ui.send_cmd(f"glueAcc {ui.glue_acc.text() or 0}"))
+    
     acc_layout.addWidget(lbl_acc)
     acc_layout.addWidget(ui.glue_acc)
+    acc_layout.addWidget(ui.btn_apply_acc)
     acc_layout.addStretch()
     
     adv_layout.addLayout(acc_layout)
