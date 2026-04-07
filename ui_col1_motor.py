@@ -74,16 +74,16 @@ def setup_motor_column(ui, parent_layout):
     ui.tabs.setStyleSheet(TABS_STYLE)
     
     # Wspólne style
-    small_apply_style = """
-        QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
-        QPushButton:hover { background-color: #66BB6A; }
-        QPushButton:pressed { background-color: #388E3C; }
-        QPushButton:disabled { background-color: #333333; color: #666666; }
-    """
     perc_btn_style = """
         QPushButton { background-color: #444444; color: white; font-weight: bold; border-radius: 5px; }
         QPushButton:hover { background-color: #555555; }
         QPushButton:pressed { background-color: #2196F3; }
+    """
+    large_apply_style = """
+        QPushButton { background-color: #4CAF50; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
+        QPushButton:hover { background-color: #66BB6A; }
+        QPushButton:pressed { background-color: #388E3C; }
+        QPushButton:disabled { background-color: #333333; color: #666666; }
     """
     
     # ==========================================
@@ -160,8 +160,8 @@ def setup_motor_column(ui, parent_layout):
     
     # 1. Pole Auto Calib Value (tylko odczyt)
     auto_cal_layout = QtWidgets.QHBoxLayout()
-    lbl_auto_cal = QtWidgets.QLabel("Auto Calib [ABS]:") # Zmieniona nazwa
-    lbl_auto_cal.setFixedWidth(180)
+    lbl_auto_cal = QtWidgets.QLabel("Auto Calib [ABS]:")
+    lbl_auto_cal.setFixedWidth(160)
     lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.auto_cal_val = QtWidgets.QLineEdit("0.0000")
@@ -197,28 +197,28 @@ def setup_motor_column(ui, parent_layout):
     btn_auto_layout.addWidget(ui.btn_calc_auto)
     btn_auto_layout.addWidget(ui.btn_load_auto)
 
-    # 3. Pole Percent Increment Z PRZYCISKAMI + / - (O 1%)
+    # 3. Pole Percent Increment (Wyrównane do reszty)
     perc_layout = QtWidgets.QHBoxLayout()
-    lbl_perc = QtWidgets.QLabel("Percent Increment [%]:")
-    lbl_perc.setFixedWidth(200) 
-    lbl_perc.setStyleSheet("font-size: 18px; font-weight: bold; color: #cccccc;")
+    lbl_perc = QtWidgets.QLabel("Percent Inc [%]:")
+    lbl_perc.setFixedWidth(160) 
+    lbl_perc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_step_minus = QtWidgets.QPushButton("-")
-    ui.btn_perc_step_minus.setFixedSize(60, 60)
-    ui.btn_perc_step_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.btn_perc_step_minus.setFixedSize(70, 70)
+    ui.btn_perc_step_minus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
     ui.btn_perc_step_minus.setStyleSheet(perc_btn_style)
 
     ui.perc_inc = QtWidgets.QLineEdit("5")
-    ui.perc_inc.setFixedSize(100, 60)
-    ui.perc_inc.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
+    ui.perc_inc.setFixedSize(140, 70)
+    ui.perc_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.perc_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.perc_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.perc_inc.setValidator(QtGui.QIntValidator(1, 100))
     add_touch_keyboard(ui.perc_inc)
     
     ui.btn_perc_step_plus = QtWidgets.QPushButton("+")
-    ui.btn_perc_step_plus.setFixedSize(60, 60)
-    ui.btn_perc_step_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.btn_perc_step_plus.setFixedSize(70, 70)
+    ui.btn_perc_step_plus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
     ui.btn_perc_step_plus.setStyleSheet(perc_btn_style)
 
     perc_layout.addWidget(lbl_perc)
@@ -227,29 +227,28 @@ def setup_motor_column(ui, parent_layout):
     perc_layout.addWidget(ui.btn_perc_step_plus)
     perc_layout.addStretch()
     
-    # 4. Pole Glue Calibration + PRZYCISKI %
+    # 4. Pole Glue Calibration (Wyrównane do reszty)
     cal_layout = QtWidgets.QHBoxLayout()
-    lbl_cal = QtWidgets.QLabel("Glue Calibration:")
+    lbl_cal = QtWidgets.QLabel("Glue Calib:")
     lbl_cal.setFixedWidth(160)
-    lbl_cal.setStyleSheet("font-size: 18px; font-weight: bold; color: #cccccc;")
+    lbl_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_minus = QtWidgets.QPushButton("-%")
-    ui.btn_perc_minus.setFixedSize(65, 70)
+    ui.btn_perc_minus.setFixedSize(70, 70)
     ui.btn_perc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.btn_perc_minus.setStyleSheet(perc_btn_style)
 
     ui.cal_glue = QtWidgets.QLineEdit("0.0000")
-    ui.cal_glue.setFixedSize(190, 70)
+    ui.cal_glue.setFixedSize(140, 70)
     ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
     ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    # RegEx blokuje znaki minus i wymusza tylko liczby dodatnie
     regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
     add_touch_keyboard(ui.cal_glue)
     
     ui.btn_perc_plus = QtWidgets.QPushButton("+%")
-    ui.btn_perc_plus.setFixedSize(65, 70)
+    ui.btn_perc_plus.setFixedSize(70, 70)
     ui.btn_perc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.btn_perc_plus.setStyleSheet(perc_btn_style)
 
@@ -259,27 +258,21 @@ def setup_motor_column(ui, parent_layout):
     cal_layout.addWidget(ui.btn_perc_plus)
     cal_layout.addStretch()
     
-    # 5. Przycisk APPLY poniżej sekcji kalibracji
-    apply_cal_layout = QtWidgets.QHBoxLayout()
-    empty_lbl = QtWidgets.QLabel("")
-    empty_lbl.setFixedWidth(160) # Odstęp, żeby przycisk był równo z polem
-    
+    # 5. Przycisk APPLY CALIBRATION na całą szerokość
     ui.btn_apply_cal = QtWidgets.QPushButton("APPLY CALIBRATION")
-    ui.btn_apply_cal.setFixedHeight(50)
-    ui.btn_apply_cal.setStyleSheet(small_apply_style)
+    ui.btn_apply_cal.setFixedHeight(80)
+    ui.btn_apply_cal.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    ui.btn_apply_cal.setStyleSheet(large_apply_style)
     ui.btn_apply_cal.setEnabled(False)
     ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"calGlue {ui.cal_glue.text()}"))
-    
-    apply_cal_layout.addWidget(empty_lbl)
-    apply_cal_layout.addWidget(ui.btn_apply_cal)
-    apply_cal_layout.addStretch()
     
     auto_layout.addLayout(auto_cal_layout)
     auto_layout.addLayout(btn_auto_layout)
     auto_layout.addSpacing(15)
     auto_layout.addLayout(perc_layout)
     auto_layout.addLayout(cal_layout)
-    auto_layout.addLayout(apply_cal_layout) # Dodane pod spodem
+    auto_layout.addSpacing(10)
+    auto_layout.addWidget(ui.btn_apply_cal) # Bezpośrednio, na całą szerokość
     auto_layout.addStretch()
 
     # LOGIKA PRZYCISKÓW W ZAKŁADCE AUTO
@@ -288,7 +281,6 @@ def setup_motor_column(ui, parent_layout):
             rpm = float(ui.lbl_rpm.text())
             speed = float(ui.lbl_speed.text())
             if speed != 0:
-                # Wartość bezwzględna (zawsze dodatnia)
                 val = abs(rpm / speed) 
                 ui.auto_cal_val.setText(f"{val:.4f}")
             else:
@@ -339,32 +331,35 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.setContentsMargins(15, 20, 15, 15)
     adv_layout.setSpacing(15)
     
+    # Pole Glue Acceleration (wyrównane)
     acc_layout = QtWidgets.QHBoxLayout()
-    lbl_acc = QtWidgets.QLabel("Glue Acceleration:")
-    lbl_acc.setFixedWidth(180)
+    lbl_acc = QtWidgets.QLabel("Glue Accel:")
+    lbl_acc.setFixedWidth(160)
     lbl_acc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
     
     ui.glue_acc = QtWidgets.QLineEdit("0")
-    ui.glue_acc.setFixedSize(220, 70)
+    ui.glue_acc.setFixedSize(140, 70)
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.glue_acc.setValidator(QtGui.QIntValidator(MIN_GLUE_ACC, MAX_GLUE_ACC))
     add_touch_keyboard(ui.glue_acc) 
     
-    ui.btn_apply_acc = QtWidgets.QPushButton("APPLY")
-    ui.btn_apply_acc.setFixedSize(100, 70)
-    ui.btn_apply_acc.setStyleSheet(small_apply_style)
-    ui.btn_apply_acc.setEnabled(False)
-    ui.btn_apply_acc.clicked.connect(lambda: ui.send_cmd(f"glueAcc {ui.glue_acc.text() or 0}"))
-    
     acc_layout.addWidget(lbl_acc)
     acc_layout.addWidget(ui.glue_acc)
-    acc_layout.addWidget(ui.btn_apply_acc)
     acc_layout.addStretch()
     
+    # Przycisk APPLY ACCELERATION na całą szerokość (żeby pasował do kalibracji)
+    ui.btn_apply_acc = QtWidgets.QPushButton("APPLY ACCELERATION")
+    ui.btn_apply_acc.setFixedHeight(80)
+    ui.btn_apply_acc.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    ui.btn_apply_acc.setStyleSheet(large_apply_style)
+    ui.btn_apply_acc.setEnabled(False)
+    ui.btn_apply_acc.clicked.connect(lambda: ui.send_cmd(f"glueAcc {ui.glue_acc.text() or 0}"))
+
     adv_layout.addLayout(acc_layout)
-    adv_layout.addSpacing(80) 
+    adv_layout.addSpacing(10)
+    adv_layout.addWidget(ui.btn_apply_acc)
     adv_layout.addStretch()
     
     # --- Dodanie zakładek we właściwej kolejności ---
