@@ -45,7 +45,7 @@ def setup_inverter_column(ui, parent_layout):
     vfd_inc_layout = QtWidgets.QHBoxLayout()
     
     lbl_vfd_inc = QtWidgets.QLabel("STEP INCREMENT:")
-    lbl_vfd_inc.setFixedWidth(200) 
+    lbl_vfd_inc.setFixedWidth(220) 
     lbl_vfd_inc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.vfd_inc = QtWidgets.QLineEdit(str(DEFAULT_VFD_INC))

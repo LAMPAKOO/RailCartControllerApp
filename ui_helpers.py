@@ -24,7 +24,7 @@ def create_step_control(ui, layout, label, cmd_name):
     h_layout = QtWidgets.QHBoxLayout()
     
     lbl = QtWidgets.QLabel(label)
-    lbl.setFixedWidth(200) 
+    lbl.setFixedWidth(220) 
     lbl.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     h_layout.addWidget(lbl)
     
@@ -60,7 +60,7 @@ def create_vfd_step_control(ui, layout, label, cmd_name):
     h_layout = QtWidgets.QHBoxLayout()
     
     lbl = QtWidgets.QLabel(label)
-    lbl.setFixedWidth(200) 
+    lbl.setFixedWidth(220) 
     lbl.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     h_layout.addWidget(lbl)
     

@@ -55,7 +55,7 @@ def setup_system_column(ui, parent_layout):
     
     ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
     ui.btn_exit.setFixedHeight(80) 
-    ui.btn_exit.setFixedWidth(200)
+    ui.btn_exit.setFixedWidth(220)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
     top_bar.addWidget(ui.btn_exit, 0)

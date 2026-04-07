@@ -95,7 +95,7 @@ def setup_motor_column(ui, parent_layout):
     
     inc_layout = QtWidgets.QHBoxLayout()
     lbl_inc = QtWidgets.QLabel("STEP INCREMENT:")
-    lbl_inc.setFixedWidth(200) 
+    lbl_inc.setFixedWidth(220) 
     lbl_inc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.speed_inc = QtWidgets.QLineEdit("50")
@@ -161,7 +161,7 @@ def setup_motor_column(ui, parent_layout):
     # 1. Pole Auto Calib Value (tylko odczyt)
     auto_cal_layout = QtWidgets.QHBoxLayout()
     lbl_auto_cal = QtWidgets.QLabel("AUTO CALIBRATION:")
-    lbl_auto_cal.setFixedWidth(200)
+    lbl_auto_cal.setFixedWidth(220)
     lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.auto_cal_val = QtWidgets.QLineEdit("0.00")
@@ -200,7 +200,7 @@ def setup_motor_column(ui, parent_layout):
     # 3. Pole Percent Increment (Wyrównane do reszty)
     perc_layout = QtWidgets.QHBoxLayout()
     lbl_perc = QtWidgets.QLabel("INCREMENT [%]:")
-    lbl_perc.setFixedWidth(200) 
+    lbl_perc.setFixedWidth(220) 
     lbl_perc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_step_minus = QtWidgets.QPushButton("-")
@@ -230,11 +230,11 @@ def setup_motor_column(ui, parent_layout):
     # 4. Pole Glue Calibration (Wyrównane do reszty)
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("GLUE CALIBRATION:")
-    lbl_cal.setFixedWidth(200)
+    lbl_cal.setFixedWidth(220)
     lbl_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_minus = QtWidgets.QPushButton("-%")
-    ui.btn_perc_minus.setFixedSize(70, 70)
+    ui.btn_perc_minus.setFixedSize(80, 70)
     ui.btn_perc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.btn_perc_minus.setStyleSheet(perc_btn_style)
 
@@ -248,7 +248,7 @@ def setup_motor_column(ui, parent_layout):
     add_touch_keyboard(ui.cal_glue)
     
     ui.btn_perc_plus = QtWidgets.QPushButton("+%")
-    ui.btn_perc_plus.setFixedSize(70, 70)
+    ui.btn_perc_plus.setFixedSize(80, 70)
     ui.btn_perc_plus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.btn_perc_plus.setStyleSheet(perc_btn_style)
 
@@ -344,7 +344,7 @@ def setup_motor_column(ui, parent_layout):
     # Pole Glue Acceleration (wyrównane)
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("Glue Accel:")
-    lbl_acc.setFixedWidth(200)
+    lbl_acc.setFixedWidth(220)
     lbl_acc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.glue_acc = QtWidgets.QLineEdit("0")

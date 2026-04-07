@@ -2,9 +2,7 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-#Enlarged input box test & changed to CAPS. Enlarged acc input box. Now saving calib value in higer precision and displaying only 2 decimals.
-#Iverted calcultating factor for calibration.
-#Changed "LOAD & APPLY" to "LOAD and APPLY". CHanged m/min to m/h. 
+
 def main():
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle("Fusion")
