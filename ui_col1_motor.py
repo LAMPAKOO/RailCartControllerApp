@@ -32,7 +32,7 @@ def setup_motor_column(ui, parent_layout):
     h_spd.addStretch()
     
     h_rpm = QtWidgets.QHBoxLayout()
-    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/min]: ")
+    lbl_r_pfx = QtWidgets.QLabel("SPEED [m/h]: ")
     lbl_r_pfx.setStyleSheet("color: #4caf50; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
     ui.lbl_rpm = QtWidgets.QLabel("0.00")
     ui.lbl_rpm.setStyleSheet("color: #4caf50; font-size: 40px; font-weight: bold; font-family: 'Consolas'; background: transparent;")
@@ -94,9 +94,9 @@ def setup_motor_column(ui, parent_layout):
     basic_layout.setContentsMargins(15, 15, 15, 15)
     
     inc_layout = QtWidgets.QHBoxLayout()
-    lbl_inc = QtWidgets.QLabel("Step Increment:")
-    lbl_inc.setFixedWidth(160) 
-    lbl_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_inc = QtWidgets.QLabel("STEP INCREMENT:")
+    lbl_inc.setFixedWidth(200) 
+    lbl_inc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.speed_inc = QtWidgets.QLineEdit("50")
     ui.speed_inc.setFixedSize(140, 70) 
@@ -123,8 +123,8 @@ def setup_motor_column(ui, parent_layout):
     inc_layout.addStretch()
     basic_layout.addLayout(inc_layout)
     
-    ui.fwd_speed = create_step_control(ui, basic_layout, "Dispense Speed:", "forwardSpeed")
-    ui.bwd_speed = create_step_control(ui, basic_layout, "Retract Speed:", "backwardSpeed")
+    ui.fwd_speed = create_step_control(ui, basic_layout, "DISPENSE SPEED:", "forwardSpeed")
+    ui.bwd_speed = create_step_control(ui, basic_layout, "RETRACT SPEED:", "backwardSpeed")
     
     basic_layout.addSpacing(15)
     
@@ -160,11 +160,11 @@ def setup_motor_column(ui, parent_layout):
     
     # 1. Pole Auto Calib Value (tylko odczyt)
     auto_cal_layout = QtWidgets.QHBoxLayout()
-    lbl_auto_cal = QtWidgets.QLabel("Auto Calib [ABS]:")
-    lbl_auto_cal.setFixedWidth(160)
-    lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIBRATION:")
+    lbl_auto_cal.setFixedWidth(200)
+    lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
-    ui.auto_cal_val = QtWidgets.QLineEdit("0.0000")
+    ui.auto_cal_val = QtWidgets.QLineEdit("0.00")
     ui.auto_cal_val.setFixedSize(220, 70)
     ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
@@ -186,7 +186,7 @@ def setup_motor_column(ui, parent_layout):
         QPushButton:pressed { background-color: #F57C00; }
     """)
     
-    ui.btn_load_auto = QtWidgets.QPushButton("LOAD & APPLY")
+    ui.btn_load_auto = QtWidgets.QPushButton("LOAD and APPLY")
     ui.btn_load_auto.setFixedHeight(60)
     ui.btn_load_auto.setStyleSheet("""
         QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
@@ -199,9 +199,9 @@ def setup_motor_column(ui, parent_layout):
 
     # 3. Pole Percent Increment (Wyrównane do reszty)
     perc_layout = QtWidgets.QHBoxLayout()
-    lbl_perc = QtWidgets.QLabel("Percent Inc [%]:")
-    lbl_perc.setFixedWidth(160) 
-    lbl_perc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_perc = QtWidgets.QLabel("INCREMENT [%]:")
+    lbl_perc.setFixedWidth(200) 
+    lbl_perc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_step_minus = QtWidgets.QPushButton("-")
     ui.btn_perc_step_minus.setFixedSize(70, 70)
@@ -229,9 +229,9 @@ def setup_motor_column(ui, parent_layout):
     
     # 4. Pole Glue Calibration (Wyrównane do reszty)
     cal_layout = QtWidgets.QHBoxLayout()
-    lbl_cal = QtWidgets.QLabel("Glue Calib:")
-    lbl_cal.setFixedWidth(160)
-    lbl_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_cal = QtWidgets.QLabel("GLUE CALIBRATION:")
+    lbl_cal.setFixedWidth(200)
+    lbl_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_minus = QtWidgets.QPushButton("-%")
     ui.btn_perc_minus.setFixedSize(70, 70)
@@ -281,10 +281,10 @@ def setup_motor_column(ui, parent_layout):
             rpm = float(ui.lbl_rpm.text())
             speed = float(ui.lbl_speed.text())
             if speed != 0:
-                val = abs(rpm / speed) 
-                ui.auto_cal_val.setText(f"{val:.4f}")
+                val = abs(speed / rpm) 
+                ui.auto_cal_val.setText(f"{val:.2f}")
             else:
-                ui.auto_cal_val.setText("0.0000")
+                ui.auto_cal_val.setText("0.00")
         except ValueError:
             pass
 
@@ -293,18 +293,28 @@ def setup_motor_column(ui, parent_layout):
         ui.cal_glue.setText(val)
         ui.send_cmd(f"calGlue {val}")
 
+    # Wewnątrz ui_col1_motor.py, w funkcji adjust_cal_perc:
+
     def adjust_cal_perc(is_plus):
         try:
+            # Pobieramy aktualną wartość z PEŁNĄ precyzją (z tekstu, ale zanim go skrócimy)
             current_cal = float(ui.cal_glue.text() or 0)
-            perc = float(ui.perc_inc.text() or 0) / 100.0
+            perc_val = float(ui.perc_inc.text() or 0)
+            factor = 1.0 + (perc_val / 100.0)
+
             if is_plus:
-                new_cal = current_cal * (1.0 + perc)
+                new_cal = current_cal * factor
             else:
-                new_cal = current_cal * (1.0 - perc)
+                # Aby WRÓCIĆ dokładnie do poprzedniej wartości po dodaniu %, 
+                # musimy wykonać operację odwrotną (dzielenie), a nie mnożenie przez (1-%)
+                new_cal = current_cal / factor
             
-            val_str = f"{new_cal:.4f}"
-            ui.cal_glue.setText(val_str)
-            ui.send_cmd(f"calGlue {val_str}")
+            # WYSYŁAMY do maszyny pełną precyzję (np. 4 miejsca)
+            ui.send_cmd(f"calGlue {new_cal:.4f}")
+            
+            # WYŚWIETLAMY użytkownikowi tylko 2 miejsca
+            ui.cal_glue.setText(f"{new_cal:.2f}")
+        
         except ValueError:
             pass
 
@@ -334,11 +344,11 @@ def setup_motor_column(ui, parent_layout):
     # Pole Glue Acceleration (wyrównane)
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("Glue Accel:")
-    lbl_acc.setFixedWidth(160)
-    lbl_acc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_acc.setFixedWidth(200)
+    lbl_acc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.glue_acc = QtWidgets.QLineEdit("0")
-    ui.glue_acc.setFixedSize(140, 70)
+    ui.glue_acc.setFixedSize(220, 70)
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
@@ -371,7 +381,7 @@ def setup_motor_column(ui, parent_layout):
     # ==========================================
     # POZA ZAKŁADKAMI: PRZYCISK STOP MOTOR
     # ==========================================
-    ui.btn_motor_stop = QtWidgets.QPushButton("STOP MOTOR")
+    ui.btn_motor_stop = QtWidgets.QPushButton("STOP GLUE")
     ui.btn_motor_stop.setFixedHeight(140)
     ui.btn_motor_stop.setStyleSheet(STOP_BTN_STYLE)
     ui.btn_motor_stop.setEnabled(False)

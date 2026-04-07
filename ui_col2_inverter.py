@@ -44,9 +44,9 @@ def setup_inverter_column(ui, parent_layout):
     
     vfd_inc_layout = QtWidgets.QHBoxLayout()
     
-    lbl_vfd_inc = QtWidgets.QLabel("Step Increment:")
-    lbl_vfd_inc.setFixedWidth(160) 
-    lbl_vfd_inc.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_vfd_inc = QtWidgets.QLabel("STEP INCREMENT:")
+    lbl_vfd_inc.setFixedWidth(200) 
+    lbl_vfd_inc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.vfd_inc = QtWidgets.QLineEdit(str(DEFAULT_VFD_INC))
     ui.vfd_inc.setFixedSize(140, 70) 
@@ -76,7 +76,7 @@ def setup_inverter_column(ui, parent_layout):
     
     vfd_layout.addLayout(vfd_inc_layout)
     
-    ui.vfd_freq = create_vfd_step_control(ui, vfd_layout, "Frequency (Hz):", "HZ")
+    ui.vfd_freq = create_vfd_step_control(ui, vfd_layout, "FREQUENCY [Hz]", "HZ")
     
     vfd_layout.addSpacing(15)
     
@@ -177,13 +177,13 @@ def setup_inverter_column(ui, parent_layout):
     file_dir_layout = QtWidgets.QHBoxLayout()
     file_dir_layout.setSpacing(10)
     
-    lbl_fn = QtWidgets.QLabel("Filename:")
+    lbl_fn = QtWidgets.QLabel("FILENAME:")
     lbl_fn.setStyleSheet(LABEL_STYLE)
     ui.filename_input = QtWidgets.QLineEdit()
     ui.filename_input.setStyleSheet(INPUT_STYLE)
     add_touch_keyboard(ui.filename_input)
     
-    lbl_dir = QtWidgets.QLabel("Save Dir:")
+    lbl_dir = QtWidgets.QLabel("SAVE DIRECTORY:")
     lbl_dir.setStyleSheet(LABEL_STYLE)
     lbl_dir.setContentsMargins(10, 0, 0, 0)
     ui.save_path_input = QtWidgets.QLineEdit()
