@@ -238,12 +238,12 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_perc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.btn_perc_minus.setStyleSheet(perc_btn_style)
 
-    ui.cal_glue = QtWidgets.QLineEdit("0.0000")
+    ui.cal_glue = QtWidgets.QLineEdit("0.00")
     ui.cal_glue.setFixedSize(140, 70)
     ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
     ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,4})?$")
+    regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,2})?$")
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
     add_touch_keyboard(ui.cal_glue)
     
@@ -341,37 +341,63 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.setContentsMargins(15, 20, 15, 15)
     adv_layout.setSpacing(15)
     
-    # Pole Glue Acceleration (wyrównane)
+    # 1. Pole Glue Acceleration + mały przycisk APPLY z boku
     acc_layout = QtWidgets.QHBoxLayout()
-    lbl_acc = QtWidgets.QLabel("Glue Accel:")
+    lbl_acc = QtWidgets.QLabel("GLUE ACC:")
     lbl_acc.setFixedWidth(220)
     lbl_acc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.glue_acc = QtWidgets.QLineEdit("0")
-    ui.glue_acc.setFixedSize(220, 70)
+    ui.glue_acc.setFixedSize(140, 70)
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     ui.glue_acc.setValidator(QtGui.QIntValidator(MIN_GLUE_ACC, MAX_GLUE_ACC))
     add_touch_keyboard(ui.glue_acc) 
     
-    acc_layout.addWidget(lbl_acc)
-    acc_layout.addWidget(ui.glue_acc)
-    acc_layout.addStretch()
-    
-    # Przycisk APPLY ACCELERATION na całą szerokość (żeby pasował do kalibracji)
-    ui.btn_apply_acc = QtWidgets.QPushButton("APPLY ACCELERATION")
-    ui.btn_apply_acc.setFixedHeight(80)
-    ui.btn_apply_acc.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-    ui.btn_apply_acc.setStyleSheet(large_apply_style)
+    ui.btn_apply_acc = QtWidgets.QPushButton("APPLY")
+    ui.btn_apply_acc.setFixedSize(100, 70)
+    ui.btn_apply_acc.setStyleSheet(large_apply_style) # Ten sam styl co dla filtra
     ui.btn_apply_acc.setEnabled(False)
     ui.btn_apply_acc.clicked.connect(lambda: ui.send_cmd(f"glueAcc {ui.glue_acc.text() or 0}"))
-
-    adv_layout.addLayout(acc_layout)
-    adv_layout.addSpacing(10)
-    adv_layout.addWidget(ui.btn_apply_acc)
-    adv_layout.addStretch()
     
+    acc_layout.addWidget(lbl_acc)
+    acc_layout.addWidget(ui.glue_acc)
+    acc_layout.addWidget(ui.btn_apply_acc) # Przycisk dodany obok pola
+    acc_layout.addStretch()
+
+    # 2. Pole FILTER VALUE + mały przycisk APPLY z boku
+    filter_layout = QtWidgets.QHBoxLayout()
+    lbl_filter = QtWidgets.QLabel("FILTER VALUE:")
+    lbl_filter.setFixedWidth(220)
+    lbl_filter.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
+    
+    ui.filter_alpha = QtWidgets.QLineEdit("0.200")
+    ui.filter_alpha.setFixedSize(140, 70)
+    ui.filter_alpha.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.filter_alpha.setAlignment(QtCore.Qt.AlignCenter)
+    ui.filter_alpha.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    
+    # RegEx pozwalający wpisać tylko liczby od 0 do 1 z max 3 miejscami po przecinku
+    regex_filter = QtCore.QRegularExpression(r"^(0(\.\d{0,3})?|1(\.0{0,3})?)$")
+    ui.filter_alpha.setValidator(QtGui.QRegularExpressionValidator(regex_filter))
+    add_touch_keyboard(ui.filter_alpha)
+    
+    ui.btn_apply_filter = QtWidgets.QPushButton("APPLY")
+    ui.btn_apply_filter.setFixedSize(100, 70)
+    ui.btn_apply_filter.setStyleSheet(large_apply_style) 
+    ui.btn_apply_filter.setEnabled(False)
+    ui.btn_apply_filter.clicked.connect(lambda: ui.send_cmd(f"filterAlpha {ui.filter_alpha.text()}"))
+    
+    filter_layout.addWidget(lbl_filter)
+    filter_layout.addWidget(ui.filter_alpha)
+    filter_layout.addWidget(ui.btn_apply_filter)
+    filter_layout.addStretch()
+    
+    # --- Dodanie obu linii do głównego układu zakładki ---
+    adv_layout.addLayout(acc_layout)
+    adv_layout.addLayout(filter_layout) 
+    adv_layout.addStretch()
     # --- Dodanie zakładek we właściwej kolejności ---
     ui.tabs.addTab(tab_basic, "Basic Control")
     ui.tabs.addTab(tab_auto, "Auto Settings")

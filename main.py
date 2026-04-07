@@ -2,7 +2,6 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-
 def main():
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle("Fusion")

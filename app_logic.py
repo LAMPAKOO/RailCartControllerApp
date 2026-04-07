@@ -44,7 +44,7 @@ class IndustrialControlApp(AppUI):
                     "vfd_inc": 5,
                     "vfd_freq": 0,
                     "glue_acc": 0,
-                    "cal_glue": "0.0000"
+                    "cal_glue": "0.00"
                 } for i in range(1, 5)
             }
         }
@@ -79,7 +79,7 @@ class IndustrialControlApp(AppUI):
         self.vfd_inc.textChanged.connect(lambda: self.clamp_val(self.vfd_inc, MAX_VFD_INC))
         self.glue_acc.textChanged.connect(lambda: self.clamp_val(self.glue_acc, MAX_GLUE_ACC))
         self.perc_inc.textChanged.connect(lambda: self.clamp_val(self.perc_inc, 100))
-        
+
     def clamp_val(self, line_edit, max_limit):
         """Mechanizm bezpieczeństwa: nie pozwala wpisać więcej niż MAX_LIMIT"""
         text = line_edit.text()
@@ -359,7 +359,8 @@ class IndustrialControlApp(AppUI):
             self.btn_motor_stop.setEnabled(False) 
             self.btn_vfd_stop.setEnabled(False)   
             self.btn_load_prof.setEnabled(False)
-            
+            self.btn_apply_filter.setEnabled(False)
+
             # WYSZARZANIE PRZYCISKÓW APPLY PO ROZŁĄCZENIU
             self.btn_apply.setEnabled(False)
             self.btn_apply_acc.setEnabled(False)
@@ -390,11 +391,13 @@ class IndustrialControlApp(AppUI):
                 self.btn_glue_fwd.setEnabled(True)
                 self.btn_glue_bwd.setEnabled(True)
                 self.btn_load_prof.setEnabled(True)
+
                 
                 # AKTYWOWANIE PRZYCISKÓW APPLY PO POŁĄCZENIU
                 self.btn_apply.setEnabled(True)
                 self.btn_apply_acc.setEnabled(True)
                 self.btn_apply_cal.setEnabled(True)
+                self.btn_apply_filter.setEnabled(True)
                 
                 self.btn_manual.setChecked(True)
                 self.send_cmd("MODE_MANUAL")
@@ -520,7 +523,13 @@ class IndustrialControlApp(AppUI):
                 if name == "forwardSpeed": self.fwd_speed.setText(str(int(val_f)))
                 elif name == "backwardSpeed": self.bwd_speed.setText(str(int(val_f)))
                 elif name == "accGlue": self.glue_acc.setText(str(int(val_f)))
-                elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.4f}")
+                elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.2f}")
+
+                # --- NOWE: ODBIÓR FILTER ALPHA ---
+                elif name_lower == "filteralpha": 
+                    self.filter_alpha.setText(f"{val_f:.3f}")
+                # ---------------------------------
+
                 elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
                     self.lbl_vfd_freq.setText(f"{val_f:.2f}")
                     
@@ -573,6 +582,7 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"glueAcc {self.glue_acc.text() or 0}")
         self.send_cmd(f"calGlue {self.cal_glue.text()}")
         self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
+        self.send_cmd(f"filterAlpha {self.filter_alpha.text() or 0}")
 
     def read_nvs(self):
         self.send_cmd("READNVS")
