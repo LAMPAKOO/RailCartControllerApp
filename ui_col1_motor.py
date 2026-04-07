@@ -160,7 +160,7 @@ def setup_motor_column(ui, parent_layout):
     
     # 1. Pole Auto Calib Value (tylko odczyt)
     auto_cal_layout = QtWidgets.QHBoxLayout()
-    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIBRATION:")
+    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
     lbl_auto_cal.setFixedWidth(220)
     lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
@@ -258,7 +258,7 @@ def setup_motor_column(ui, parent_layout):
     cal_layout.addWidget(ui.btn_perc_plus)
     cal_layout.addStretch()
     
-    ui.btn_apply_cal = QtWidgets.QPushButton("APPLY CALIB:")
+    ui.btn_apply_cal = QtWidgets.QPushButton("APPLY CALIBRATION")
     ui.btn_apply_cal.setFixedHeight(80)
     ui.btn_apply_cal.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_apply_cal.setStyleSheet(large_apply_style)

@@ -344,6 +344,15 @@ class IndustrialControlApp(AppUI):
             if self.is_recording:
                 self.stop_recording()
                 
+            # === NOWE: WYSYŁANIE KOMEND STOP PRZED ROZŁĄCZENIEM ===
+            try:
+                self.send_cmd("STOP")       # Zatrzymanie silnika kleju
+                self.send_cmd("VFD_STOP")   # Zatrzymanie falownika
+                
+                time.sleep(0.1)             # Czekamy 100ms, aby komendy na pewno "wyszły" z kabla
+            except Exception:
+                pass
+                
             self.ser.close()
             self.ser = None
             self.timer.stop()
