@@ -204,7 +204,7 @@ def setup_motor_column(ui, parent_layout):
     lbl_perc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.btn_perc_step_minus = QtWidgets.QPushButton("-")
-    ui.btn_perc_step_minus.setFixedSize(70, 70)
+    ui.btn_perc_step_minus.setFixedSize(80, 70)
     ui.btn_perc_step_minus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
     ui.btn_perc_step_minus.setStyleSheet(perc_btn_style)
 
@@ -217,7 +217,7 @@ def setup_motor_column(ui, parent_layout):
     add_touch_keyboard(ui.perc_inc)
     
     ui.btn_perc_step_plus = QtWidgets.QPushButton("+")
-    ui.btn_perc_step_plus.setFixedSize(70, 70)
+    ui.btn_perc_step_plus.setFixedSize(80, 70)
     ui.btn_perc_step_plus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
     ui.btn_perc_step_plus.setStyleSheet(perc_btn_style)
 
@@ -229,7 +229,7 @@ def setup_motor_column(ui, parent_layout):
     
     # 4. Pole Glue Calibration (Wyrównane do reszty)
     cal_layout = QtWidgets.QHBoxLayout()
-    lbl_cal = QtWidgets.QLabel("GLUE CALIBRATION:")
+    lbl_cal = QtWidgets.QLabel("GLUE CALIB:")
     lbl_cal.setFixedWidth(220)
     lbl_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
@@ -258,8 +258,7 @@ def setup_motor_column(ui, parent_layout):
     cal_layout.addWidget(ui.btn_perc_plus)
     cal_layout.addStretch()
     
-    # 5. Przycisk APPLY CALIBRATION na całą szerokość
-    ui.btn_apply_cal = QtWidgets.QPushButton("APPLY CALIBRATION")
+    ui.btn_apply_cal = QtWidgets.QPushButton("APPLY CALIB:")
     ui.btn_apply_cal.setFixedHeight(80)
     ui.btn_apply_cal.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_apply_cal.setStyleSheet(large_apply_style)
@@ -348,7 +347,7 @@ def setup_motor_column(ui, parent_layout):
     lbl_acc.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.glue_acc = QtWidgets.QLineEdit("0")
-    ui.glue_acc.setFixedSize(140, 70)
+    ui.glue_acc.setFixedSize(220, 70)
     ui.glue_acc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.glue_acc.setAlignment(QtCore.Qt.AlignCenter) 
     ui.glue_acc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
@@ -373,7 +372,7 @@ def setup_motor_column(ui, parent_layout):
     lbl_filter.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
     ui.filter_alpha = QtWidgets.QLineEdit("0.200")
-    ui.filter_alpha.setFixedSize(140, 70)
+    ui.filter_alpha.setFixedSize(220, 70)
     ui.filter_alpha.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.filter_alpha.setAlignment(QtCore.Qt.AlignCenter)
     ui.filter_alpha.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
