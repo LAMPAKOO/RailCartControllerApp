@@ -290,30 +290,44 @@ def setup_motor_column(ui, parent_layout):
     def load_and_apply_auto_cal():
         val = ui.auto_cal_val.text()
         ui.cal_glue.setText(val)
+        try:
+            # Zapamiętujemy dokładną wartość ukrytą w tle 
+            ui.exact_cal_value = float(val) 
+        except ValueError:
+            pass
         ui.send_cmd(f"calGlue {val}")
-
-    # Wewnątrz ui_col1_motor.py, w funkcji adjust_cal_perc:
 
     def adjust_cal_perc(is_plus):
         try:
-            # Pobieramy aktualną wartość z PEŁNĄ precyzją (z tekstu, ale zanim go skrócimy)
-            current_cal = float(ui.cal_glue.text() or 0)
+            displayed_val = float(ui.cal_glue.text() or 0)
+            
+            # Pobieramy dokładną wartość ukrytą w pamięci (jeśli już istnieje)
+            saved_exact = getattr(ui, 'exact_cal_value', displayed_val)
+            
+            # Sprawdzamy, czy użytkownik nie wpisał nowej wartości "z palca" w okienko.
+            # Jeśli okienko różni się od tego, co myślimy że w nim jest, używamy wartości z okienka!
+            if abs(displayed_val - round(saved_exact, 2)) > 0.001:
+                current_cal = displayed_val
+            else:
+                current_cal = saved_exact
+
             perc_val = float(ui.perc_inc.text() or 0)
             factor = 1.0 + (perc_val / 100.0)
 
             if is_plus:
                 new_cal = current_cal * factor
             else:
-                # Aby WRÓCIĆ dokładnie do poprzedniej wartości po dodaniu %, 
-                # musimy wykonać operację odwrotną (dzielenie), a nie mnożenie przez (1-%)
                 new_cal = current_cal / factor
             
-            # WYSYŁAMY do maszyny pełną precyzję (np. 4 miejsca)
+            # ZAPISUJEMY do ukrytej pamięci nową, super-dokładną wartość
+            ui.exact_cal_value = new_cal
+            
+            # WYSYŁAMY do maszyny wysoką precyzję (4 miejsca po przecinku)
             ui.send_cmd(f"calGlue {new_cal:.4f}")
             
-            # WYŚWIETLAMY użytkownikowi tylko 2 miejsca
+            # WYŚWIETLAMY użytkownikowi obciętą do 2 miejsc
             ui.cal_glue.setText(f"{new_cal:.2f}")
-        
+            
         except ValueError:
             pass
 
