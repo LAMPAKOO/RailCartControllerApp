@@ -44,8 +44,6 @@ def setup_motor_column(ui, parent_layout):
     disp1_layout.addLayout(h_rpm)
     col1_layout.addWidget(disp1)
     
-    # --- PRZYCISKI TRYBÓW ZOSTAŁY USUNIĘTE ---
-    
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
     
@@ -104,36 +102,7 @@ def setup_motor_column(ui, parent_layout):
     
     basic_layout.addSpacing(15)
 
-    # --- NOWE: SEKCJA AUTO CALIB W ZAKŁADCE MANUAL ---
-    auto_cal_layout = QtWidgets.QHBoxLayout()
-    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
-    lbl_auto_cal.setFixedWidth(220)
-    lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
-    
-    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
-    ui.auto_cal_val.setFixedSize(160, 70)
-    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
-    ui.auto_cal_val.setReadOnly(True) 
-    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
-    
-    ui.btn_load_auto = QtWidgets.QPushButton("LOAD & APPLY")
-    ui.btn_load_auto.setFixedSize(140, 70)
-    ui.btn_load_auto.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
-        QPushButton:hover { background-color: #42A5F5; }
-        QPushButton:pressed { background-color: #1E88E5; }
-    """)
-    
-    auto_cal_layout.addWidget(lbl_auto_cal)
-    auto_cal_layout.addWidget(ui.auto_cal_val)
-    auto_cal_layout.addWidget(ui.btn_load_auto)
-    auto_cal_layout.addStretch()
-    
-    basic_layout.addLayout(auto_cal_layout)
-    basic_layout.addSpacing(15)
-    # -------------------------------------------------
-    
+    # --- PRZYCISKI DISPENSE/RETRACT SĄ TERAZ WYŻEJ ---
     move_layout = QtWidgets.QHBoxLayout()
     move_layout.setSpacing(15)
     
@@ -154,6 +123,49 @@ def setup_motor_column(ui, parent_layout):
     move_layout.addWidget(ui.btn_glue_fwd, 1)
     move_layout.addWidget(ui.btn_glue_bwd, 1)
     basic_layout.addLayout(move_layout)
+    
+    basic_layout.addSpacing(15)
+
+    # --- SEKCJA AUTO CALIB PRZENIESIONA NA DÓŁ ---
+    auto_cal_container = QtWidgets.QVBoxLayout()
+    
+    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
+    lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    auto_cal_container.addWidget(lbl_auto_cal)
+    
+    auto_cal_h_layout = QtWidgets.QHBoxLayout()
+    
+    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
+    ui.auto_cal_val.setFixedSize(160, 70)
+    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
+    ui.auto_cal_val.setReadOnly(True) 
+    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
+    
+    ui.btn_refresh_auto = QtWidgets.QPushButton("REFRESH")
+    ui.btn_refresh_auto.setFixedSize(120, 70)
+    ui.btn_refresh_auto.setStyleSheet("""
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton:hover { background-color: #FFB74D; }
+        QPushButton:pressed { background-color: #F57C00; }
+    """)
+    
+    ui.btn_load_auto = QtWidgets.QPushButton("APPLY")
+    ui.btn_load_auto.setFixedSize(120, 70)
+    ui.btn_load_auto.setStyleSheet("""
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton:hover { background-color: #42A5F5; }
+        QPushButton:pressed { background-color: #1E88E5; }
+    """)
+    
+    auto_cal_h_layout.addWidget(ui.auto_cal_val)
+    auto_cal_h_layout.addWidget(ui.btn_refresh_auto)
+    auto_cal_h_layout.addWidget(ui.btn_load_auto)
+    auto_cal_h_layout.addStretch()
+    
+    auto_cal_container.addLayout(auto_cal_h_layout)
+    basic_layout.addLayout(auto_cal_container)
+    
     basic_layout.addStretch()
     
     # ==========================================
@@ -239,20 +251,15 @@ def setup_motor_column(ui, parent_layout):
     auto_layout.addStretch()
 
     # LOGIKA PRZYCISKÓW I ZEGARA
-    # LOGIKA PRZYCISKÓW I ZEGARA
     def calculate_auto_cal():
         try:
-            # Pobieramy HZ z wyświetlacza falownika (zamiast lbl_rpm)
             hz = float(ui.lbl_vfd_freq.text())
             speed = float(ui.lbl_speed.text())
-            
-            # Zabezpieczenie przed dzieleniem przez zero (gdy silnik stoi)
             if hz != 0:
                 val = abs(speed / hz) 
                 ui.auto_cal_val.setText(f"{val:.3f}")
             else:
                 ui.auto_cal_val.setText("0.000")
-        # Wyłapujemy też AttributeError na wypadek, gdyby widget lbl_vfd_freq jeszcze się nie załadował
         except (ValueError, AttributeError):
             pass
 
@@ -268,6 +275,17 @@ def setup_motor_column(ui, parent_layout):
         except ValueError:
             pass
         ui.send_cmd(f"calGlue {val}")
+
+    def refresh_dispense_speed():
+        try:
+            hz = float(ui.lbl_vfd_freq.text() or 0)
+            cal = float(ui.cal_glue.text() or 0)
+            new_speed = int(hz * cal)
+            
+            ui.fwd_speed.setText(str(new_speed))
+            ui.send_cmd(f"forwardSpeed {new_speed}")
+        except (ValueError, AttributeError):
+            pass
 
     def adjust_cal_perc(is_plus):
         try:
@@ -303,6 +321,7 @@ def setup_motor_column(ui, parent_layout):
             pass
 
     ui.btn_load_auto.clicked.connect(load_and_apply_auto_cal)
+    ui.btn_refresh_auto.clicked.connect(refresh_dispense_speed) 
     ui.btn_perc_minus.clicked.connect(lambda: adjust_cal_perc(False))
     ui.btn_perc_plus.clicked.connect(lambda: adjust_cal_perc(True))
     ui.btn_perc_step_minus.clicked.connect(lambda: step_perc_val(-1))
@@ -372,7 +391,7 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.addLayout(filter_layout) 
     adv_layout.addStretch()
 
-    # --- NOWOŚĆ: Logika przełączania trybów zakładkami ---
+    # --- Logika przełączania trybów zakładkami ---
     ui.tabs.addTab(tab_basic, "MANUAL")
     ui.tabs.addTab(tab_auto, "AUTO")
     ui.tabs.addTab(tab_adv, "SETTINGS")
