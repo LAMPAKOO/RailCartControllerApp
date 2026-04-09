@@ -2,7 +2,8 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-#Changed STOP INVERTER to STOP DRIVE MOTOR. Changed precision of displayed calibration value to 3 decimals. Changed input regex to allow .000 format.""
+# Changed calib text box sieze to 160 px. Auto calibration value calculates automatically.
+# No CALCULATE button, new wide LOAD AND APPLY AUTO CALIBRATION button.
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

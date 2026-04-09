@@ -164,7 +164,7 @@ def setup_motor_column(ui, parent_layout):
     lbl_auto_cal.setFixedWidth(220)
     lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     
-    ui.auto_cal_val = QtWidgets.QLineEdit("0.00")
+    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
     ui.auto_cal_val.setFixedSize(220, 70)
     ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
@@ -175,27 +175,15 @@ def setup_motor_column(ui, parent_layout):
     auto_cal_layout.addWidget(ui.auto_cal_val)
     auto_cal_layout.addStretch()
     
-    # 2. Przyciski CALCULATE i LOAD & APPLY
-    btn_auto_layout = QtWidgets.QHBoxLayout()
-    
-    ui.btn_calc_auto = QtWidgets.QPushButton("CALCULATE")
-    ui.btn_calc_auto.setFixedHeight(60)
-    ui.btn_calc_auto.setStyleSheet("""
-        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
-        QPushButton:hover { background-color: #FFB74D; }
-        QPushButton:pressed { background-color: #F57C00; }
-    """)
-    
-    ui.btn_load_auto = QtWidgets.QPushButton("LOAD and APPLY")
+    # 2. Przycisk LOAD & APPLY na całą szerokość (Przycisk CALCULATE został usunięty)
+    ui.btn_load_auto = QtWidgets.QPushButton("LOAD AND APPLY AUTO CALIBRATION")
     ui.btn_load_auto.setFixedHeight(60)
+    ui.btn_load_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_load_auto.setStyleSheet("""
         QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
         QPushButton:hover { background-color: #42A5F5; }
         QPushButton:pressed { background-color: #1E88E5; }
     """)
-    
-    btn_auto_layout.addWidget(ui.btn_calc_auto)
-    btn_auto_layout.addWidget(ui.btn_load_auto)
 
     # 3. Pole Percent Increment (Wyrównane do reszty)
     perc_layout = QtWidgets.QHBoxLayout()
@@ -209,7 +197,7 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_perc_step_minus.setStyleSheet(perc_btn_style)
 
     ui.perc_inc = QtWidgets.QLineEdit("5")
-    ui.perc_inc.setFixedSize(140, 70)
+    ui.perc_inc.setFixedSize(160, 70)
     ui.perc_inc.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.perc_inc.setAlignment(QtCore.Qt.AlignCenter)
     ui.perc_inc.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
@@ -239,7 +227,7 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_perc_minus.setStyleSheet(perc_btn_style)
 
     ui.cal_glue = QtWidgets.QLineEdit("0.000")
-    ui.cal_glue.setFixedSize(140, 70)
+    ui.cal_glue.setFixedSize(160, 70)
     ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
     ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
@@ -266,12 +254,12 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"calGlue {ui.cal_glue.text()}"))
     
     auto_layout.addLayout(auto_cal_layout)
-    auto_layout.addLayout(btn_auto_layout)
+    auto_layout.addWidget(ui.btn_load_auto) # Teraz przycisk jest na całą szerokość
     auto_layout.addSpacing(15)
     auto_layout.addLayout(perc_layout)
     auto_layout.addLayout(cal_layout)
     auto_layout.addSpacing(10)
-    auto_layout.addWidget(ui.btn_apply_cal) # Bezpośrednio, na całą szerokość
+    auto_layout.addWidget(ui.btn_apply_cal) 
     auto_layout.addStretch()
 
     # LOGIKA PRZYCISKÓW W ZAKŁADCE AUTO
@@ -283,9 +271,14 @@ def setup_motor_column(ui, parent_layout):
                 val = abs(speed / rpm) 
                 ui.auto_cal_val.setText(f"{val:.3f}")
             else:
-                ui.auto_cal_val.setText("0.00")
+                ui.auto_cal_val.setText("0.000")
         except ValueError:
             pass
+
+    # NOWE: Zegar w tle aktualizujący pole Auto Calib 5 razy na sekundę (co 200 ms)
+    ui.auto_cal_timer = QtCore.QTimer(ui)
+    ui.auto_cal_timer.timeout.connect(calculate_auto_cal)
+    ui.auto_cal_timer.start(200)
 
     def load_and_apply_auto_cal():
         val = ui.auto_cal_val.text()
@@ -339,7 +332,6 @@ def setup_motor_column(ui, parent_layout):
         except ValueError:
             pass
 
-    ui.btn_calc_auto.clicked.connect(calculate_auto_cal)
     ui.btn_load_auto.clicked.connect(load_and_apply_auto_cal)
     ui.btn_perc_minus.clicked.connect(lambda: adjust_cal_perc(False))
     ui.btn_perc_plus.clicked.connect(lambda: adjust_cal_perc(True))
