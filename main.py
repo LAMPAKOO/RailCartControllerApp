@@ -2,7 +2,7 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-#Corrected calibration to calib change in labels. Sending STOP commands on disconnect.
+#Changed STOP INVERTER to STOP DRIVE MOTOR. Changed precision of displayed calibration value to 3 decimals. Changed input regex to allow .000 format.""
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

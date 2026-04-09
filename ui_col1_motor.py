@@ -238,12 +238,12 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_perc_minus.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.btn_perc_minus.setStyleSheet(perc_btn_style)
 
-    ui.cal_glue = QtWidgets.QLineEdit("0.00")
+    ui.cal_glue = QtWidgets.QLineEdit("0.000")
     ui.cal_glue.setFixedSize(140, 70)
     ui.cal_glue.setFont(QtGui.QFont("Segoe UI", 22, QtGui.QFont.Bold))
     ui.cal_glue.setAlignment(QtCore.Qt.AlignCenter) 
     ui.cal_glue.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
-    regex_cal = QtCore.QRegularExpression(r"^[0-9]+(\.[0-9]{0,2})?$")
+    regex_cal = QtCore.QRegularExpression(r"^[0-9]*(\.[0-9]{0,3})?$")
     ui.cal_glue.setValidator(QtGui.QRegularExpressionValidator(regex_cal))
     add_touch_keyboard(ui.cal_glue)
     
@@ -281,7 +281,7 @@ def setup_motor_column(ui, parent_layout):
             speed = float(ui.lbl_speed.text())
             if speed != 0:
                 val = abs(speed / rpm) 
-                ui.auto_cal_val.setText(f"{val:.2f}")
+                ui.auto_cal_val.setText(f"{val:.3f}")
             else:
                 ui.auto_cal_val.setText("0.00")
         except ValueError:
@@ -325,8 +325,8 @@ def setup_motor_column(ui, parent_layout):
             # WYSYŁAMY do maszyny wysoką precyzję (4 miejsca po przecinku)
             ui.send_cmd(f"calGlue {new_cal:.4f}")
             
-            # WYŚWIETLAMY użytkownikowi obciętą do 2 miejsc
-            ui.cal_glue.setText(f"{new_cal:.2f}")
+            # WYŚWIETLAMY użytkownikowi obciętą do 3 miejsc
+            ui.cal_glue.setText(f"{new_cal:.3f}")
             
         except ValueError:
             pass
@@ -392,7 +392,7 @@ def setup_motor_column(ui, parent_layout):
     ui.filter_alpha.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     
     # RegEx pozwalający wpisać tylko liczby od 0 do 1 z max 3 miejscami po przecinku
-    regex_filter = QtCore.QRegularExpression(r"^(0(\.\d{0,3})?|1(\.0{0,3})?)$")
+    regex_filter = QtCore.QRegularExpression(r"^(0?(\.\d{0,3})?|1(\.0{0,3})?)$")
     ui.filter_alpha.setValidator(QtGui.QRegularExpressionValidator(regex_filter))
     add_touch_keyboard(ui.filter_alpha)
     

@@ -532,7 +532,7 @@ class IndustrialControlApp(AppUI):
                 if name == "forwardSpeed": self.fwd_speed.setText(str(int(val_f)))
                 elif name == "backwardSpeed": self.bwd_speed.setText(str(int(val_f)))
                 elif name == "accGlue": self.glue_acc.setText(str(int(val_f)))
-                elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.2f}")
+                elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.3f}")
 
                 # --- NOWE: ODBIÓR FILTER ALPHA ---
                 elif name_lower == "filteralpha": 
