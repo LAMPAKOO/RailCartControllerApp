@@ -1,3 +1,5 @@
+from encodings import hz
+
 import serial
 import serial.tools.list_ports
 import csv
@@ -441,11 +443,14 @@ class IndustrialControlApp(AppUI):
         if self.ser and self.ser.is_open:
             try:
                 # Odczytujemy aktualną prędkość, z jaką maszyna pracowała w AUTO
-                current_speed = float(self.lbl_speedlbl_vfd_freq.text() or 0)
+                current_speed = float(self.lbl_speed.text() or 0)
                 
                 if current_speed > 0:
                     # Jeśli klej się lał, przepisujemy jego prędkość do okienka Dispense
-                    new_speed = int(float(self.lbl_vfd_freq.text() or 0) * float(self.auto_cal_val.text() or 0))
+                    hz = float(self.lbl_vfd_freq.text() or 0)
+                    calib = float(self.cal_glue.text() or 0)
+                    new_speed = int(hz * calib)
+                    
                     self.fwd_speed.setText(str(new_speed))
                     
                     # Wysyłamy nową stałą prędkość i wymuszamy dalszy ruch bez zatrzymywania
