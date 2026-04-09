@@ -344,12 +344,12 @@ class IndustrialControlApp(AppUI):
             if self.is_recording:
                 self.stop_recording()
                 
-            # === NOWE: WYSYŁANIE KOMEND STOP PRZED ROZŁĄCZENIEM ===
+            # === WYSYŁANIE KOMEND STOP PRZED ROZŁĄCZENIEM ===
             try:
                 self.send_cmd("STOP")       # Zatrzymanie silnika kleju
                 self.send_cmd("VFD_STOP")   # Zatrzymanie falownika
                 
-                time.sleep(0.1)             # Czekamy 100ms, aby komendy na pewno "wyszły" z kabla
+                time.sleep(0.1)             # Czekamy 100ms
             except Exception:
                 pass
                 
@@ -359,8 +359,7 @@ class IndustrialControlApp(AppUI):
             self.btn_connect.setText("CONNECT")
             self.btn_start_rec.setEnabled(False) 
             
-            self.btn_manual.setEnabled(False)
-            self.btn_auto.setEnabled(False)
+            # Usunięto btn_manual i btn_auto
             self.btn_glue_fwd.setEnabled(False)
             self.btn_glue_bwd.setEnabled(False)
             self.btn_vfd_fwd.setEnabled(False)
@@ -391,8 +390,7 @@ class IndustrialControlApp(AppUI):
                 
                 self.log(f"Connected to {port}")
                 
-                self.btn_manual.setEnabled(True)
-                self.btn_auto.setEnabled(True)
+                # Usunięto btn_manual i btn_auto
                 self.btn_vfd_fwd.setEnabled(True)
                 self.btn_vfd_bwd.setEnabled(True)
                 self.btn_motor_stop.setEnabled(True) 
@@ -400,7 +398,6 @@ class IndustrialControlApp(AppUI):
                 self.btn_glue_fwd.setEnabled(True)
                 self.btn_glue_bwd.setEnabled(True)
                 self.btn_load_prof.setEnabled(True)
-
                 
                 # AKTYWOWANIE PRZYCISKÓW APPLY PO POŁĄCZENIU
                 self.btn_apply.setEnabled(True)
@@ -408,7 +405,8 @@ class IndustrialControlApp(AppUI):
                 self.btn_apply_cal.setEnabled(True)
                 self.btn_apply_filter.setEnabled(True)
                 
-                self.btn_manual.setChecked(True)
+                # Zamiast wciskać przycisk manual, wracamy do pierwszej zakładki
+                self.tabs.setCurrentIndex(0) 
                 self.send_cmd("MODE_MANUAL")
                 self.read_nvs()
                 
@@ -433,7 +431,6 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"{cmd} {new_val}")
         
     def switch_to_manual(self):
-        self.btn_manual.setChecked(True)
         if self.ser and self.ser.is_open:
             self.btn_glue_fwd.setEnabled(True)
             self.btn_glue_bwd.setEnabled(True)
@@ -445,15 +442,15 @@ class IndustrialControlApp(AppUI):
             self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
 
     def switch_to_auto(self):
-        self.btn_auto.setChecked(True)
         self.btn_glue_fwd.setEnabled(False)
         self.btn_glue_bwd.setEnabled(False)
         self.send_cmd("MODE_AUTO")
 
     def stop_motor(self):
         self.send_cmd("STOP")
-        if self.btn_auto.isChecked():
-            self.switch_to_manual()
+        # Jeśli jesteśmy w zakładce AUTO (indeks 1), wróć do MANUAL (indeks 0)
+        if self.tabs.currentIndex() == 1:
+            self.tabs.setCurrentIndex(0)
 
     def start_dispense(self):
         self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")

@@ -44,31 +44,7 @@ def setup_motor_column(ui, parent_layout):
     disp1_layout.addLayout(h_rpm)
     col1_layout.addWidget(disp1)
     
-    mode_h = QtWidgets.QHBoxLayout()
-    mode_h.setSpacing(10)
-    
-    ui.btn_manual = QtWidgets.QPushButton("MANUAL")
-    ui.btn_manual.setCheckable(True)
-    ui.btn_manual.setChecked(True)
-    ui.btn_manual.setFixedHeight(60)
-    ui.btn_manual.setStyleSheet(MODE_BTN_STYLE)
-    ui.btn_manual.setEnabled(False)
-    ui.btn_manual.clicked.connect(ui.switch_to_manual)
-    
-    ui.btn_auto = QtWidgets.QPushButton("AUTO")
-    ui.btn_auto.setCheckable(True)
-    ui.btn_auto.setFixedHeight(60)
-    ui.btn_auto.setStyleSheet(MODE_BTN_STYLE)
-    ui.btn_auto.setEnabled(False)
-    ui.btn_auto.clicked.connect(ui.switch_to_auto)
-    
-    ui.mode_btn_group = QtWidgets.QButtonGroup()
-    ui.mode_btn_group.addButton(ui.btn_manual)
-    ui.mode_btn_group.addButton(ui.btn_auto)
-    
-    mode_h.addWidget(ui.btn_manual)
-    mode_h.addWidget(ui.btn_auto)
-    col1_layout.addLayout(mode_h)
+    # --- PRZYCISKI TRYBÓW ZOSTAŁY USUNIĘTE ---
     
     ui.tabs = QtWidgets.QTabWidget()
     ui.tabs.setStyleSheet(TABS_STYLE)
@@ -87,7 +63,7 @@ def setup_motor_column(ui, parent_layout):
     """
     
     # ==========================================
-    # ZAKŁADKA 1: BASIC CONTROL
+    # ZAKŁADKA 1: MANUAL 
     # ==========================================
     tab_basic = QtWidgets.QWidget()
     basic_layout = QtWidgets.QVBoxLayout(tab_basic)
@@ -127,6 +103,36 @@ def setup_motor_column(ui, parent_layout):
     ui.bwd_speed = create_step_control(ui, basic_layout, "RETRACT SPEED:", "backwardSpeed")
     
     basic_layout.addSpacing(15)
+
+    # --- NOWE: SEKCJA AUTO CALIB W ZAKŁADCE MANUAL ---
+    auto_cal_layout = QtWidgets.QHBoxLayout()
+    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
+    lbl_auto_cal.setFixedWidth(220)
+    lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
+    
+    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
+    ui.auto_cal_val.setFixedSize(160, 70)
+    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
+    ui.auto_cal_val.setReadOnly(True) 
+    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
+    
+    ui.btn_load_auto = QtWidgets.QPushButton("LOAD & APPLY")
+    ui.btn_load_auto.setFixedSize(140, 70)
+    ui.btn_load_auto.setStyleSheet("""
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton:hover { background-color: #42A5F5; }
+        QPushButton:pressed { background-color: #1E88E5; }
+    """)
+    
+    auto_cal_layout.addWidget(lbl_auto_cal)
+    auto_cal_layout.addWidget(ui.auto_cal_val)
+    auto_cal_layout.addWidget(ui.btn_load_auto)
+    auto_cal_layout.addStretch()
+    
+    basic_layout.addLayout(auto_cal_layout)
+    basic_layout.addSpacing(15)
+    # -------------------------------------------------
     
     move_layout = QtWidgets.QHBoxLayout()
     move_layout.setSpacing(15)
@@ -151,41 +157,14 @@ def setup_motor_column(ui, parent_layout):
     basic_layout.addStretch()
     
     # ==========================================
-    # ZAKŁADKA 2: AUTO SETTINGS 
+    # ZAKŁADKA 2: AUTO 
     # ==========================================
     tab_auto = QtWidgets.QWidget()
     auto_layout = QtWidgets.QVBoxLayout(tab_auto)
     auto_layout.setContentsMargins(15, 20, 15, 15)
     auto_layout.setSpacing(15)
     
-    # 1. Pole Auto Calib Value (tylko odczyt)
-    auto_cal_layout = QtWidgets.QHBoxLayout()
-    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
-    lbl_auto_cal.setFixedWidth(220)
-    lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
-    
-    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
-    ui.auto_cal_val.setFixedSize(220, 70)
-    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
-    ui.auto_cal_val.setReadOnly(True) 
-    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
-    
-    auto_cal_layout.addWidget(lbl_auto_cal)
-    auto_cal_layout.addWidget(ui.auto_cal_val)
-    auto_cal_layout.addStretch()
-    
-    # 2. Przycisk LOAD & APPLY na całą szerokość (Przycisk CALCULATE został usunięty)
-    ui.btn_load_auto = QtWidgets.QPushButton("LOAD AND APPLY AUTO CALIBRATION")
-    ui.btn_load_auto.setFixedHeight(60)
-    ui.btn_load_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-    ui.btn_load_auto.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 18px; border-radius: 8px; }
-        QPushButton:hover { background-color: #42A5F5; }
-        QPushButton:pressed { background-color: #1E88E5; }
-    """)
-
-    # 3. Pole Percent Increment (Wyrównane do reszty)
+    # 1. Pole Percent Increment
     perc_layout = QtWidgets.QHBoxLayout()
     lbl_perc = QtWidgets.QLabel("INCREMENT [%]:")
     lbl_perc.setFixedWidth(220) 
@@ -215,7 +194,7 @@ def setup_motor_column(ui, parent_layout):
     perc_layout.addWidget(ui.btn_perc_step_plus)
     perc_layout.addStretch()
     
-    # 4. Pole Glue Calibration (Wyrównane do reszty)
+    # 2. Pole Glue Calibration 
     cal_layout = QtWidgets.QHBoxLayout()
     lbl_cal = QtWidgets.QLabel("GLUE CALIB:")
     lbl_cal.setFixedWidth(220)
@@ -253,16 +232,13 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_apply_cal.setEnabled(False)
     ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"calGlue {ui.cal_glue.text()}"))
     
-    auto_layout.addLayout(auto_cal_layout)
-    auto_layout.addWidget(ui.btn_load_auto) # Teraz przycisk jest na całą szerokość
-    auto_layout.addSpacing(15)
     auto_layout.addLayout(perc_layout)
     auto_layout.addLayout(cal_layout)
     auto_layout.addSpacing(10)
     auto_layout.addWidget(ui.btn_apply_cal) 
     auto_layout.addStretch()
 
-    # LOGIKA PRZYCISKÓW W ZAKŁADCE AUTO
+    # LOGIKA PRZYCISKÓW I ZEGARA
     def calculate_auto_cal():
         try:
             rpm = float(ui.lbl_rpm.text())
@@ -275,7 +251,6 @@ def setup_motor_column(ui, parent_layout):
         except ValueError:
             pass
 
-    # NOWE: Zegar w tle aktualizujący pole Auto Calib 5 razy na sekundę (co 200 ms)
     ui.auto_cal_timer = QtCore.QTimer(ui)
     ui.auto_cal_timer.timeout.connect(calculate_auto_cal)
     ui.auto_cal_timer.start(200)
@@ -284,7 +259,6 @@ def setup_motor_column(ui, parent_layout):
         val = ui.auto_cal_val.text()
         ui.cal_glue.setText(val)
         try:
-            # Zapamiętujemy dokładną wartość ukrytą w tle 
             ui.exact_cal_value = float(val) 
         except ValueError:
             pass
@@ -293,12 +267,8 @@ def setup_motor_column(ui, parent_layout):
     def adjust_cal_perc(is_plus):
         try:
             displayed_val = float(ui.cal_glue.text() or 0)
-            
-            # Pobieramy dokładną wartość ukrytą w pamięci (jeśli już istnieje)
             saved_exact = getattr(ui, 'exact_cal_value', displayed_val)
             
-            # Sprawdzamy, czy użytkownik nie wpisał nowej wartości "z palca" w okienko.
-            # Jeśli okienko różni się od tego, co myślimy że w nim jest, używamy wartości z okienka!
             if abs(displayed_val - round(saved_exact, 2)) > 0.001:
                 current_cal = displayed_val
             else:
@@ -312,13 +282,8 @@ def setup_motor_column(ui, parent_layout):
             else:
                 new_cal = current_cal / factor
             
-            # ZAPISUJEMY do ukrytej pamięci nową, super-dokładną wartość
             ui.exact_cal_value = new_cal
-            
-            # WYSYŁAMY do maszyny wysoką precyzję (4 miejsca po przecinku)
             ui.send_cmd(f"calGlue {new_cal:.4f}")
-            
-            # WYŚWIETLAMY użytkownikowi obciętą do 3 miejsc
             ui.cal_glue.setText(f"{new_cal:.3f}")
             
         except ValueError:
@@ -346,7 +311,7 @@ def setup_motor_column(ui, parent_layout):
     adv_layout.setContentsMargins(15, 20, 15, 15)
     adv_layout.setSpacing(15)
     
-    # 1. Pole Glue Acceleration + mały przycisk APPLY z boku
+    # 1. Pole Glue Acceleration
     acc_layout = QtWidgets.QHBoxLayout()
     lbl_acc = QtWidgets.QLabel("GLUE ACC:")
     lbl_acc.setFixedWidth(220)
@@ -362,16 +327,16 @@ def setup_motor_column(ui, parent_layout):
     
     ui.btn_apply_acc = QtWidgets.QPushButton("APPLY")
     ui.btn_apply_acc.setFixedSize(100, 70)
-    ui.btn_apply_acc.setStyleSheet(large_apply_style) # Ten sam styl co dla filtra
+    ui.btn_apply_acc.setStyleSheet(large_apply_style) 
     ui.btn_apply_acc.setEnabled(False)
     ui.btn_apply_acc.clicked.connect(lambda: ui.send_cmd(f"glueAcc {ui.glue_acc.text() or 0}"))
     
     acc_layout.addWidget(lbl_acc)
     acc_layout.addWidget(ui.glue_acc)
-    acc_layout.addWidget(ui.btn_apply_acc) # Przycisk dodany obok pola
+    acc_layout.addWidget(ui.btn_apply_acc) 
     acc_layout.addStretch()
 
-    # 2. Pole FILTER VALUE + mały przycisk APPLY z boku
+    # 2. Pole FILTER VALUE 
     filter_layout = QtWidgets.QHBoxLayout()
     lbl_filter = QtWidgets.QLabel("FILTER VALUE:")
     lbl_filter.setFixedWidth(220)
@@ -383,7 +348,6 @@ def setup_motor_column(ui, parent_layout):
     ui.filter_alpha.setAlignment(QtCore.Qt.AlignCenter)
     ui.filter_alpha.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
     
-    # RegEx pozwalający wpisać tylko liczby od 0 do 1 z max 3 miejscami po przecinku
     regex_filter = QtCore.QRegularExpression(r"^(0?(\.\d{0,3})?|1(\.0{0,3})?)$")
     ui.filter_alpha.setValidator(QtGui.QRegularExpressionValidator(regex_filter))
     add_touch_keyboard(ui.filter_alpha)
@@ -399,14 +363,22 @@ def setup_motor_column(ui, parent_layout):
     filter_layout.addWidget(ui.btn_apply_filter)
     filter_layout.addStretch()
     
-    # --- Dodanie obu linii do głównego układu zakładki ---
     adv_layout.addLayout(acc_layout)
     adv_layout.addLayout(filter_layout) 
     adv_layout.addStretch()
-    # --- Dodanie zakładek we właściwej kolejności ---
-    ui.tabs.addTab(tab_basic, "Basic Control")
-    ui.tabs.addTab(tab_auto, "Auto Settings")
-    ui.tabs.addTab(tab_adv, "Settings")
+
+    # --- NOWOŚĆ: Logika przełączania trybów zakładkami ---
+    ui.tabs.addTab(tab_basic, "MANUAL")
+    ui.tabs.addTab(tab_auto, "AUTO")
+    ui.tabs.addTab(tab_adv, "SETTINGS")
+    
+    def on_tab_changed(index):
+        if index == 0:
+            ui.switch_to_manual()
+        elif index == 1:
+            ui.switch_to_auto()
+            
+    ui.tabs.currentChanged.connect(on_tab_changed)
     col1_layout.addWidget(ui.tabs)
 
     # ==========================================

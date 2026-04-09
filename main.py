@@ -2,8 +2,7 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-# Changed calib text box sieze to 160 px. Auto calibration value calculates automatically.
-# No CALCULATE button, new wide LOAD AND APPLY AUTO CALIBRATION button.
+# Changed basic control and auto settings tabs to AUTO / MANUAL, they work identically as removed AUTO / MANUAL buttons. Move auto calib text box and load and apply button to MANUAL tab.
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
