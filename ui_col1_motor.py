@@ -102,7 +102,56 @@ def setup_motor_column(ui, parent_layout):
     
     basic_layout.addSpacing(15)
 
-    # --- PRZYCISKI DISPENSE/RETRACT SĄ TERAZ WYŻEJ ---
+    # --- SEKCJA AUTO CALIB (PRZENIESIONA NAD DISPENSE/RETRACT) ---
+    auto_cal_container = QtWidgets.QVBoxLayout()
+    
+    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
+    lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    auto_cal_container.addWidget(lbl_auto_cal)
+    
+    auto_cal_h_layout = QtWidgets.QHBoxLayout()
+    
+    # Przycisk REFRESH po lewej, ustawiony na rozciąganie
+    ui.btn_refresh_auto = QtWidgets.QPushButton("REFRESH")
+    ui.btn_refresh_auto.setFixedHeight(70)
+    ui.btn_refresh_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    ui.btn_refresh_auto.setStyleSheet("""
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton:hover { background-color: #FFB74D; }
+        QPushButton:pressed { background-color: #F57C00; }
+    """)
+    
+    # Pole tekstowe w środku, stały rozmiar
+    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
+    ui.auto_cal_val.setFixedSize(160, 70)
+    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
+    ui.auto_cal_val.setReadOnly(True) 
+    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
+    
+    # Przycisk APPLY po prawej, ustawiony na rozciąganie
+    ui.btn_load_auto = QtWidgets.QPushButton("APPLY")
+    ui.btn_load_auto.setFixedHeight(70)
+    ui.btn_load_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    ui.btn_load_auto.setStyleSheet("""
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton:hover { background-color: #42A5F5; }
+        QPushButton:pressed { background-color: #1E88E5; }
+    """)
+    
+    # Dodajemy w kolejności: REFRESH -> POLE -> APPLY
+    # (Usunąłem .addStretch(), dzięki czemu przyciski automatycznie zajmą całą wolną szerokość)
+    auto_cal_h_layout.addWidget(ui.btn_refresh_auto)
+    auto_cal_h_layout.addWidget(ui.auto_cal_val)
+    auto_cal_h_layout.addWidget(ui.btn_load_auto)
+    
+    auto_cal_container.addLayout(auto_cal_h_layout)
+    basic_layout.addLayout(auto_cal_container)
+    
+    basic_layout.addSpacing(15)
+    # -------------------------------------------------------------
+
+    # --- PRZYCISKI DISPENSE I RETRACT (PRZENIESIONE PONIŻEJ) ---
     move_layout = QtWidgets.QHBoxLayout()
     move_layout.setSpacing(15)
     
@@ -123,48 +172,6 @@ def setup_motor_column(ui, parent_layout):
     move_layout.addWidget(ui.btn_glue_fwd, 1)
     move_layout.addWidget(ui.btn_glue_bwd, 1)
     basic_layout.addLayout(move_layout)
-    
-    basic_layout.addSpacing(15)
-
-    # --- SEKCJA AUTO CALIB PRZENIESIONA NA DÓŁ ---
-    auto_cal_container = QtWidgets.QVBoxLayout()
-    
-    lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
-    lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
-    auto_cal_container.addWidget(lbl_auto_cal)
-    
-    auto_cal_h_layout = QtWidgets.QHBoxLayout()
-    
-    ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
-    ui.auto_cal_val.setFixedSize(160, 70)
-    ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
-    ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
-    ui.auto_cal_val.setReadOnly(True) 
-    ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
-    
-    ui.btn_refresh_auto = QtWidgets.QPushButton("REFRESH")
-    ui.btn_refresh_auto.setFixedSize(120, 70)
-    ui.btn_refresh_auto.setStyleSheet("""
-        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
-        QPushButton:hover { background-color: #FFB74D; }
-        QPushButton:pressed { background-color: #F57C00; }
-    """)
-    
-    ui.btn_load_auto = QtWidgets.QPushButton("APPLY")
-    ui.btn_load_auto.setFixedSize(120, 70)
-    ui.btn_load_auto.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
-        QPushButton:hover { background-color: #42A5F5; }
-        QPushButton:pressed { background-color: #1E88E5; }
-    """)
-    
-    auto_cal_h_layout.addWidget(ui.auto_cal_val)
-    auto_cal_h_layout.addWidget(ui.btn_refresh_auto)
-    auto_cal_h_layout.addWidget(ui.btn_load_auto)
-    auto_cal_h_layout.addStretch()
-    
-    auto_cal_container.addLayout(auto_cal_h_layout)
-    basic_layout.addLayout(auto_cal_container)
     
     basic_layout.addStretch()
     
