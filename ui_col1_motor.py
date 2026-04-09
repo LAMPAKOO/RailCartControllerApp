@@ -106,7 +106,7 @@ def setup_motor_column(ui, parent_layout):
     auto_cal_container = QtWidgets.QVBoxLayout()
     
     lbl_auto_cal = QtWidgets.QLabel("AUTO CALIB:")
-    lbl_auto_cal.setStyleSheet("font-size: 20px; font-weight: bold; color: #cccccc;")
+    lbl_auto_cal.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
     auto_cal_container.addWidget(lbl_auto_cal)
     
     auto_cal_h_layout = QtWidgets.QHBoxLayout()
@@ -116,14 +116,14 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_refresh_auto.setFixedHeight(70)
     ui.btn_refresh_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_refresh_auto.setStyleSheet("""
-        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 24px; border-radius: 5px; }
         QPushButton:hover { background-color: #FFB74D; }
         QPushButton:pressed { background-color: #F57C00; }
     """)
     
     # Pole tekstowe w środku, stały rozmiar
     ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
-    ui.auto_cal_val.setFixedSize(160, 70)
+    ui.auto_cal_val.setFixedSize(180, 70)
     ui.auto_cal_val.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
     ui.auto_cal_val.setAlignment(QtCore.Qt.AlignCenter)
     ui.auto_cal_val.setReadOnly(True) 
@@ -134,7 +134,7 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_load_auto.setFixedHeight(70)
     ui.btn_load_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_load_auto.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 24px; border-radius: 5px; }
         QPushButton:hover { background-color: #42A5F5; }
         QPushButton:pressed { background-color: #1E88E5; }
     """)
@@ -174,7 +174,7 @@ def setup_motor_column(ui, parent_layout):
     basic_layout.addLayout(move_layout)
     
     basic_layout.addStretch()
-    
+
     # ==========================================
     # ZAKŁADKA 2: AUTO 
     # ==========================================
