@@ -239,16 +239,21 @@ def setup_motor_column(ui, parent_layout):
     auto_layout.addStretch()
 
     # LOGIKA PRZYCISKÓW I ZEGARA
+    # LOGIKA PRZYCISKÓW I ZEGARA
     def calculate_auto_cal():
         try:
-            rpm = float(ui.lbl_rpm.text())
+            # Pobieramy HZ z wyświetlacza falownika (zamiast lbl_rpm)
+            hz = float(ui.lbl_vfd_freq.text())
             speed = float(ui.lbl_speed.text())
-            if speed != 0:
-                val = abs(speed / rpm) 
+            
+            # Zabezpieczenie przed dzieleniem przez zero (gdy silnik stoi)
+            if hz != 0:
+                val = abs(speed / hz) 
                 ui.auto_cal_val.setText(f"{val:.3f}")
             else:
                 ui.auto_cal_val.setText("0.000")
-        except ValueError:
+        # Wyłapujemy też AttributeError na wypadek, gdyby widget lbl_vfd_freq jeszcze się nie załadował
+        except (ValueError, AttributeError):
             pass
 
     ui.auto_cal_timer = QtCore.QTimer(ui)

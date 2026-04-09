@@ -2,7 +2,8 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-# Changed basic control and auto settings tabs to AUTO / MANUAL, they work identically as removed AUTO / MANUAL buttons. Move auto calib text box and load and apply button to MANUAL tab.
+# Now calculating calibration constant from Hz not m/h. Switching from AUTO to MANUAL will not STOP the motor.
+# It will adjust DISPENSE speed based on last calibration constant and current frequency.
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

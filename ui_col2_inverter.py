@@ -76,7 +76,7 @@ def setup_inverter_column(ui, parent_layout):
     
     vfd_layout.addLayout(vfd_inc_layout)
     
-    ui.vfd_freq = create_vfd_step_control(ui, vfd_layout, "FREQUENCY [Hz]", "HZ")
+    ui.vfd_freq = create_vfd_step_control(ui, vfd_layout, "FREQUENCY [Hz]:", "HZ")
     
     vfd_layout.addSpacing(15)
     

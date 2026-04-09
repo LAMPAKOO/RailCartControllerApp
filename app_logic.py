@@ -436,10 +436,31 @@ class IndustrialControlApp(AppUI):
             self.btn_glue_bwd.setEnabled(True)
             
         self.send_cmd("MODE_MANUAL")
-        self.send_cmd("STOP")
+        
+        # --- NOWA LOGIKA PRZEJŚCIA Z AUTO DO MANUAL ---
         if self.ser and self.ser.is_open:
-            self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
-            self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
+            try:
+                # Odczytujemy aktualną prędkość, z jaką maszyna pracowała w AUTO
+                current_speed = float(self.lbl_speedlbl_vfd_freq.text() or 0)
+                
+                if current_speed > 0:
+                    # Jeśli klej się lał, przepisujemy jego prędkość do okienka Dispense
+                    new_speed = int(float(self.lbl_vfd_freq.text() or 0) * float(self.auto_cal_val.text() or 0))
+                    self.fwd_speed.setText(str(new_speed))
+                    
+                    # Wysyłamy nową stałą prędkość i wymuszamy dalszy ruch bez zatrzymywania
+                    self.send_cmd(f"forwardSpeed {new_speed}")
+                    self.send_cmd("MOVE_FORWARD") 
+                else:
+                    # Jeśli maszyna stała w miejscu, zatrzymujemy normalnie
+                    self.send_cmd("STOP")
+                    self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+                    
+                self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
+                
+            except Exception:
+                # W razie jakiegokolwiek błędu odczytu – bezpieczny stop
+                self.send_cmd("STOP")
 
     def switch_to_auto(self):
         self.btn_glue_fwd.setEnabled(False)
