@@ -395,8 +395,39 @@ def setup_motor_column(ui, parent_layout):
     filter_layout.addWidget(ui.btn_apply_filter)
     filter_layout.addStretch()
     
+    # 3. Pole CALIB DISTANCE + mały przycisk APPLY z boku
+    calib_dist_layout = QtWidgets.QHBoxLayout()
+    lbl_calib_dist = QtWidgets.QLabel("CALIB DISTANCE:")
+    lbl_calib_dist.setFixedWidth(220)
+    lbl_calib_dist.setStyleSheet("font-size: 24px; font-weight: bold; color: #cccccc;")
+    
+    ui.calib_dist = QtWidgets.QLineEdit("1.000000")
+    ui.calib_dist.setFixedSize(220, 70)
+    ui.calib_dist.setFont(QtGui.QFont("Segoe UI", 24, QtGui.QFont.Bold))
+    ui.calib_dist.setAlignment(QtCore.Qt.AlignCenter)
+    ui.calib_dist.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+    
+    # RegEx pozwalający wpisać liczbę zmiennoprzecinkową z max 6 miejscami po przecinku
+    regex_calib_dist = QtCore.QRegularExpression(r"^[0-9]*(\.[0-9]{0,6})?$")
+    ui.calib_dist.setValidator(QtGui.QRegularExpressionValidator(regex_calib_dist))
+    add_touch_keyboard(ui.calib_dist)
+    
+    ui.btn_apply_calib_dist = QtWidgets.QPushButton("APPLY")
+    ui.btn_apply_calib_dist.setFixedSize(100, 70)
+    ui.btn_apply_calib_dist.setStyleSheet(large_apply_style) 
+    ui.btn_apply_calib_dist.setEnabled(False)
+    ui.btn_apply_calib_dist.clicked.connect(lambda: ui.send_cmd(f"calibDistance {ui.calib_dist.text()}"))
+    
+    calib_dist_layout.addWidget(lbl_calib_dist)
+    calib_dist_layout.addWidget(ui.calib_dist)
+    calib_dist_layout.addWidget(ui.btn_apply_calib_dist)
+    calib_dist_layout.addStretch()
+
+    # Dodajemy wszystkie trzy sekcje do zakładki SETTINGS
+    # --- Układanie wszystkich trzech wierszy w zakładce ---
     adv_layout.addLayout(acc_layout)
     adv_layout.addLayout(filter_layout) 
+    adv_layout.addLayout(calib_dist_layout) # <--- DODAJESZ NOWY WIERSZ TUTAJ
     adv_layout.addStretch()
 
     # --- Logika przełączania trybów zakładkami ---

@@ -2,8 +2,7 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-# Dispense and retract increment now has variable step (1 for 1-10, 10 for 10-200, 100 for 100-1000, etc.)
-# Increment value is saved in config now.
+# Added distance calibration parameter command and GUI (settings tab) support.
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

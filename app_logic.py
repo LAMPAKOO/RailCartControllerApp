@@ -391,13 +391,14 @@ class IndustrialControlApp(AppUI):
             self.btn_motor_stop.setEnabled(False) 
             self.btn_vfd_stop.setEnabled(False)   
             self.btn_load_prof.setEnabled(False)
-            self.btn_apply_filter.setEnabled(False)
 
             # WYSZARZANIE PRZYCISKÓW APPLY PO ROZŁĄCZENIU
             self.btn_apply.setEnabled(False)
             self.btn_apply_acc.setEnabled(False)
             self.btn_apply_cal.setEnabled(False)
-            
+            self.btn_apply_filter.setEnabled(False)
+            self.btn_apply_calib_dist.setEnabled(False)
+
             self.log("Disconnected")
         else:
             try:
@@ -428,7 +429,8 @@ class IndustrialControlApp(AppUI):
                 self.btn_apply_acc.setEnabled(True)
                 self.btn_apply_cal.setEnabled(True)
                 self.btn_apply_filter.setEnabled(True)
-                
+                self.btn_apply_calib_dist.setEnabled(True)
+
                 # Zamiast wciskać przycisk manual, wracamy do pierwszej zakładki
                 self.tabs.setCurrentIndex(0) 
                 self.send_cmd("MODE_MANUAL")
@@ -584,6 +586,11 @@ class IndustrialControlApp(AppUI):
                     self.filter_alpha.setText(f"{val_f:.3f}")
                 # ---------------------------------
 
+                # --- NOWE: ODBIÓR CALIB DISTANCE ---
+                elif name_lower == "calibdistance":
+                    self.calib_dist.setText(f"{val_f:.6f}")
+                # -----------------------------------
+
                 elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
                     self.lbl_vfd_freq.setText(f"{val_f:.2f}")
                     
@@ -637,6 +644,7 @@ class IndustrialControlApp(AppUI):
         self.send_cmd(f"calGlue {self.cal_glue.text()}")
         self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
         self.send_cmd(f"filterAlpha {self.filter_alpha.text() or 0}")
+        self.send_cmd(f"calibDistance {self.calib_dist.text() or 1}")
 
     def read_nvs(self):
         self.send_cmd("READNVS")
