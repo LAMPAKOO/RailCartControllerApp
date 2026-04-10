@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 from ui_styles import *
-from ui_helpers import create_step_control, add_touch_keyboard
+from ui_helpers import create_step_control, add_touch_keyboard, adjust_speed_inc
 
 def setup_motor_column(ui, parent_layout):
     col1 = QtWidgets.QFrame()
@@ -80,15 +80,16 @@ def setup_motor_column(ui, parent_layout):
     ui.speed_inc.setValidator(QtGui.QIntValidator(MIN_SPEED_INC, MAX_SPEED_INC))
     add_touch_keyboard(ui.speed_inc)
     
+
     btn_inc_minus = QtWidgets.QPushButton("-")
     btn_inc_minus.setFixedSize(70, 70) 
     btn_inc_minus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
-    btn_inc_minus.clicked.connect(lambda: ui.speed_inc.setText(str(max(MIN_SPEED_INC, int(ui.speed_inc.text() or 0) - 10))))
+    btn_inc_minus.clicked.connect(lambda: adjust_speed_inc(ui, False))
     
     btn_inc_plus = QtWidgets.QPushButton("+")
     btn_inc_plus.setFixedSize(70, 70) 
     btn_inc_plus.setFont(QtGui.QFont("Segoe UI", 36, QtGui.QFont.Bold))
-    btn_inc_plus.clicked.connect(lambda: ui.speed_inc.setText(str(min(MAX_SPEED_INC, int(ui.speed_inc.text() or 0) + 10))))
+    btn_inc_plus.clicked.connect(lambda: adjust_speed_inc(ui, True))
     
     inc_layout.addWidget(lbl_inc)
     inc_layout.addWidget(btn_inc_minus)

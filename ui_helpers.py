@@ -91,3 +91,24 @@ def create_vfd_step_control(ui, layout, label, cmd_name):
     
     layout.addLayout(h_layout)
     return edit
+
+def adjust_speed_inc(ui, is_plus):
+        try:
+            current = int(ui.speed_inc.text() or 0)
+            
+            if is_plus:
+                if current < 10: step = 1
+                elif current < 200: step = 10
+                else: step = 100
+                new_val = current + step
+            else:
+                if current <= 10: step = 1
+                elif current <= 200: step = 10
+                else: step = 100
+                new_val = current - step
+            
+            # Zapobieganie wyjściu poza dozwolone limity MIN/MAX
+            new_val = max(MIN_SPEED_INC, min(MAX_SPEED_INC, new_val))
+            ui.speed_inc.setText(str(new_val))
+        except ValueError:
+            pass

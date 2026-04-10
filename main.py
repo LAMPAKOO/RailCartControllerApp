@@ -2,8 +2,8 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
 
-# Now calculating calibration constant from Hz not m/h. Switching from AUTO to MANUAL will not STOP the motor.
-# It will adjust DISPENSE speed based on last calibration constant and current frequency.
+# Dispense and retract increment now has variable step (1 for 1-10, 10 for 10-200, 100 for 100-1000, etc.)
+# Increment value is saved in config now.
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

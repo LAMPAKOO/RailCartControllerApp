@@ -36,6 +36,9 @@ class IndustrialControlApp(AppUI):
             "last_port": "",
             "global_filename": "motor_test",
             "global_save_dir": self.base_dir,
+            "global_speed_inc": "50",   # <--- DODANE
+            "global_perc_inc": "5",     # <--- DODANE
+            "global_vfd_inc": "5",      # <--- DODANE
             "profiles": {
                 f"Profile {i}": {
                     "filename": "motor_test",
@@ -191,21 +194,40 @@ class IndustrialControlApp(AppUI):
                         self.config_data["global_filename"] = loaded["global_filename"]
                     if "global_save_dir" in loaded:
                         self.config_data["global_save_dir"] = loaded["global_save_dir"]
+                    # --- DODANE ---
+                    if "global_speed_inc" in loaded:
+                        self.config_data["global_speed_inc"] = loaded["global_speed_inc"]
+                    if "global_perc_inc" in loaded:
+                        self.config_data["global_perc_inc"] = loaded["global_perc_inc"]
+                    if "global_vfd_inc" in loaded:
+                        self.config_data["global_vfd_inc"] = loaded["global_vfd_inc"]
+                    # --------------
             except Exception as e:
                 self.log(f"Config Load Error: {str(e)}")
 
     def setup_initial_state(self):
         self.filename_input.setText(self.config_data["global_filename"])
         self.save_path_input.setText(self.config_data["global_save_dir"])
+        self.speed_inc.setText(self.config_data.get("global_speed_inc", "50"))
+        self.perc_inc.setText(self.config_data.get("global_perc_inc", "5"))
+        self.vfd_inc.setText(self.config_data.get("global_vfd_inc", "5"))
         
         self.filename_input.textChanged.connect(self.save_global_state)
         self.save_path_input.textChanged.connect(self.save_global_state)
         self.port_combo.currentTextChanged.connect(self.save_global_state)
+        self.speed_inc.textChanged.connect(self.save_global_state)
+        self.perc_inc.textChanged.connect(self.save_global_state)
+        self.vfd_inc.textChanged.connect(self.save_global_state)
 
     def save_global_state(self, *args):
         self.config_data["global_filename"] = self.filename_input.text()
         self.config_data["global_save_dir"] = self.save_path_input.text()
         self.config_data["last_port"] = self.port_combo.currentText()
+        # --- DODANE: Pobranie wartości z okienek do zapisu ---
+        self.config_data["global_speed_inc"] = self.speed_inc.text()
+        self.config_data["global_perc_inc"] = self.perc_inc.text()
+        self.config_data["global_vfd_inc"] = self.vfd_inc.text()
+        # -----------------------------------------------------
         self.save_config()
 
     def save_config(self):
