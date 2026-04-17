@@ -391,6 +391,7 @@ class IndustrialControlApp(AppUI):
             self.btn_motor_stop.setEnabled(False) 
             self.btn_vfd_stop.setEnabled(False)   
             self.btn_load_prof.setEnabled(False)
+            self.btn_refresh_auto.setEnabled(False)
 
             # WYSZARZANIE PRZYCISKÓW APPLY PO ROZŁĄCZENIU
             self.btn_apply.setEnabled(False)
@@ -423,7 +424,8 @@ class IndustrialControlApp(AppUI):
                 self.btn_glue_fwd.setEnabled(True)
                 self.btn_glue_bwd.setEnabled(True)
                 self.btn_load_prof.setEnabled(True)
-                
+                self.btn_refresh_auto.setEnabled(True)
+
                 # AKTYWOWANIE PRZYCISKÓW APPLY PO POŁĄCZENIU
                 self.btn_apply.setEnabled(True)
                 self.btn_apply_acc.setEnabled(True)
@@ -598,8 +600,6 @@ class IndustrialControlApp(AppUI):
                         self.vfd_freq.blockSignals(True)
                         self.vfd_freq.setText(str(int(val_f)))
                         self.vfd_freq.blockSignals(False)
-                    
-                    self.send_cmd(f"HZ {val_f}")
             except: pass
 
     def start_recording(self):

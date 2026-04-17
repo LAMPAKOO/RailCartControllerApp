@@ -112,15 +112,17 @@ def setup_motor_column(ui, parent_layout):
     
     auto_cal_h_layout = QtWidgets.QHBoxLayout()
     
-    # Przycisk REFRESH po lewej, ustawiony na rozciąganie
+    # Przycisk REFRESH po lewej
     ui.btn_refresh_auto = QtWidgets.QPushButton("REFRESH")
     ui.btn_refresh_auto.setFixedHeight(70)
     ui.btn_refresh_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_refresh_auto.setStyleSheet("""
-        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 24px; border-radius: 5px; }
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
         QPushButton:hover { background-color: #FFB74D; }
         QPushButton:pressed { background-color: #F57C00; }
+        QPushButton:disabled { background-color: #333333; color: #666666; } 
     """)
+    ui.btn_refresh_auto.setEnabled(False) # <--- Domyślnie zablokowany
     
     # Pole tekstowe w środku, stały rozmiar
     ui.auto_cal_val = QtWidgets.QLineEdit("0.000")
@@ -130,15 +132,17 @@ def setup_motor_column(ui, parent_layout):
     ui.auto_cal_val.setReadOnly(True) 
     ui.auto_cal_val.setStyleSheet("background-color: #222222; color: #888888; border: 1px solid #333; border-radius: 5px;") 
     
-    # Przycisk APPLY po prawej, ustawiony na rozciąganie
+    # Przycisk APPLY po prawej
     ui.btn_load_auto = QtWidgets.QPushButton("APPLY")
     ui.btn_load_auto.setFixedHeight(70)
     ui.btn_load_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_load_auto.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 24px; border-radius: 5px; }
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
         QPushButton:hover { background-color: #42A5F5; }
         QPushButton:pressed { background-color: #1E88E5; }
+        QPushButton:disabled { background-color: #333333; color: #666666; } 
     """)
+    ui.btn_load_auto.setEnabled(False) # <--- Domyślnie zablokowany
     
     # Dodajemy w kolejności: REFRESH -> POLE -> APPLY
     # (Usunąłem .addStretch(), dzięki czemu przyciski automatycznie zajmą całą wolną szerokość)
