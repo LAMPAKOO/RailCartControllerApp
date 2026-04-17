@@ -263,13 +263,21 @@ def setup_motor_column(ui, parent_layout):
         try:
             hz = float(ui.lbl_vfd_freq.text())
             speed = float(ui.lbl_speed.text())
+            
             if hz != 0:
-                val = abs(speed / hz) 
+                val = max(speed / hz, 0.0)
                 ui.auto_cal_val.setText(f"{val:.3f}")
+                
+                # --- NOWE: Aktywuj przycisk tylko gdy val > 0 ---
+                ui.btn_load_auto.setEnabled(val > 0)
             else:
                 ui.auto_cal_val.setText("0.000")
+                ui.btn_load_auto.setEnabled(False)
+                
         except (ValueError, AttributeError):
-            pass
+            # W razie błędów lub pustych pól - wyłączamy przycisk
+            if hasattr(ui, 'btn_load_auto'):
+                ui.btn_load_auto.setEnabled(False)
 
     ui.auto_cal_timer = QtCore.QTimer(ui)
     ui.auto_cal_timer.timeout.connect(calculate_auto_cal)
