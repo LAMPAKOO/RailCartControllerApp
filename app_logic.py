@@ -86,6 +86,11 @@ class IndustrialControlApp(AppUI):
         self.glue_acc.textChanged.connect(lambda: self.clamp_val(self.glue_acc, MAX_GLUE_ACC))
         self.perc_inc.textChanged.connect(lambda: self.clamp_val(self.perc_inc, 100))
 
+        # Ustawienie ikony okna i paska zadań
+        icon_path = os.path.join(self.base_dir, "icon.png") # lub icon.ico
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QtGui.QIcon(icon_path))
+            
     def clamp_val(self, line_edit, max_limit):
         """Mechanizm bezpieczeństwa: nie pozwala wpisać więcej niż MAX_LIMIT"""
         text = line_edit.text()

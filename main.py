@@ -1,6 +1,13 @@
+import ctypes
 import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
+
+try:
+    myappid = 'mojafirma.maszyna.shmsystem.1' # Dowolny, unikalny ciąg znaków
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+except Exception:
+    pass
 
 # Added distance calibration parameter command and GUI (settings tab) support.
 
