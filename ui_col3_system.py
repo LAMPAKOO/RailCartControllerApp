@@ -46,16 +46,29 @@ def setup_system_column(ui, parent_layout):
     if os.path.exists(logo_path):
         ui.lbl_logo = ResizableLogo(logo_path)
     else:
-        ui.lbl_logo = QtWidgets.QLabel("⚙️ SHM SYSTEM") 
+        ui.lbl_logo = QtWidgets.QLabel("SHM SYSTEM") 
         ui.lbl_logo.setStyleSheet("color: black; font-size: 26px; font-weight: bold; background: transparent;")
         ui.lbl_logo.setAlignment(QtCore.Qt.AlignCenter)
     
     logo_internal_layout.addWidget(ui.lbl_logo)
     top_bar.addWidget(ui.logo_container_widget, 1)
     
-    ui.btn_exit = QtWidgets.QPushButton("EXIT APP")
+    # --- NOWY PRZYCISK: MINIMIZE ---
+    ui.btn_minimize = QtWidgets.QPushButton("HIDE")
+    ui.btn_minimize.setFixedHeight(80) 
+    ui.btn_minimize.setFixedWidth(110)
+    ui.btn_minimize.setStyleSheet("""
+        QPushButton { background-color: #444444; color: white; font-size: 24px; font-weight: bold; border-radius: 8px; }
+        QPushButton:hover { background-color: #555555; }
+        QPushButton:pressed { background-color: #2196F3; }
+    """)
+    ui.btn_minimize.clicked.connect(ui.showMinimized)
+    top_bar.addWidget(ui.btn_minimize, 0)
+    # -------------------------------
+    
+    ui.btn_exit = QtWidgets.QPushButton("EXIT")
     ui.btn_exit.setFixedHeight(80) 
-    ui.btn_exit.setFixedWidth(220)
+    ui.btn_exit.setFixedWidth(110)
     ui.btn_exit.setStyleSheet(BTN_EXIT_STYLE)
     ui.btn_exit.clicked.connect(ui.close) 
     top_bar.addWidget(ui.btn_exit, 0)
