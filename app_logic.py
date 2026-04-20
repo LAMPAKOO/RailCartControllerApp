@@ -503,25 +503,24 @@ class IndustrialControlApp(AppUI):
         # --- NOWA LOGIKA PRZEJŚCIA Z AUTO DO MANUAL ---
         if self.ser and self.ser.is_open:
             try:
-                # Odczytujemy aktualną prędkość, z jaką maszyna pracowała w AUTO
-                current_speed = float(self.lbl_speed.text() or 0)
-                
-                if current_speed > 0:
-                    # Jeśli klej się lał, przepisujemy jego prędkość do okienka Dispense
-                    hz = float(self.lbl_vfd_freq.text() or 0)
-                    calib = float(self.cal_glue.text() or 0)
-                    new_speed = int(hz * calib)
-                    
-                    self.fwd_speed.setText(str(new_speed))
-                    
-                    # Wysyłamy nową stałą prędkość i wymuszamy dalszy ruch bez zatrzymywania
-                    self.send_cmd(f"forwardSpeed {new_speed}")
-                    self.send_cmd("MOVE_FORWARD") 
-                else:
-                    # Jeśli maszyna stała w miejscu, zatrzymujemy normalnie
+                # 1. Sprawdzamy, czy powodem przejścia jest przycisk STOP GLUE
+                if getattr(self, 'is_force_stopping', False):
                     self.send_cmd("STOP")
-                    self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+                    self.is_force_stopping = False  # Resetujemy flagę
+                else:
+                    # 2. Jeśli to normalne kliknięcie zakładki, sprawdzamy prędkość
+                    current_speed = float(self.lbl_speed.text() or 0)
                     
+                    if current_speed > 0:
+                        # Ponieważ fwd_speed aktualizowało się w tle, wystarczy je tylko wysłać
+                        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+                        self.send_cmd("MOVE_FORWARD") 
+                    else:
+                        # Jeśli maszyna stała w miejscu, zatrzymujemy normalnie
+                        self.send_cmd("STOP")
+                        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+                    
+                # Wysyłamy również prędkość powrotu
                 self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
                 
             except Exception:
@@ -534,10 +533,17 @@ class IndustrialControlApp(AppUI):
         self.send_cmd("MODE_AUTO")
 
     def stop_motor(self):
+        # Ustawiamy flagę wymuszonego zatrzymania
+        self.is_force_stopping = True
+        
         self.send_cmd("STOP")
-        # Jeśli jesteśmy w zakładce AUTO (indeks 1), wróć do MANUAL (indeks 0)
+        
         if self.tabs.currentIndex() == 1:
+            # To wywoła switch_to_manual()
             self.tabs.setCurrentIndex(0)
+        else:
+            # Jeśli byliśmy już w MANUAL, po prostu zdejmujemy flagę
+            self.is_force_stopping = False
 
     def start_dispense(self):
         self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")

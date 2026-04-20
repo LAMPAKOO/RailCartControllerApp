@@ -269,17 +269,26 @@ def setup_motor_column(ui, parent_layout):
             speed = float(ui.lbl_speed.text())
             
             if hz != 0:
-                val = max(speed / hz, 0.0)
+                val = abs(speed / hz) 
                 ui.auto_cal_val.setText(f"{val:.3f}")
-                
-                # --- NOWE: Aktywuj przycisk tylko gdy val > 0 ---
                 ui.btn_load_auto.setEnabled(val > 0)
             else:
                 ui.auto_cal_val.setText("0.000")
                 ui.btn_load_auto.setEnabled(False)
+            
+            # --- ROZWIĄZANIE PROBLEMU 2: Aktualizacja Dispense Speed na żywo ---
+            # Sprawdzamy, czy aktualnie aktywna jest zakładka AUTO (indeks 1)
+            if ui.tabs.currentIndex() == 1:
+                cal = float(ui.cal_glue.text() or 0)
+                new_disp_speed = int(hz * cal)
+                
+                # Używamy blockSignals(True), żeby zapobiec ciągłemu zapisywaniu pliku
+                # config.json na dysk przy każdym "tyknięciu" zegara!
+                ui.fwd_speed.blockSignals(True)
+                ui.fwd_speed.setText(str(new_disp_speed))
+                ui.fwd_speed.blockSignals(False)
                 
         except (ValueError, AttributeError):
-            # W razie błędów lub pustych pól - wyłączamy przycisk
             if hasattr(ui, 'btn_load_auto'):
                 ui.btn_load_auto.setEnabled(False)
 
