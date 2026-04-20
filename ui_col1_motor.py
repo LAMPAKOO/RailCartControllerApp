@@ -117,7 +117,7 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_refresh_auto.setFixedHeight(70)
     ui.btn_refresh_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_refresh_auto.setStyleSheet("""
-        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 24px; border-radius: 5px; }
         QPushButton:hover { background-color: #FFB74D; }
         QPushButton:pressed { background-color: #F57C00; }
         QPushButton:disabled { background-color: #333333; color: #666666; } 
@@ -137,13 +137,13 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_load_auto.setFixedHeight(70)
     ui.btn_load_auto.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_load_auto.setStyleSheet("""
-        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 16px; border-radius: 5px; }
+        QPushButton { background-color: #2196F3; color: white; font-weight: bold; font-size: 24px; border-radius: 5px; }
         QPushButton:hover { background-color: #42A5F5; }
         QPushButton:pressed { background-color: #1E88E5; }
         QPushButton:disabled { background-color: #333333; color: #666666; } 
     """)
     ui.btn_load_auto.setEnabled(False) # <--- Domyślnie zablokowany
-    
+
     # Dodajemy w kolejności: REFRESH -> POLE -> APPLY
     # (Usunąłem .addStretch(), dzięki czemu przyciski automatycznie zajmą całą wolną szerokość)
     auto_cal_h_layout.addWidget(ui.btn_refresh_auto)

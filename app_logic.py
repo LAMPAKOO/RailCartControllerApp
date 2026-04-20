@@ -21,6 +21,7 @@ class IndustrialControlApp(AppUI):
         
         self.ser = None
         self.is_recording = False
+        self.speed_warn_shown = False
         self.csv_file = None
         self.csv_writer = None
         self.current_full_path = ""
@@ -77,7 +78,7 @@ class IndustrialControlApp(AppUI):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.listen_to_uart)
 
-        self.fwd_speed.textChanged.connect(lambda: self.clamp_val(self.fwd_speed, MAX_SPEED))
+        self.fwd_speed.textChanged.connect(self.validate_dispense_speed)
         self.bwd_speed.textChanged.connect(lambda: self.clamp_val(self.bwd_speed, MAX_SPEED))
         self.vfd_freq.textChanged.connect(lambda: self.clamp_val(self.vfd_freq, MAX_VFD_FREQ))
         self.speed_inc.textChanged.connect(lambda: self.clamp_val(self.speed_inc, MAX_SPEED_INC))
@@ -98,6 +99,35 @@ class IndustrialControlApp(AppUI):
         except ValueError:
             pass
         
+    def validate_dispense_speed(self):
+        # 1. Zachowujemy stary mechanizm nieprzekraczania absolutnego maksa (np. 2000)
+        self.clamp_val(self.fwd_speed, MAX_SPEED)
+        
+        # 2. Pobieramy aktualną wpisaną wartość
+        try:
+            val = int(self.fwd_speed.text() or 0)
+        except ValueError:
+            val = 0
+            
+        from ui_styles import WARN_SPEED_LIMIT  # Pobranie naszej nowej stałej
+        
+        # 3. Logika kolorowania i wyświetlania ostrzeżenia
+        if val > WARN_SPEED_LIMIT:
+            # Czerwone ostrzegawcze tło
+            self.fwd_speed.setStyleSheet("background-color: #7f0000; color: white; border: 2px solid #ff5252; border-radius: 5px;")
+            
+            # Pokaż okienko tylko raz
+            if not self.speed_warn_shown:
+                self.show_modern_error(
+                    "Speed Warning", 
+                    f"Safe dispensing limit of {WARN_SPEED_LIMIT} exceeded!\nDo not use with glue! Use only without load!"
+                )
+                self.speed_warn_shown = True
+        else:
+            # Powrót do standardowego wyglądu i reset flagi
+            self.fwd_speed.setStyleSheet("background-color: #333333; color: white; border: 1px solid #444; border-radius: 5px;")
+            self.speed_warn_shown = False
+
     def autosave_files(self):
         """Wymusza twardy zapis buforów plików na dysk (ochrona przed utratą zasilania)"""
         try:
