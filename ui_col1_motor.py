@@ -269,7 +269,7 @@ def setup_motor_column(ui, parent_layout):
             speed = float(ui.lbl_speed.text())
             
             if hz != 0:
-                val = abs(speed / hz) 
+                val = max(speed / hz, 0.000)
                 ui.auto_cal_val.setText(f"{val:.3f}")
                 ui.btn_load_auto.setEnabled(val > 0)
             else:

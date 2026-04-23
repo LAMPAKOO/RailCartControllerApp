@@ -212,11 +212,26 @@ def setup_inverter_column(ui, parent_layout):
     
     # --- NOWY PRZYCISK: RESET DISTANCE ---
     ui.btn_reset_dist = QtWidgets.QPushButton("RESET")
-    ui.btn_reset_dist.setFixedHeight(60) # Dopasuj ewentualnie do wysokości start/stop
+    ui.btn_reset_dist.setFixedHeight(60) 
+    ui.btn_reset_dist.setEnabled(False)  # <--- Domyślnie zablokowany przed połączeniem
     ui.btn_reset_dist.setStyleSheet("""
-        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 18px; border-radius: 5px; }
-        QPushButton:hover { background-color: #FFB74D; }
-        QPushButton:pressed { background-color: #F57C00; }
+        QPushButton { 
+            background-color: #FF9800; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 18px; 
+            border-radius: 5px; 
+        }
+        QPushButton:hover { 
+            background-color: #FFB74D; 
+        }
+        QPushButton:pressed { 
+            background-color: #F57C00; 
+        }
+        QPushButton:disabled { 
+            background-color: #333333; 
+            color: #666666; 
+        } 
     """)
     ui.btn_reset_dist.clicked.connect(lambda: ui.send_cmd("RESET_DISTANCE"))
     # -------------------------------------
