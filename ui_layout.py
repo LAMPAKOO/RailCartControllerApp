@@ -6,7 +6,7 @@ from ui_col3_system import setup_system_column
 
 class AppUI(QtWidgets.QMainWindow):
     def init_ui(self):
-        self.setWindowTitle("Industrial Motor Control & Data Logger")
+        self.setWindowTitle("RailCartController")
         self.resize(1400, 850)
         
         # Główne tło okna
