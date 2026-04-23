@@ -416,7 +416,8 @@ class IndustrialControlApp(AppUI):
             self.ser = None
             self.timer.stop()
             self.btn_connect.setText("CONNECT")
-            self.btn_start_rec.setEnabled(False) 
+            self.btn_start_rec.setEnabled(False)
+            self.btn_reset_dist.setEnabled(False) 
             
             # Usunięto btn_manual i btn_auto
             self.btn_glue_fwd.setEnabled(False)
@@ -447,6 +448,7 @@ class IndustrialControlApp(AppUI):
                 
                 self.btn_connect.setText("DISCONNECT")
                 self.btn_start_rec.setEnabled(True) 
+                self.btn_reset_dist.setEnabled(True)
                 self.timer.start(30)
                 
                 self.log(f"Connected to {port}")

@@ -210,6 +210,17 @@ def setup_inverter_column(ui, parent_layout):
     ui.btn_start_rec.setEnabled(False)
     ui.btn_start_rec.clicked.connect(ui.start_recording)
     
+    # --- NOWY PRZYCISK: RESET DISTANCE ---
+    ui.btn_reset_dist = QtWidgets.QPushButton("RESET")
+    ui.btn_reset_dist.setFixedHeight(60) # Dopasuj ewentualnie do wysokości start/stop
+    ui.btn_reset_dist.setStyleSheet("""
+        QPushButton { background-color: #FF9800; color: white; font-weight: bold; font-size: 18px; border-radius: 5px; }
+        QPushButton:hover { background-color: #FFB74D; }
+        QPushButton:pressed { background-color: #F57C00; }
+    """)
+    ui.btn_reset_dist.clicked.connect(lambda: ui.send_cmd("RESET_DISTANCE"))
+    # -------------------------------------
+
     ui.btn_stop_rec = QtWidgets.QPushButton("STOP RECORDING")
     ui.btn_stop_rec.setFixedHeight(60)
     ui.btn_stop_rec.setStyleSheet(REC_BTN_STYLE)
@@ -217,6 +228,7 @@ def setup_inverter_column(ui, parent_layout):
     ui.btn_stop_rec.clicked.connect(ui.stop_recording)
     
     rec_h.addWidget(ui.btn_start_rec)
+    rec_h.addWidget(ui.btn_reset_dist)
     rec_h.addWidget(ui.btn_stop_rec)
     col2_layout.addLayout(rec_h)
     
