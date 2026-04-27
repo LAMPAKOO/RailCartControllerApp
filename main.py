@@ -1,7 +1,12 @@
 import ctypes
+import os
 import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 from app_logic import IndustrialControlApp
+
+# --- BLOKADA SKALOWANIA EKRANU (Zastępuje plik .bat) ---
+os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+# -------------------------------------------------------
 
 try:
     myappid = 'shm.system.RailCartController.1' # Dowolny, unikalny ciąg znaków

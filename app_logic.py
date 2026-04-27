@@ -528,6 +528,7 @@ class IndustrialControlApp(AppUI):
             except Exception:
                 # W razie jakiegokolwiek błędu odczytu – bezpieczny stop
                 self.send_cmd("STOP")
+        self.validate_dispense_speed()  # Aktualizujemy kolorowanie i ostrzeżenia po przejściu do manual
 
     def switch_to_auto(self):
         self.btn_glue_fwd.setEnabled(False)

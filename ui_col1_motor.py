@@ -282,11 +282,12 @@ def setup_motor_column(ui, parent_layout):
                 cal = float(ui.cal_glue.text() or 0)
                 new_disp_speed = int(hz * cal)
                 
-                # Używamy blockSignals(True), żeby zapobiec ciągłemu zapisywaniu pliku
-                # config.json na dysk przy każdym "tyknięciu" zegara!
-                ui.fwd_speed.blockSignals(True)
-                ui.fwd_speed.setText(str(new_disp_speed))
-                ui.fwd_speed.blockSignals(False)
+                if(new_disp_speed > 0): # nie aktualizujemy, jeśli wynik jest 0 lub ujemny (np. przy zerowej częstotliwości), żeby nie nadpisać ręcznej wartości "0" ustawionej przez użytkownika
+                    # Używamy blockSignals(True), żeby zapobiec ciągłemu zapisywaniu pliku
+                    # config.json na dysk przy każdym "tyknięciu" zegara!
+                    ui.fwd_speed.blockSignals(True)
+                    ui.fwd_speed.setText(str(new_disp_speed))
+                    ui.fwd_speed.blockSignals(False)
                 
         except (ValueError, AttributeError):
             if hasattr(ui, 'btn_load_auto'):
