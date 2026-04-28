@@ -40,7 +40,7 @@ echo.
 echo ------------------------------------------
 echo Step 2: Uploading firmware...
 echo ------------------------------------------
-esptool --chip esp32 --port %PORT% --baud %BAUD% write_flash 0x0 "%FILE%"
+esptool --chip esp32 --port %PORT% --baud %BAUD% write-flash 0x0 "%FILE%"
 
 if errorlevel 1 (
     echo.
