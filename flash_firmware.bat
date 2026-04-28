@@ -36,18 +36,6 @@ echo Firmware: %FILE%
 echo Baud: %BAUD%
 echo.
 
-echo ------------------------------------------
-echo Step 1: Erasing flash memory...
-echo ------------------------------------------
-esptool --chip esp32 --port %PORT% --baud %BAUD% erase_flash
-
-if errorlevel 1 (
-    echo.
-    echo [ERROR] Flash erase failed!
-    pause
-    exit /b
-)
-
 echo.
 echo ------------------------------------------
 echo Step 2: Uploading firmware...
