@@ -76,7 +76,7 @@ def setup_inverter_column(ui, parent_layout):
     
     vfd_layout.addLayout(vfd_inc_layout)
     
-    ui.vfd_freq = create_vfd_step_control(ui, vfd_layout, "FREQUENCY [Hz]:", "HZ")
+    ui.vfd_freq = create_vfd_step_control(ui, vfd_layout, "FREQUENCY [Hz]:", "driveFreq")
     
     vfd_layout.addSpacing(15)
     
@@ -107,7 +107,7 @@ def setup_inverter_column(ui, parent_layout):
     ui.btn_vfd_stop.setFixedHeight(140)
     ui.btn_vfd_stop.setStyleSheet(STOP_BTN_STYLE)
     ui.btn_vfd_stop.setEnabled(False)
-    ui.btn_vfd_stop.clicked.connect(lambda: ui.send_cmd("VFD_STOP"))
+    ui.btn_vfd_stop.clicked.connect(lambda: ui.send_cmd("STOP_DRIVE"))
     col2_layout.addWidget(ui.btn_vfd_stop)
 
     col2_layout.addSpacing(15)

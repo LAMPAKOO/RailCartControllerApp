@@ -20,6 +20,9 @@ class IndustrialControlApp(AppUI):
         super().__init__()
         
         self.ser = None
+
+        self.uart_buffer = ""
+
         self.is_recording = False
         self.speed_warn_shown = False
         self.csv_file = None
@@ -198,8 +201,8 @@ class IndustrialControlApp(AppUI):
                 
             if self.ser and self.ser.is_open:
                 try:
-                    self.send_cmd("STOP")
-                    self.send_cmd("VFD_STOP")
+                    self.send_cmd("STOP_GLUE")
+                    self.send_cmd("STOP_DRIVE")
                     time.sleep(0.1) 
                     self.ser.close()
                 except Exception:
@@ -405,8 +408,8 @@ class IndustrialControlApp(AppUI):
                 
             # === WYSYŁANIE KOMEND STOP PRZED ROZŁĄCZENIEM ===
             try:
-                self.send_cmd("STOP")       # Zatrzymanie silnika kleju
-                self.send_cmd("VFD_STOP")   # Zatrzymanie falownika
+                self.send_cmd("STOP_GLUE")       # Zatrzymanie silnika kleju
+                self.send_cmd("STOP_DRIVE")   # Zatrzymanie falownika
                 
                 time.sleep(0.1)             # Czekamy 100ms
             except Exception:
@@ -487,7 +490,7 @@ class IndustrialControlApp(AppUI):
         current_val = int(edit.text() or 0)
         new_val = current_val + delta
         
-        if cmd == "HZ":
+        if cmd == "driveFreq":
             new_val = max(MIN_VFD_FREQ, min(MAX_VFD_FREQ, new_val))
         else:
             new_val = max(MIN_SPEED, min(MAX_SPEED, new_val))
@@ -507,7 +510,7 @@ class IndustrialControlApp(AppUI):
             try:
                 # 1. Sprawdzamy, czy powodem przejścia jest przycisk STOP GLUE
                 if getattr(self, 'is_force_stopping', False):
-                    self.send_cmd("STOP")
+                    self.send_cmd("STOP_GLUE")
                     self.is_force_stopping = False  # Resetujemy flagę
                 else:
                     # 2. Jeśli to normalne kliknięcie zakładki, sprawdzamy prędkość
@@ -515,19 +518,19 @@ class IndustrialControlApp(AppUI):
                     
                     if current_speed > 0:
                         # Ponieważ fwd_speed aktualizowało się w tle, wystarczy je tylko wysłać
-                        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
-                        self.send_cmd("MOVE_FORWARD") 
+                        self.send_cmd(f"dispenseSpeed {self.fwd_speed.text() or 0}")
+                        self.send_cmd("DISPENSE") 
                     else:
                         # Jeśli maszyna stała w miejscu, zatrzymujemy normalnie
-                        self.send_cmd("STOP")
-                        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
+                        self.send_cmd("STOP_GLUE")
+                        self.send_cmd(f"dispenseSpeed {self.fwd_speed.text() or 0}")
                     
                 # Wysyłamy również prędkość powrotu
-                self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
+                self.send_cmd(f"retractSpeed {self.bwd_speed.text() or 0}")
                 
             except Exception:
                 # W razie jakiegokolwiek błędu odczytu – bezpieczny stop
-                self.send_cmd("STOP")
+                self.send_cmd("STOP_GLUE")
         self.validate_dispense_speed()  # Aktualizujemy kolorowanie i ostrzeżenia po przejściu do manual
 
     def switch_to_auto(self):
@@ -539,7 +542,7 @@ class IndustrialControlApp(AppUI):
         # Ustawiamy flagę wymuszonego zatrzymania
         self.is_force_stopping = True
         
-        self.send_cmd("STOP")
+        self.send_cmd("STOP_GLUE")
         
         if self.tabs.currentIndex() == 1:
             # To wywoła switch_to_manual()
@@ -549,28 +552,38 @@ class IndustrialControlApp(AppUI):
             self.is_force_stopping = False
 
     def start_dispense(self):
-        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
-        self.send_cmd("MOVE_FORWARD")
+        self.send_cmd(f"dispenseSpeed {self.fwd_speed.text() or 0}")
+        self.send_cmd("DISPENSE")
 
     def start_retract(self):
-        self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
-        self.send_cmd("MOVE_BACKWARD")
+        self.send_cmd(f"retractSpeed {self.bwd_speed.text() or 0}")
+        self.send_cmd("RETRACT")
 
     def start_vfd_forward(self):
-        self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
-        self.send_cmd("VFD_FORWARD")
+        self.send_cmd(f"driveFreq {self.vfd_freq.text() or 0}")
+        self.send_cmd("DRIVE_FORWARD")
 
     def start_vfd_reverse(self):
-        self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
-        self.send_cmd("VFD_REVERSE")
+        self.send_cmd(f"driveFreq {self.vfd_freq.text() or 0}")
+        self.send_cmd("DRIVE_BACKWARD")
 
     def listen_to_uart(self):
         if not self.ser or not self.ser.is_open: return
         try:
-            while self.ser.in_waiting > 0:
-                line = self.ser.readline().decode('utf-8', errors='replace').strip()
+            # 1. Zczytujemy wszystko, co fizycznie nadeszło do bufora systemu operacyjnego
+            if self.ser.in_waiting > 0:
+                chunk = self.ser.read(self.ser.in_waiting).decode('utf-8', errors='replace')
+                self.uart_buffer += chunk
+            
+            # 2. Przetwarzamy tylko kompletne linie (te, które mają znak nowej linii)
+            while '\n' in self.uart_buffer:
+                # Rozdzielamy bufor na pierwszą linię i całą resztę (która zostaje na później)
+                line, self.uart_buffer = self.uart_buffer.split('\n', 1)
+                line = line.strip()
+                
                 if not line: continue
                 
+                # --- TUTAJ ZACZYNA SIĘ TWÓJ ORYGINALNY KOD ---
                 if line.startswith("DATA:"):
                     try:
                         raw_data = line.replace("DATA:", "").strip()
@@ -605,7 +618,7 @@ class IndustrialControlApp(AppUI):
                                     dist_rel, dist_abs, speed, rpm, freq
                                 ])
                     except ValueError:
-                        pass
+                        pass # Błędy ignorujemy cicho, ale teraz przynajmniej nie przez obcięcie ramki
                 else:
                     self.log(f"<< {line}")
                     self.process_incoming_params(line)
@@ -622,10 +635,10 @@ class IndustrialControlApp(AppUI):
                 val_f = float(val)
                 name_lower = name.lower()
                 
-                if name == "forwardSpeed": self.fwd_speed.setText(str(int(val_f)))
-                elif name == "backwardSpeed": self.bwd_speed.setText(str(int(val_f)))
-                elif name == "accGlue": self.glue_acc.setText(str(int(val_f)))
-                elif name == "calibGlue": self.cal_glue.setText(f"{val_f:.3f}")
+                if name == "dispenseSpeed": self.fwd_speed.setText(str(int(val_f)))
+                elif name == "retractSpeed": self.bwd_speed.setText(str(int(val_f)))
+                elif name == "glueAcc": self.glue_acc.setText(str(int(val_f)))
+                elif name == "glueCalib": self.cal_glue.setText(f"{val_f:.3f}")
 
                 # --- NOWE: ODBIÓR FILTER ALPHA ---
                 elif name_lower == "filteralpha": 
@@ -633,11 +646,11 @@ class IndustrialControlApp(AppUI):
                 # ---------------------------------
 
                 # --- NOWE: ODBIÓR CALIB DISTANCE ---
-                elif name_lower == "calibdistance":
+                elif name_lower == "distancecalib":
                     self.calib_dist.setText(f"{val_f:.6f}")
                 # -----------------------------------
 
-                elif name_lower in ["frequency", "freq", "hz", "vfd frequency"]: 
+                elif name_lower in ["frequency", "freq", "hz", "vfd frequency", "drivefreq"]: 
                     self.lbl_vfd_freq.setText(f"{val_f:.2f}")
                     
                     if float(self.vfd_freq.text() or 0) != val_f:
@@ -682,13 +695,13 @@ class IndustrialControlApp(AppUI):
         self.log(f"RECORDING SAVED: {os.path.basename(final_path)}")
 
     def apply_all(self):
-        self.send_cmd(f"forwardSpeed {self.fwd_speed.text() or 0}")
-        self.send_cmd(f"backwardSpeed {self.bwd_speed.text() or 0}")
+        self.send_cmd(f"dispenseSpeed {self.fwd_speed.text() or 0}")
+        self.send_cmd(f"retractSpeed {self.bwd_speed.text() or 0}")
         self.send_cmd(f"glueAcc {self.glue_acc.text() or 0}")
-        self.send_cmd(f"calGlue {self.cal_glue.text()}")
-        self.send_cmd(f"HZ {self.vfd_freq.text() or 0}")
+        self.send_cmd(f"glueCalib {self.cal_glue.text()}")
+        self.send_cmd(f"driveFreq {self.vfd_freq.text() or 0}")
         self.send_cmd(f"filterAlpha {self.filter_alpha.text() or 0}")
-        self.send_cmd(f"calibDistance {self.calib_dist.text() or 1}")
+        self.send_cmd(f"distanceCalib {self.calib_dist.text() or 1}")
 
     def read_nvs(self):
         self.send_cmd("READNVS")

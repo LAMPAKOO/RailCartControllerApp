@@ -98,8 +98,8 @@ def setup_motor_column(ui, parent_layout):
     inc_layout.addStretch()
     basic_layout.addLayout(inc_layout)
     
-    ui.fwd_speed = create_step_control(ui, basic_layout, "DISPENSE SPEED:", "forwardSpeed")
-    ui.bwd_speed = create_step_control(ui, basic_layout, "RETRACT SPEED:", "backwardSpeed")
+    ui.fwd_speed = create_step_control(ui, basic_layout, "DISPENSE SPEED:", "dispenseSpeed")
+    ui.bwd_speed = create_step_control(ui, basic_layout, "RETRACT SPEED:", "retractSpeed")
     
     basic_layout.addSpacing(15)
 
@@ -254,7 +254,7 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_apply_cal.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
     ui.btn_apply_cal.setStyleSheet(large_apply_style)
     ui.btn_apply_cal.setEnabled(False)
-    ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"calGlue {ui.cal_glue.text()}"))
+    ui.btn_apply_cal.clicked.connect(lambda: ui.send_cmd(f"glueCalib {ui.cal_glue.text()}"))
     
     auto_layout.addLayout(perc_layout)
     auto_layout.addLayout(cal_layout)
@@ -304,7 +304,7 @@ def setup_motor_column(ui, parent_layout):
             ui.exact_cal_value = float(val) 
         except ValueError:
             pass
-        ui.send_cmd(f"calGlue {val}")
+        ui.send_cmd(f"glueCalib {val}")
 
     def refresh_dispense_speed():
         try:
@@ -313,7 +313,7 @@ def setup_motor_column(ui, parent_layout):
             new_speed = int(hz * cal)
             
             ui.fwd_speed.setText(str(new_speed))
-            ui.send_cmd(f"forwardSpeed {new_speed}")
+            ui.send_cmd(f"dispenseSpeed {new_speed}")
         except (ValueError, AttributeError):
             pass
 
@@ -336,7 +336,7 @@ def setup_motor_column(ui, parent_layout):
                 new_cal = current_cal / factor
             
             ui.exact_cal_value = new_cal
-            ui.send_cmd(f"calGlue {new_cal:.4f}")
+            ui.send_cmd(f"glueCalib {new_cal:.4f}")
             ui.cal_glue.setText(f"{new_cal:.3f}")
             
         except ValueError:
@@ -438,7 +438,7 @@ def setup_motor_column(ui, parent_layout):
     ui.btn_apply_calib_dist.setFixedSize(100, 70)
     ui.btn_apply_calib_dist.setStyleSheet(large_apply_style) 
     ui.btn_apply_calib_dist.setEnabled(False)
-    ui.btn_apply_calib_dist.clicked.connect(lambda: ui.send_cmd(f"calibDistance {ui.calib_dist.text()}"))
+    ui.btn_apply_calib_dist.clicked.connect(lambda: ui.send_cmd(f"distanceCalib {ui.calib_dist.text()}"))
     
     calib_dist_layout.addWidget(lbl_calib_dist)
     calib_dist_layout.addWidget(ui.calib_dist)
