@@ -1,10 +1,9 @@
 @echo off
-title ESP32 Auto Flash Tool (Auto COM Detect)
+title ESP32 Auto Flash Tool (Fixed COM Detect)
 color 0A
 
 echo ==========================================
 echo        ESP32 AUTO FLASH TOOL
-echo        (Auto COM Port Detection)
 echo ==========================================
 echo.
 
@@ -22,13 +21,12 @@ echo.
 
 set PORT=
 
-for /f "tokens=1,2 delims=:" %%A in ('wmic path Win32_SerialPort get DeviceID^,Name ^| findstr /i "USB CH340 CP210 FTDI ESP32"') do (
+for /f "tokens=1 delims= " %%A in ('wmic path Win32_SerialPort get DeviceID ^| findstr /r "COM[0-9]*"') do (
     set PORT=%%A
 )
 
 if "%PORT%"=="" (
-    echo [ERROR] No ESP32 COM port found!
-    echo Make sure device is connected.
+    echo [ERROR] No COM port found!
     pause
     exit /b
 )
